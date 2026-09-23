@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>いまの状態と、次にやること</title>
+<style>
+  :root{
+    --bg:#FDFDFB; --surface:#FFFFFF; --surface-hover:#F6F8F9;
+    --border:#E3E8EB; --text:#16181A; --text2:#5A6672; --text3:#A6B0B9;
+    --primary:#0EA5E9; --primary-soft:#E0F2FE; --primary-deep:#075985;
+    --warn-soft:#FEF3C7; --warn-deep:#92400E;
+    --shadow-sm:0 1px 4px rgba(28,25,23,0.05);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+    padding:32px 16px 64px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  .tag{
+    display:inline-block;font-size:11px;font-weight:500;letter-spacing:0.06em;
+    padding:4px 8px;border-radius:4px;background:var(--primary-soft);color:var(--primary-deep);
+  }
+  h1{font-size:22px;font-weight:600;letter-spacing:0.02em;line-height:1.45;margin:16px 0 0;}
+  .date{font-size:12px;color:var(--text2);margin-top:8px;letter-spacing:0.02em;}
+  h2{
+    font-size:16px;font-weight:600;letter-spacing:0.01em;line-height:1.55;
+    margin:40px 0 0;padding-top:24px;border-top:0.5px solid rgba(28,25,23,0.08);
+  }
+  p{font-size:14px;line-height:1.85;color:var(--text);letter-spacing:0.01em;margin:12px 0 0;}
+  .muted{color:var(--text2);font-size:13px;}
+  ul{margin:12px 0 0;padding-left:20px;}
+  li{font-size:14px;line-height:1.85;letter-spacing:0.01em;margin-bottom:6px;}
+
+  .card{
+    background:var(--surface);border-radius:16px;padding:20px;margin-top:16px;
+    box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
+  }
+  .card h3{font-size:14px;font-weight:600;margin:0;letter-spacing:0.01em;}
+  .card .body{font-size:13px;line-height:1.85;color:var(--text2);margin-top:8px;letter-spacing:0.01em;}
+
+  .done{color:var(--text2);}
+  .done b{color:var(--text);font-weight:400;}
+  .step{display:flex;gap:12px;align-items:flex-start;margin-top:14px;}
+  .num{
+    flex:none;width:22px;height:22px;border-radius:999px;background:var(--surface-hover);
+    color:var(--text2);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;
+    margin-top:2px;
+  }
+  .num.on{background:var(--primary-soft);color:var(--primary-deep);}
+  .step .t{font-size:14px;line-height:1.7;letter-spacing:0.01em;}
+  .step .s{font-size:12px;color:var(--text2);line-height:1.7;margin-top:3px;}
+
+  .ask{
+    background:var(--warn-soft);border-radius:16px;padding:20px;margin-top:16px;
+  }
+  .ask h3{font-size:14px;font-weight:600;color:var(--warn-deep);margin:0;letter-spacing:0.01em;}
+  .ask p{font-size:13px;line-height:1.85;color:var(--warn-deep);margin-top:8px;}
+  .ask .opt{
+    background:rgba(255,255,255,0.6);border-radius:8px;padding:12px;margin-top:12px;
+    font-size:13px;line-height:1.8;color:var(--warn-deep);
+  }
+  .ask .opt b{font-weight:600;}
+
+  a.back{
+    display:inline-block;margin-top:40px;font-size:13px;color:var(--primary-deep);
+    text-decoration:none;border-bottom:1px solid var(--primary-soft);padding-bottom:2px;
+  }
+  .foot{margin-top:48px;font-size:12px;color:var(--text3);line-height:1.9;letter-spacing:0.02em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">作業メモ</span>
+  <h1>いまの状態と、次にやること</h1>
+  <div class="date">アクロバット教室 生徒管理アプリ ／ 2026年9月23日</div>
+
+  <h2>ここまで終わったこと</h2>
+  <ul class="done">
+    <li><b>画面の形が決まった</b>。クラス分けをやめて時間帯だけにする、出席ははじめから全員ついていて来ていない子を外す、名前はひらがなの下の名前だけ、同じ名前の子がいる時だけ曜日と時間を足す</li>
+    <li><b>モックが動いて、誰にでも送れる状態になった</b>。スマホ版とiPad・パソコン版の2つ</li>
+    <li><b>並べ替えと絞り込みが入った</b>。曜日順・学年順・年齢順、ぜんいん・自分の担当・体験・先生ごと</li>
+    <li><b>担当の先生を何人でも付けられるようにした</b>。1枠に2人つく日にも対応済み</li>
+    <li><b>データの保存先ができた</b>。Supabase のプロジェクトを用意して、鍵が通ることまで確認した。中身はまだ空</li>
+  </ul>
+
+  <h2>次にやること</h2>
+  <p class="muted">ここから先は「保存される土台」を作る段階です。今のモックは触っても消えるので、画面を増やす前にここを通します。</p>
+
+  <div class="step">
+    <div class="num on">1</div>
+    <div>
+      <div class="t">テーブルを作る</div>
+      <div class="s">生徒・保護者・時間帯・出席・先生などの入れ物。下に一覧を書きました</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="num">2</div>
+    <div>
+      <div class="t">誰がどこまで見えるか鍵をかける</div>
+      <div class="s">店舗ごと・役割ごと。ここを飛ばすと、URLを知っている人に全部見えます</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="num">3</div>
+    <div>
+      <div class="t">ログインを付ける</div>
+      <div class="s">誰が書いたメモか、誰が合格を出したかを残せるようにするため</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="num">4</div>
+    <div>
+      <div class="t">モックを本物のデータに差し替える</div>
+      <div class="s">ここまで来ると、iPhoneでつけた出席がiPadにもMacにも出ます</div>
+    </div>
+  </div>
+
+  <p class="muted" style="margin-top:20px;">
+    1の作業は、パソコンの前でやる必要があります。こちらが用意した文をSupabaseの画面に貼って実行するだけで、判断は要りません。外出先ではできないので、帰ってからで大丈夫です。
+  </p>
+
+  <h2>これから作る入れ物（何を覚えるか）</h2>
+  <p class="muted">プログラムの言葉を使わずに書きます。おかしいところがあれば言ってください。</p>
+
+  <div class="card">
+    <h3>教室</h3>
+    <div class="body">店舗の名前。いまは1つですが、2店舗目を出したときに、店舗を足すだけで動くようにしておきます</div>
+  </div>
+  <div class="card">
+    <h3>先生</h3>
+    <div class="body">名前、メールアドレス、役割（本部・店長・講師）、在職か退職か。退職しても消さずに残します。過去のメモに名前が残り続けるので</div>
+  </div>
+  <div class="card">
+    <h3>保護者</h3>
+    <div class="body">名前、電話番号。兄弟がいる場合は、同じ保護者に2人ぶら下がります</div>
+  </div>
+  <div class="card">
+    <h3>生徒</h3>
+    <div class="body">ひらがなの名前、ふりがな、生年月日、保護者、在籍の状態（体験・在籍・休会・退会）とその日付、写真の使い方の許可。学年と年齢は覚えません。生年月日から毎回計算します</div>
+  </div>
+  <div class="card">
+    <h3>時間帯</h3>
+    <div class="body">曜日、始まりと終わりの時刻。クラス名は持ちません</div>
+  </div>
+  <div class="card">
+    <h3>時間帯の担当</h3>
+    <div class="body">どの時間帯に、どの先生が付くか。1枠に何人でも入ります</div>
+  </div>
+  <div class="card">
+    <h3>どの子がどの時間帯にいるか</h3>
+    <div class="body">いつからいつまで、という形で持ちます。曜日を変わったときに、前がどこだったかも残るようにするためです</div>
+  </div>
+  <div class="card">
+    <h3>その日の授業</h3>
+    <div class="body">日付と時間帯、その日やった練習の内容。同じ日に同じ枠が2つできないようにします</div>
+  </div>
+  <div class="card">
+    <h3>出席</h3>
+    <div class="body">誰が来た・来なかった。いつもの子か、振替か、体験かも一緒に。同じ子が同じ日に二重に入らないようにします</div>
+  </div>
+  <div class="card">
+    <h3>観察メモ</h3>
+    <div class="body">その子について気づいたこと。苦戦している技があれば技と結びつけます。誰が書いたかも残します</div>
+  </div>
+  <div class="card">
+    <h3>扱い方説明書</h3>
+    <div class="body">その子への関わり方。生徒1人につき1つ、常に最新のもの。書き換えた履歴も別に残します</div>
+  </div>
+  <div class="card">
+    <h3>技と級</h3>
+    <div class="body">技の名前と見本、級の名前、どの級にどの技が要るか。合格の記録（誰がいつ判定したか）</div>
+  </div>
+  <div class="card">
+    <h3>写真と動画</h3>
+    <div class="body">写真の置き場所、撮った日、どの授業のものか、写っている子（集合写真は複数）。動画はYouTubeの限定公開リンクだけ</div>
+  </div>
+
+  <h2>外出先でも決められること</h2>
+  <p class="muted">帰ってから作り始めると手戻りになるので、先に決めておきたいところです。</p>
+
+  <div class="ask">
+    <h3>技と級の表は、店舗ごとに変えられるようにしますか</h3>
+    <p>2店舗目を出したあとで変えるのは、合格の記録が全部ぶら下がっているぶん重い作業になります。だから最初に決めておきたいところです。</p>
+    <div class="opt">
+      <b>全店舗で同じ1つにする</b><br>
+      本部だけが編集できて、どの店舗も同じ表を見ます。店舗をまたいだ生徒の比較ができます
+    </div>
+    <div class="opt">
+      <b>店舗ごとに変えられるようにする</b><br>
+      2店舗目が独自の技を足せます。そのかわり店舗をまたいだ比較はできなくなります
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>体験の子は、在籍の人数に入れますか</h3>
+    <p>いまのモックでは別に数えています（在籍◯人、体験◯人）。入会したら在籍に変わる形です。これで合っていれば、返事は要りません。</p>
+  </div>
+
+  <a class="back" href="./">← モックに戻る</a>
+
+  <div class="foot">
+    このページは残ります。消えません。<br>
+    内容が古くなったら作り直します。
+  </div>
+</div>
+</body>
+</html>
