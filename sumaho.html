@@ -146,6 +146,8 @@
     font-size:11px;font-weight:500;letter-spacing:0.06em;padding:2px 8px;border-radius:4px;
     background:var(--surface-active);color:var(--text2);white-space:nowrap;flex:none;
   }
+  .check2{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .check2 svg{width:20px;height:20px;stroke:var(--primary);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
   .rchev{width:20px;height:20px;flex:none;}
   .rchev svg{width:20px;height:20px;stroke:var(--text3);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
   .empty{padding:32px 12px;text-align:center;font-size:14px;color:var(--text3);line-height:1.8;}
@@ -242,7 +244,7 @@
     <div class="body">
       <button class="teacher" onclick="go('s4')">
         <div>
-          <div class="tlabel">担当の先生</div>
+          <div class="tlabel" id="s2tlabel">担当の先生</div>
           <div class="tname" id="s2teacher"></div>
         </div>
         <div class="tedit">変更</div>
@@ -349,12 +351,13 @@ const SLOT_TIMES = ['15:00 – 16:00','16:00 – 17:00','17:00 – 18:00'];
 /* 授業がある曜日 */
 const OPEN_DAYS = [2, 3, 5, 6];
 
-/* 曜日・時間帯ごとの担当（毎週同じ） */
+/* 曜日・時間帯ごとの担当（毎週同じ）。
+   1枠に何人でも入れられる。いまは1人の枠が多いが、土曜15:00は2人でつく想定 */
 const DEFAULT_TEACHER = {
-  '2|15:00 – 16:00':'あやね先生', '2|16:00 – 17:00':'海翔先生',   '2|17:00 – 18:00':'ゆか先生',
-  '3|15:00 – 16:00':'だいき先生', '3|16:00 – 17:00':'あやね先生',
-  '5|15:00 – 16:00':'海翔先生',   '5|16:00 – 17:00':'だいき先生',
-  '6|15:00 – 16:00':'海翔先生',   '6|16:00 – 17:00':'ゆか先生',   '6|17:00 – 18:00':'だいき先生',
+  '2|15:00 – 16:00':['あやね先生'],            '2|16:00 – 17:00':['海翔先生'],   '2|17:00 – 18:00':['ゆか先生'],
+  '3|15:00 – 16:00':['だいき先生'],            '3|16:00 – 17:00':['あやね先生'],
+  '5|15:00 – 16:00':['海翔先生'],              '5|16:00 – 17:00':['だいき先生'],
+  '6|15:00 – 16:00':['海翔先生','あやね先生'], '6|16:00 – 17:00':['ゆか先生'],   '6|17:00 – 18:00':['だいき先生'],
 };
 
 /* 生徒マスタ。name はひらがなの下の名前のみ（苗字を使わない） */
@@ -467,12 +470,18 @@ function shortSuffix(s){
 
 function byId(id){ return STUDENTS.find(s => s.id === id); }
 function todayDay(){ return new Date(TODAY + 'T00:00:00+09:00').getDay(); }
-function teacherOf(day, slot){ return DEFAULT_TEACHER[day + '|' + SLOT_TIMES[slot]] || TEACHERS[0]; }
-function teacherOfStudent(s){ return teacherOf(s.day, s.slot); }
+
+/* 担当は必ず配列で返す（1人でも複数でも同じ扱いにする） */
+function teachersOf(day, slot){
+  const v = DEFAULT_TEACHER[day + '|' + SLOT_TIMES[slot]];
+  return v ? v.slice() : [];
+}
+function teachersOfStudent(s){ return teachersOf(s.day, s.slot); }
+function teachersLabel(arr){ return arr.length ? arr.join('・') : '未定'; }
 
 /* その曜日に実際にある時間帯だけ返す */
 function slotsOfDay(day){
-  return SLOT_TIMES.map((t, i) => i).filter(i => DEFAULT_TEACHER[day + '|' + SLOT_TIMES[i]]);
+  return SLOT_TIMES.map((t, i) => i).filter(i => (DEFAULT_TEACHER[day + '|' + SLOT_TIMES[i]] || []).length);
 }
 
 /* フォルダ分け（絞り込み）。key で1つ選ぶ */
@@ -484,9 +493,9 @@ const FILTERS = [
 
 function passesFilter(s, key){
   if(key === 'all')   return true;
-  if(key === 'mine')  return teacherOfStudent(s) === CURRENT_USER;
+  if(key === 'mine')  return teachersOfStudent(s).includes(CURRENT_USER);
   if(key === 'trial') return s.status === 'trial';
-  if(key.startsWith('t:')) return teacherOfStudent(s) === key.slice(2);
+  if(key.startsWith('t:')) return teachersOfStudent(s).includes(key.slice(2));
   return true;
 }
 
@@ -500,7 +509,7 @@ const SLOTS = slotsOfDay(DOW).map(i => ({
 
 const state = {};
 SLOTS.forEach(s => {
-  state[s.id] = { present:{}, extra:[], teacher: teacherOf(DOW, s.idx) };
+  state[s.id] = { present:{}, extra:[], teachers: teachersOf(DOW, s.idx) };
   s.roster.forEach(id => state[s.id].present[id] = true);   // 毎週同じメンバー → はじめから全員出席
 });
 
@@ -562,7 +571,7 @@ function renderSlots(){
     b.innerHTML = `
       <div>
         <div class="ctime">${s.time}</div>
-        <div class="cteacher">担当 ${st.teacher}</div>
+        <div class="cteacher">担当 ${teachersLabel(st.teachers)}</div>
       </div>
       <div class="count">
         <div><span class="n">${n}</span><span class="d">/${list.length}</span></div>
@@ -604,7 +613,9 @@ function renderTiles(){
   const n = list.filter(m => st.present[m.id]).length;
   document.getElementById('s2present').textContent = n;
   document.getElementById('s2total').textContent = '/' + list.length;
-  document.getElementById('s2teacher').textContent = st.teacher;
+  document.getElementById('s2teacher').textContent = teachersLabel(st.teachers);
+  document.getElementById('s2tlabel').textContent =
+    st.teachers.length > 1 ? `担当の先生（${st.teachers.length}人）` : '担当の先生';
   renderSlots();
 }
 
@@ -612,15 +623,37 @@ function renderTeachers(){
   const el = document.getElementById('teacherList');
   const st = state[cur];
   el.innerHTML = '';
+  const head = document.createElement('div');
+  head.className = 'group';
+  head.textContent = '何人でも選べます';
+  el.appendChild(head);
+
   TEACHERS.forEach(t => {
-    const isCur = (t === st.teacher);
+    const on = st.teachers.includes(t);
     const b = document.createElement('button');
-    b.className = 'row' + (isCur ? ' sel' : '');
-    b.onclick = () => { st.teacher = t; renderTiles(); go('s2'); toast('担当を ' + t + ' にしました'); };
+    b.className = 'row' + (on ? ' sel' : '');
+    b.onclick = () => {
+      if(on){
+        if(st.teachers.length === 1){ toast('担当を0人にはできません'); return; }
+        st.teachers = st.teachers.filter(x => x !== t);
+        toast(t + ' を担当から外しました');
+      }else{
+        st.teachers = st.teachers.concat(t);
+        toast(t + ' を担当に足しました');
+      }
+      renderTiles();
+      renderTeachers();
+    };
     b.innerHTML = `<div><div class="rname">${t}</div></div>
-      <div class="${isCur ? 'rcur' : 'radd'}">${isCur ? '今日の担当' : '担当にする'}</div>`;
+      ${on ? '<span class="check2"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>'
+           : '<div class="radd">担当に足す</div>'}`;
     el.appendChild(b);
   });
+
+  const foot = document.createElement('div');
+  foot.style.cssText = 'padding:16px 2px;font-size:12px;color:var(--text2);line-height:1.8;letter-spacing:0.02em;';
+  foot.textContent = '今日の担当：' + teachersLabel(st.teachers);
+  el.appendChild(foot);
 }
 
 /* ---- 振替・体験 ---- */
@@ -745,7 +778,7 @@ function renderStudents(){
       b.innerHTML = `
         <div>
           <div class="rname">${displayName(s)}</div>
-          <div class="rmeta">${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? '' : DAY_LABEL[s.day] + '曜 '}${SLOT_TIMES[s.slot]}　${teacherOfStudent(s)}</div>
+          <div class="rmeta">${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? '' : DAY_LABEL[s.day] + '曜 '}${SLOT_TIMES[s.slot]}　${teachersLabel(teachersOfStudent(s))}</div>
         </div>
         ${s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : ''}
         <div class="rchev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>`;
@@ -758,7 +791,7 @@ function renderDetail(){
   const s = byId(curStudent);
   document.getElementById('detail').innerHTML = `
     <div class="name-big">${s.name}</div>
-    <div class="name-sub">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}　担当 ${teacherOfStudent(s)}</div>
+    <div class="name-sub">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}　担当 ${teachersLabel(teachersOfStudent(s))}</div>
     <div class="chips">
       <span class="chip on">${gradeLabel(s.birth)}</span>
       <span class="chip on">${age(s.birth)}さい</span>

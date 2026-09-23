@@ -193,12 +193,13 @@ const SLOT_TIMES = ['15:00 – 16:00','16:00 – 17:00','17:00 – 18:00'];
 /* 授業がある曜日 */
 const OPEN_DAYS = [2, 3, 5, 6];
 
-/* 曜日・時間帯ごとの担当（毎週同じ） */
+/* 曜日・時間帯ごとの担当（毎週同じ）。
+   1枠に何人でも入れられる。いまは1人の枠が多いが、土曜15:00は2人でつく想定 */
 const DEFAULT_TEACHER = {
-  '2|15:00 – 16:00':'あやね先生', '2|16:00 – 17:00':'海翔先生',   '2|17:00 – 18:00':'ゆか先生',
-  '3|15:00 – 16:00':'だいき先生', '3|16:00 – 17:00':'あやね先生',
-  '5|15:00 – 16:00':'海翔先生',   '5|16:00 – 17:00':'だいき先生',
-  '6|15:00 – 16:00':'海翔先生',   '6|16:00 – 17:00':'ゆか先生',   '6|17:00 – 18:00':'だいき先生',
+  '2|15:00 – 16:00':['あやね先生'],            '2|16:00 – 17:00':['海翔先生'],   '2|17:00 – 18:00':['ゆか先生'],
+  '3|15:00 – 16:00':['だいき先生'],            '3|16:00 – 17:00':['あやね先生'],
+  '5|15:00 – 16:00':['海翔先生'],              '5|16:00 – 17:00':['だいき先生'],
+  '6|15:00 – 16:00':['海翔先生','あやね先生'], '6|16:00 – 17:00':['ゆか先生'],   '6|17:00 – 18:00':['だいき先生'],
 };
 
 /* 生徒マスタ。name はひらがなの下の名前のみ（苗字を使わない） */
@@ -311,12 +312,18 @@ function shortSuffix(s){
 
 function byId(id){ return STUDENTS.find(s => s.id === id); }
 function todayDay(){ return new Date(TODAY + 'T00:00:00+09:00').getDay(); }
-function teacherOf(day, slot){ return DEFAULT_TEACHER[day + '|' + SLOT_TIMES[slot]] || TEACHERS[0]; }
-function teacherOfStudent(s){ return teacherOf(s.day, s.slot); }
+
+/* 担当は必ず配列で返す（1人でも複数でも同じ扱いにする） */
+function teachersOf(day, slot){
+  const v = DEFAULT_TEACHER[day + '|' + SLOT_TIMES[slot]];
+  return v ? v.slice() : [];
+}
+function teachersOfStudent(s){ return teachersOf(s.day, s.slot); }
+function teachersLabel(arr){ return arr.length ? arr.join('・') : '未定'; }
 
 /* その曜日に実際にある時間帯だけ返す */
 function slotsOfDay(day){
-  return SLOT_TIMES.map((t, i) => i).filter(i => DEFAULT_TEACHER[day + '|' + SLOT_TIMES[i]]);
+  return SLOT_TIMES.map((t, i) => i).filter(i => (DEFAULT_TEACHER[day + '|' + SLOT_TIMES[i]] || []).length);
 }
 
 /* フォルダ分け（絞り込み）。key で1つ選ぶ */
@@ -328,9 +335,9 @@ const FILTERS = [
 
 function passesFilter(s, key){
   if(key === 'all')   return true;
-  if(key === 'mine')  return teacherOfStudent(s) === CURRENT_USER;
+  if(key === 'mine')  return teachersOfStudent(s).includes(CURRENT_USER);
   if(key === 'trial') return s.status === 'trial';
-  if(key.startsWith('t:')) return teacherOfStudent(s) === key.slice(2);
+  if(key.startsWith('t:')) return teachersOfStudent(s).includes(key.slice(2));
   return true;
 }
 
@@ -402,7 +409,7 @@ function renderHead(){
   if(view === 'today'){
     document.getElementById('ltitle').textContent = '今日';
     document.getElementById('lsub').textContent =
-      DAY_SLOTS.length ? dateLine() + '　担当 ' + teacherOf(DOW, curSlot)
+      DAY_SLOTS.length ? dateLine() + '　担当 ' + teachersLabel(teachersOf(DOW, curSlot))
                        : dateLine() + '　授業はありません';
     bar.style.display = DAY_SLOTS.length ? 'flex' : 'none';
     bar.innerHTML = '';
@@ -478,7 +485,7 @@ function itemEl(s){
   const tag = s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : '';
   const meta = view === 'today'
     ? `${gradeLabel(s.birth)}・${age(s.birth)}さい`
-    : `${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? '' : DAY_LABEL[s.day] + '曜 '}${SLOT_TIMES[s.slot]}　${teacherOfStudent(s)}`;
+    : `${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? '' : DAY_LABEL[s.day] + '曜 '}${SLOT_TIMES[s.slot]}　${teachersLabel(teachersOfStudent(s))}`;
   b.innerHTML = `
     <div>
       <div class="iname">${view === 'today' ? s.name : displayName(s)}</div>
@@ -497,7 +504,7 @@ function renderDetail(){
   el.innerHTML = `
     <div class="dwrap">
       <div class="name-big">${s.name}</div>
-      <div class="name-sub">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}　担当 ${teacherOfStudent(s)}</div>
+      <div class="name-sub">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}　担当 ${teachersLabel(teachersOfStudent(s))}</div>
       <div class="chips">
         <span class="chip on">${gradeLabel(s.birth)}</span>
         <span class="chip on">${age(s.birth)}さい</span>
@@ -513,6 +520,7 @@ function renderDetail(){
           <div class="kv"><span class="k">年齢</span><span class="v">${age(s.birth)}さい</span></div>
           <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? s.joined.replace(/-/g,'/') : 'まだ（体験）'}</span></div>
           <div class="kv"><span class="k">通っている枠</span><span class="v">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}</span></div>
+          <div class="kv"><span class="k">担当の先生</span><span class="v">${teachersLabel(teachersOfStudent(s))}</span></div>
         </div>
 
         <div class="panel">
