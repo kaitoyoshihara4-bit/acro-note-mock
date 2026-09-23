@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>iPad・Mac版モック</title>
+<title>アクロバット教室 管理（iPad・パソコン）</title>
 <style>
   :root{
     --bg:#FDFDFB; --surface:#FFFFFF; --surface-hover:#F6F8F9; --surface-active:#EEF2F4;
     --border:#E3E8EB; --text:#16181A; --text2:#5A6672; --text3:#A6B0B9;
-    --primary:#0EA5E9; --primary-soft:#E0F2FE; --primary-deep:#075985;
+    --primary:#0EA5E9; --primary-hover:#0284C7; --primary-soft:#E0F2FE; --primary-deep:#075985;
+    --danger-deep:#B91C1C;
     --shadow-sm:0 1px 4px rgba(28,25,23,0.05);
   }
   *{box-sizing:border-box;}
@@ -35,17 +36,22 @@
   .nav:hover{background:var(--surface-hover);}
   .nav.on{background:var(--primary-soft);color:var(--primary-deep);}
   .nav svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none;}
-  .nav.dim{color:var(--text3);cursor:default;}
-  .nav.dim:hover{background:transparent;}
   .sidenote{margin-top:auto;font-size:11px;color:var(--text3);line-height:1.7;padding:0 12px;letter-spacing:0.02em;}
 
   .list{
-    width:320px;flex:none;border-right:0.5px solid rgba(28,25,23,0.08);
+    width:340px;flex:none;border-right:0.5px solid rgba(28,25,23,0.08);
     display:flex;flex-direction:column;background:var(--bg);
   }
   .listhead{padding:24px 20px 12px;flex:none;}
+  .headrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
   .ltitle{font-size:22px;font-weight:600;letter-spacing:0.02em;line-height:1.45;}
   .lsub{font-size:12px;color:var(--text2);margin-top:4px;letter-spacing:0.02em;}
+  .addbtn{
+    flex:none;border:1px solid var(--border);background:var(--surface);border-radius:8px;
+    font-family:inherit;font-size:13px;color:var(--primary-deep);cursor:pointer;
+    padding:8px 12px;letter-spacing:0.02em;transition:background 120ms;
+  }
+  .addbtn:hover{background:var(--primary-soft);}
   .search{
     width:100%;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
     padding:0 12px;font-family:inherit;font-size:14px;color:var(--text);outline:none;margin-top:16px;
@@ -77,6 +83,7 @@
 
   .detail{flex:1;overflow-y:auto;padding:40px;background:var(--bg);}
   .dwrap{max-width:760px;}
+  .dhead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
   .name-big{font-size:28px;font-weight:600;letter-spacing:0.02em;line-height:1.4;}
   .name-sub{font-size:14px;color:var(--text2);margin-top:8px;letter-spacing:0.01em;}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
@@ -100,7 +107,7 @@
   .placeholder{margin-top:20px;padding:20px;border:1px dashed var(--border);border-radius:16px;
     font-size:12px;color:var(--text3);line-height:1.8;letter-spacing:0.02em;}
 
-  .slotbar{display:flex;gap:8px;margin-top:16px;}
+  .segrow{display:flex;gap:8px;margin-top:16px;}
   .seg{
     flex:1;padding:8px 4px;border:1px solid var(--border);background:var(--surface);
     border-radius:8px;font-family:inherit;font-size:12px;color:var(--text2);cursor:pointer;
@@ -108,7 +115,6 @@
   }
   .seg:hover{background:var(--surface-hover);}
   .seg.on{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-soft);}
-
   .filterbar{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
   .fchip{
     padding:6px 10px;border:1px solid var(--border);background:var(--surface);border-radius:4px;
@@ -118,20 +124,54 @@
   .fchip:hover{background:var(--surface-hover);}
   .fchip.on{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-soft);}
 
-  /* 指で触る端末だけ当たりを大きくする */
+  /* フォーム */
+  .field{margin-bottom:16px;}
+  .flabel{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:0.02em;margin-bottom:8px;}
+  .fhint{font-size:11px;color:var(--text3);letter-spacing:0.02em;margin-top:6px;line-height:1.7;}
+  input[type=text],input[type=date],input[type=tel],input[type=time],select{
+    width:100%;height:40px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+    padding:0 12px;font-family:inherit;font-size:14px;color:var(--text);outline:none;
+    -webkit-appearance:none;appearance:none;transition:border-color 120ms,box-shadow 120ms;
+  }
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A6672' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:38px;
+  }
+  input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.2);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .toggles{display:flex;flex-wrap:wrap;gap:8px;}
+  .tog{
+    padding:8px 12px;border:1px solid var(--border);background:var(--surface);border-radius:8px;
+    font-family:inherit;font-size:13px;color:var(--text2);cursor:pointer;letter-spacing:0.01em;
+    transition:background 120ms,border-color 120ms,color 120ms;
+  }
+  .tog:hover{background:var(--surface-hover);}
+  .tog.on{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-deep);}
+  .btnrow{display:flex;gap:12px;margin-top:24px;}
+  .btn{
+    height:40px;padding:0 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;
+    font-family:inherit;font-size:14px;letter-spacing:0.02em;cursor:pointer;
+    transition:background 120ms;
+  }
+  .btn:hover{background:var(--primary-hover);}
+  .btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+  .btn-sec:hover{background:var(--surface-hover);}
+  .btn-danger{background:transparent;color:var(--danger-deep);border:1px solid var(--border);}
+  .btn-danger:hover{background:#FEF2F2;}
+
   @media (pointer: coarse){
     .item{padding:16px 12px;}
     .nav{padding:14px 12px;}
     .search{height:44px;font-size:16px;}
     .seg{padding:12px 4px;}
     .fchip{padding:10px 12px;}
+    input[type=text],input[type=date],input[type=tel],input[type=time],select{height:44px;font-size:16px;}
   }
-  /* iPad 縦・狭い画面ではサイドバーを畳む */
   @media (max-width:900px){
     .side{width:64px;padding:24px 8px;}
     .side .brand,.side .nav span,.side .sidenote{display:none;}
     .nav{justify-content:center;padding:12px 0;}
-    .list{width:280px;}
+    .list{width:300px;}
     .detail{padding:24px;}
   }
 </style>
@@ -148,21 +188,26 @@
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       <span>生徒</span>
     </button>
-    <button class="nav dim" title="これから作るところ">
-      <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
-      <span>級・技</span>
+    <button class="nav" id="navSlots" onclick="setView('slots')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span>時間帯</span>
     </button>
-    <div class="sidenote">モック<br>ダミーの生徒データ</div>
+    <div class="sidenote">モック<br>この端末の中だけに保存</div>
   </nav>
 
   <section class="list">
     <div class="listhead">
-      <div class="ltitle" id="ltitle"></div>
-      <div class="lsub" id="lsub"></div>
-      <div id="slotbar" class="slotbar"></div>
-      <div id="sortbar" class="slotbar"></div>
+      <div class="headrow">
+        <div>
+          <div class="ltitle" id="ltitle"></div>
+          <div class="lsub" id="lsub"></div>
+        </div>
+        <button class="addbtn" id="addbtn" onclick="onAdd()">＋ 追加</button>
+      </div>
+      <div id="slotbar" class="segrow"></div>
+      <div id="sortbar" class="segrow"></div>
       <div id="filterbar" class="filterbar"></div>
-      <input class="search" id="q" type="search" placeholder="なまえ（ひらがな）で検索" oninput="renderList()" autocomplete="off">
+      <input class="search" id="q" type="text" placeholder="なまえ（ひらがな）で検索" oninput="renderList()" autocomplete="off">
     </div>
     <div class="listbody" id="listBody"></div>
   </section>
@@ -171,10 +216,11 @@
 </div>
 
 <script>
-/* アクロバット教室モック 共通ダミーデータ + 計算ロジック
-   実在の生徒データは入れない。電話番号は使われないダミー（090-0000-xxxx）。 */
+/* アクロバット教室モック 共通データ + 計算ロジック
+   実在の生徒データは入れない。電話番号は使われないダミー（090-0000-xxxx）。
+   画面から編集したものは、その端末の中に保存される（localStorage）。 */
 
-/* 今日（実際の日付を使う。曜日に授業が無ければ画面側で案内を出す） */
+/* 今日（実際の日付） */
 const TODAY = (() => {
   const d = new Date();
   const p = n => String(n).padStart(2, '0');
@@ -182,100 +228,145 @@ const TODAY = (() => {
 })();
 
 const DAY_LABEL = ['日','月','火','水','木','金','土'];
-const TEACHERS = ['海翔先生','ゆか先生','だいき先生','あやね先生'];
+const STATUS_LABEL = { trial:'体験', active:'在籍', paused:'休会', withdrawn:'退会' };
+const STATUS_ORDER = ['trial','active','paused','withdrawn'];
 
-/* いま入っている先生（モック用。本番はログイン中のアカウント） */
-const CURRENT_USER = '海翔先生';
+/* ---- 初期データ（まだ何も編集していない時の中身） ---- */
+const DEFAULT_DB = {
+  /* いまログインしている先生（モック用） */
+  currentTeacherId: 'tc1',
 
-/* 時間帯（クラス分けなし・時間だけ）。細かい時刻は後で差し替える */
-const SLOT_TIMES = ['15:00 – 16:00','16:00 – 17:00','17:00 – 18:00'];
+  teachers: [
+    { id:'tc1', name:'海翔先生' },
+    { id:'tc2', name:'ゆか先生' },
+    { id:'tc3', name:'だいき先生' },
+    { id:'tc4', name:'あやね先生' },
+  ],
 
-/* 授業がある曜日 */
-const OPEN_DAYS = [2, 3, 5, 6];
+  /* 時間帯。クラス名は持たない。担当は何人でも入る */
+  slots: [
+    { id:'sl1',  day:2, start:'15:00', end:'16:00', teacherIds:['tc4'] },
+    { id:'sl2',  day:2, start:'16:00', end:'17:00', teacherIds:['tc1'] },
+    { id:'sl3',  day:2, start:'17:00', end:'18:00', teacherIds:['tc2'] },
+    { id:'sl4',  day:3, start:'15:00', end:'16:00', teacherIds:['tc3'] },
+    { id:'sl5',  day:3, start:'16:00', end:'17:00', teacherIds:['tc4'] },
+    { id:'sl6',  day:5, start:'15:00', end:'16:00', teacherIds:['tc1'] },
+    { id:'sl7',  day:5, start:'16:00', end:'17:00', teacherIds:['tc3'] },
+    { id:'sl8',  day:6, start:'15:00', end:'16:00', teacherIds:['tc1','tc4'] },
+    { id:'sl9',  day:6, start:'16:00', end:'17:00', teacherIds:['tc2'] },
+    { id:'sl10', day:6, start:'17:00', end:'18:00', teacherIds:['tc3'] },
+  ],
 
-/* 曜日・時間帯ごとの担当（毎週同じ）。
-   1枠に何人でも入れられる。いまは1人の枠が多いが、土曜15:00は2人でつく想定 */
-const DEFAULT_TEACHER = {
-  '2|15:00 – 16:00':['あやね先生'],            '2|16:00 – 17:00':['海翔先生'],   '2|17:00 – 18:00':['ゆか先生'],
-  '3|15:00 – 16:00':['だいき先生'],            '3|16:00 – 17:00':['あやね先生'],
-  '5|15:00 – 16:00':['海翔先生'],              '5|16:00 – 17:00':['だいき先生'],
-  '6|15:00 – 16:00':['海翔先生','あやね先生'], '6|16:00 – 17:00':['ゆか先生'],   '6|17:00 – 18:00':['だいき先生'],
+  students: [
+    { id:'s23', name:'ともき', birth:'2015-04-18', slotId:'sl1', guardian:'ともきの保護者', phone:'090-0000-0023', status:'active', joined:'2022-04-05' },
+    { id:'s29', name:'ふうか', birth:'2017-09-12', slotId:'sl1', guardian:'ふうかの保護者', phone:'090-0000-0029', status:'active', joined:'2024-05-07' },
+    { id:'s30', name:'そうし', birth:'2018-06-25', slotId:'sl1', guardian:'そうしの保護者', phone:'090-0000-0030', status:'active', joined:'2025-04-08' },
+    { id:'s24', name:'なぎさ', birth:'2013-01-07', slotId:'sl2', guardian:'なぎさの保護者', phone:'090-0000-0024', status:'active', joined:'2020-09-08' },
+    { id:'s31', name:'あゆむ', birth:'2014-08-03', slotId:'sl2', guardian:'あゆむの保護者', phone:'090-0000-0031', status:'active', joined:'2021-06-15' },
+    { id:'s32', name:'ちひろ', birth:'2016-12-19', slotId:'sl2', guardian:'ちひろの保護者', phone:'090-0000-0032', status:'trial',  joined:'' },
+    { id:'s25', name:'まなと', birth:'2011-12-24', slotId:'sl3', guardian:'まなとの保護者', phone:'090-0000-0025', status:'withdrawn', joined:'2018-04-10' },
+    { id:'s33', name:'ゆうた', birth:'2010-03-08', slotId:'sl3', guardian:'ゆうたの保護者', phone:'090-0000-0033', status:'active', joined:'2019-04-09' },
+
+    { id:'s20', name:'あさひ', birth:'2017-03-30', slotId:'sl4', guardian:'あさひの保護者', phone:'090-0000-0020', status:'active', joined:'2024-01-10' },
+    { id:'s22', name:'そら',   birth:'2019-09-23', slotId:'sl4', guardian:'そらの保護者',   phone:'090-0000-0022', status:'active', joined:'2026-04-04' },
+    { id:'s19', name:'ゆうき', birth:'2016-06-21', slotId:'sl5', guardian:'ゆうきの保護者', phone:'090-0000-0019', status:'active', joined:'2022-09-07' },
+    { id:'s21', name:'しおり', birth:'2014-11-09', slotId:'sl5', guardian:'しおりの保護者', phone:'090-0000-0021', status:'active', joined:'2021-04-07' },
+    { id:'s28', name:'りお',   birth:'2016-11-11', slotId:'sl5', guardian:'りおの保護者',   phone:'090-0000-0028', status:'trial',  joined:'' },
+
+    { id:'s34', name:'いつき', birth:'2016-05-02', slotId:'sl6', guardian:'いつきの保護者', phone:'090-0000-0034', status:'active', joined:'2023-04-07' },
+    { id:'s35', name:'のあ',   birth:'2018-10-17', slotId:'sl6', guardian:'のあの保護者',   phone:'090-0000-0035', status:'active', joined:'2025-04-11' },
+    { id:'s36', name:'みゆ',   birth:'2017-01-29', slotId:'sl6', guardian:'みゆの保護者',   phone:'090-0000-0036', status:'active', joined:'2023-09-01' },
+    { id:'s37', name:'たける', birth:'2012-07-21', slotId:'sl7', guardian:'たけるの保護者', phone:'090-0000-0037', status:'active', joined:'2019-10-04' },
+    { id:'s38', name:'さな',   birth:'2013-11-30', slotId:'sl7', guardian:'さなの保護者',   phone:'090-0000-0038', status:'active', joined:'2021-04-09' },
+    { id:'s39', name:'ひなの', birth:'2015-02-06', slotId:'sl7', guardian:'ひなのの保護者', phone:'090-0000-0039', status:'paused', joined:'2022-07-08' },
+
+    { id:'s01', name:'あおい', birth:'2018-05-12', slotId:'sl8', guardian:'あおいの保護者', phone:'090-0000-0001', status:'active', joined:'2024-04-06' },
+    { id:'s02', name:'はると', birth:'2017-11-03', slotId:'sl8', guardian:'はるとの保護者', phone:'090-0000-0002', status:'active', joined:'2023-09-02' },
+    { id:'s03', name:'さくら', birth:'2019-04-01', slotId:'sl8', guardian:'さくらの保護者', phone:'090-0000-0003', status:'active', joined:'2024-04-06' },
+    { id:'s04', name:'ゆうき', birth:'2019-04-02', slotId:'sl8', guardian:'ゆうきの保護者', phone:'090-0000-0004', status:'active', joined:'2025-04-05' },
+    { id:'s05', name:'みなと', birth:'2016-08-22', slotId:'sl8', guardian:'みなとの保護者', phone:'090-0000-0005', status:'active', joined:'2022-05-14' },
+    { id:'s06', name:'こはる', birth:'2020-02-17', slotId:'sl8', guardian:'こはるの保護者', phone:'090-0000-0006', status:'active', joined:'2026-04-04' },
+    { id:'s07', name:'そうた', birth:'2015-06-30', slotId:'sl8', guardian:'そうたの保護者', phone:'090-0000-0007', status:'active', joined:'2021-10-09' },
+    { id:'s08', name:'いちか', birth:'2018-12-08', slotId:'sl8', guardian:'いちかの保護者', phone:'090-0000-0008', status:'paused', joined:'2024-06-01' },
+    { id:'s26', name:'ひまり', birth:'2018-07-04', slotId:'sl8', guardian:'ひまりの保護者', phone:'090-0000-0026', status:'trial',  joined:'' },
+
+    { id:'s09', name:'れん',   birth:'2014-03-19', slotId:'sl9', guardian:'れんの保護者',   phone:'090-0000-0009', status:'active', joined:'2020-07-11' },
+    { id:'s10', name:'ゆづき', birth:'2016-01-25', slotId:'sl9', guardian:'ゆづきの保護者', phone:'090-0000-0010', status:'active', joined:'2023-04-08' },
+    { id:'s11', name:'かえで', birth:'2017-07-07', slotId:'sl9', guardian:'かえでの保護者', phone:'090-0000-0011', status:'active', joined:'2023-04-08' },
+    { id:'s12', name:'りく',   birth:'2013-09-14', slotId:'sl9', guardian:'りくの保護者',   phone:'090-0000-0012', status:'active', joined:'2019-05-18' },
+    { id:'s13', name:'ひなた', birth:'2015-12-01', slotId:'sl9', guardian:'ひなたの保護者', phone:'090-0000-0013', status:'active', joined:'2022-04-09' },
+    { id:'s14', name:'かいと', birth:'2018-02-11', slotId:'sl9', guardian:'かいとの保護者', phone:'090-0000-0014', status:'active', joined:'2025-04-05' },
+
+    { id:'s15', name:'ゆいと', birth:'2011-05-05', slotId:'sl10', guardian:'ゆいとの保護者', phone:'090-0000-0015', status:'active', joined:'2018-04-14' },
+    { id:'s16', name:'あかり', birth:'2012-10-28', slotId:'sl10', guardian:'あかりの保護者', phone:'090-0000-0016', status:'active', joined:'2020-04-11' },
+    { id:'s17', name:'りょう', birth:'2009-04-02', slotId:'sl10', guardian:'りょうの保護者', phone:'090-0000-0017', status:'active', joined:'2017-06-03' },
+    { id:'s18', name:'けんと', birth:'2010-08-16', slotId:'sl10', guardian:'けんとの保護者', phone:'090-0000-0018', status:'active', joined:'2019-04-13' },
+    { id:'s27', name:'こうき', birth:'2012-02-20', slotId:'sl10', guardian:'こうきの保護者', phone:'090-0000-0027', status:'trial',  joined:'' },
+  ],
+
+  /* 出席の記録。日付ごとに { slotId: { present, extra, teacherIds } } */
+  attendance: {},
 };
 
-/* 生徒マスタ。name はひらがなの下の名前のみ（苗字を使わない） */
-const STUDENTS = [
-  // 火曜
-  { id:'s23', name:'ともき', birth:'2015-04-18', day:2, slot:0, guardian:'ともきの保護者', phone:'090-0000-0023', status:'active', joined:'2022-04-05' },
-  { id:'s29', name:'ふうか', birth:'2017-09-12', day:2, slot:0, guardian:'ふうかの保護者', phone:'090-0000-0029', status:'active', joined:'2024-05-07' },
-  { id:'s30', name:'そうし', birth:'2018-06-25', day:2, slot:0, guardian:'そうしの保護者', phone:'090-0000-0030', status:'active', joined:'2025-04-08' },
-  { id:'s24', name:'なぎさ', birth:'2013-01-07', day:2, slot:1, guardian:'なぎさの保護者', phone:'090-0000-0024', status:'active', joined:'2020-09-08' },
-  { id:'s31', name:'あゆむ', birth:'2014-08-03', day:2, slot:1, guardian:'あゆむの保護者', phone:'090-0000-0031', status:'active', joined:'2021-06-15' },
-  { id:'s32', name:'ちひろ', birth:'2016-12-19', day:2, slot:1, guardian:'ちひろの保護者', phone:'090-0000-0032', status:'trial',  joined:'' },
-  { id:'s25', name:'まなと', birth:'2011-12-24', day:2, slot:2, guardian:'まなとの保護者', phone:'090-0000-0025', status:'withdrawn', joined:'2018-04-10' },
-  { id:'s33', name:'ゆうた', birth:'2010-03-08', day:2, slot:2, guardian:'ゆうたの保護者', phone:'090-0000-0033', status:'active', joined:'2019-04-09' },
+/* ---- 保存と読み出し（その端末の中だけ） ---- */
+const SAVE_KEY = 'acro-mock-db-v2';
+let db = null;
 
-  // 水曜
-  { id:'s20', name:'あさひ', birth:'2017-03-30', day:3, slot:0, guardian:'あさひの保護者', phone:'090-0000-0020', status:'active', joined:'2024-01-10' },
-  { id:'s22', name:'そら',   birth:'2019-09-23', day:3, slot:0, guardian:'そらの保護者',   phone:'090-0000-0022', status:'active', joined:'2026-04-04' },
-  { id:'s19', name:'ゆうき', birth:'2016-06-21', day:3, slot:1, guardian:'ゆうきの保護者', phone:'090-0000-0019', status:'active', joined:'2022-09-07' },
-  { id:'s21', name:'しおり', birth:'2014-11-09', day:3, slot:1, guardian:'しおりの保護者', phone:'090-0000-0021', status:'active', joined:'2021-04-07' },
-  { id:'s28', name:'りお',   birth:'2016-11-11', day:3, slot:1, guardian:'りおの保護者',   phone:'090-0000-0028', status:'trial',  joined:'' },
+function deepCopy(o){ return JSON.parse(JSON.stringify(o)); }
 
-  // 金曜
-  { id:'s34', name:'いつき', birth:'2016-05-02', day:5, slot:0, guardian:'いつきの保護者', phone:'090-0000-0034', status:'active', joined:'2023-04-07' },
-  { id:'s35', name:'のあ',   birth:'2018-10-17', day:5, slot:0, guardian:'のあの保護者',   phone:'090-0000-0035', status:'active', joined:'2025-04-11' },
-  { id:'s36', name:'みゆ',   birth:'2017-01-29', day:5, slot:0, guardian:'みゆの保護者',   phone:'090-0000-0036', status:'active', joined:'2023-09-01' },
-  { id:'s37', name:'たける', birth:'2012-07-21', day:5, slot:1, guardian:'たけるの保護者', phone:'090-0000-0037', status:'active', joined:'2019-10-04' },
-  { id:'s38', name:'さな',   birth:'2013-11-30', day:5, slot:1, guardian:'さなの保護者',   phone:'090-0000-0038', status:'active', joined:'2021-04-09' },
-  { id:'s39', name:'ひなの', birth:'2015-02-06', day:5, slot:1, guardian:'ひなのの保護者', phone:'090-0000-0039', status:'paused', joined:'2022-07-08' },
-
-  // 土曜 15:00
-  { id:'s01', name:'あおい', birth:'2018-05-12', day:6, slot:0, guardian:'あおいの保護者', phone:'090-0000-0001', status:'active', joined:'2024-04-06' },
-  { id:'s02', name:'はると', birth:'2017-11-03', day:6, slot:0, guardian:'はるとの保護者', phone:'090-0000-0002', status:'active', joined:'2023-09-02' },
-  { id:'s03', name:'さくら', birth:'2019-04-01', day:6, slot:0, guardian:'さくらの保護者', phone:'090-0000-0003', status:'active', joined:'2024-04-06' },
-  { id:'s04', name:'ゆうき', birth:'2019-04-02', day:6, slot:0, guardian:'ゆうきの保護者', phone:'090-0000-0004', status:'active', joined:'2025-04-05' },
-  { id:'s05', name:'みなと', birth:'2016-08-22', day:6, slot:0, guardian:'みなとの保護者', phone:'090-0000-0005', status:'active', joined:'2022-05-14' },
-  { id:'s06', name:'こはる', birth:'2020-02-17', day:6, slot:0, guardian:'こはるの保護者', phone:'090-0000-0006', status:'active', joined:'2026-04-04' },
-  { id:'s07', name:'そうた', birth:'2015-06-30', day:6, slot:0, guardian:'そうたの保護者', phone:'090-0000-0007', status:'active', joined:'2021-10-09' },
-  { id:'s08', name:'いちか', birth:'2018-12-08', day:6, slot:0, guardian:'いちかの保護者', phone:'090-0000-0008', status:'paused', joined:'2024-06-01' },
-  { id:'s26', name:'ひまり', birth:'2018-07-04', day:6, slot:0, guardian:'ひまりの保護者', phone:'090-0000-0026', status:'trial',  joined:'' },
-
-  // 土曜 16:00
-  { id:'s09', name:'れん',   birth:'2014-03-19', day:6, slot:1, guardian:'れんの保護者',   phone:'090-0000-0009', status:'active', joined:'2020-07-11' },
-  { id:'s10', name:'ゆづき', birth:'2016-01-25', day:6, slot:1, guardian:'ゆづきの保護者', phone:'090-0000-0010', status:'active', joined:'2023-04-08' },
-  { id:'s11', name:'かえで', birth:'2017-07-07', day:6, slot:1, guardian:'かえでの保護者', phone:'090-0000-0011', status:'active', joined:'2023-04-08' },
-  { id:'s12', name:'りく',   birth:'2013-09-14', day:6, slot:1, guardian:'りくの保護者',   phone:'090-0000-0012', status:'active', joined:'2019-05-18' },
-  { id:'s13', name:'ひなた', birth:'2015-12-01', day:6, slot:1, guardian:'ひなたの保護者', phone:'090-0000-0013', status:'active', joined:'2022-04-09' },
-  { id:'s14', name:'かいと', birth:'2018-02-11', day:6, slot:1, guardian:'かいとの保護者', phone:'090-0000-0014', status:'active', joined:'2025-04-05' },
-
-  // 土曜 17:00
-  { id:'s15', name:'ゆいと', birth:'2011-05-05', day:6, slot:2, guardian:'ゆいとの保護者', phone:'090-0000-0015', status:'active', joined:'2018-04-14' },
-  { id:'s16', name:'あかり', birth:'2012-10-28', day:6, slot:2, guardian:'あかりの保護者', phone:'090-0000-0016', status:'active', joined:'2020-04-11' },
-  { id:'s17', name:'りょう', birth:'2009-04-02', day:6, slot:2, guardian:'りょうの保護者', phone:'090-0000-0017', status:'active', joined:'2017-06-03' },
-  { id:'s18', name:'けんと', birth:'2010-08-16', day:6, slot:2, guardian:'けんとの保護者', phone:'090-0000-0018', status:'active', joined:'2019-04-13' },
-  { id:'s27', name:'こうき', birth:'2012-02-20', day:6, slot:2, guardian:'こうきの保護者', phone:'090-0000-0027', status:'trial',  joined:'' },
-];
-
-/* ---- 計算ロジック（保存せず毎回計算する） ---- */
-
-function ymd(s){ const [y,m,d] = s.split('-').map(Number); return {y,m,d}; }
-
-// 年度（4月始まり）
-function academicYear(dateStr){
-  const {y,m} = ymd(dateStr);
-  return y - (m < 4 ? 1 : 0);
+function loadDb(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw){
+      db = Object.assign(deepCopy(DEFAULT_DB), JSON.parse(raw));
+      return;
+    }
+  }catch(e){ /* プライベートモード等でも動き続ける */ }
+  db = deepCopy(DEFAULT_DB);
 }
-// 学年コホート（4/1生まれは上の学年）
+function saveDb(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(db)); }
+  catch(e){ /* 保存できなくても画面は動く */ }
+}
+function resetDb(){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  location.reload();
+}
+loadDb();
+
+/* ---- 取り出し ---- */
+function teacherById(id){ return db.teachers.find(t => t.id === id); }
+function slotById(id){ return db.slots.find(s => s.id === id); }
+function studentById(id){ return db.students.find(s => s.id === id); }
+
+function teachersOfSlot(slot){
+  if(!slot) return [];
+  return slot.teacherIds.map(teacherById).filter(Boolean);
+}
+function teachersLabel(arr){ return arr.length ? arr.map(t => t.name).join('・') : '未定'; }
+function slotTimeLabel(slot){ return slot ? `${slot.start} – ${slot.end}` : '未設定'; }
+function slotFullLabel(slot){ return slot ? `${DAY_LABEL[slot.day]}曜 ${slot.start} – ${slot.end}` : '未設定'; }
+
+function slotsOfDay(day){
+  return db.slots.filter(s => s.day === day).sort((a,b) => a.start.localeCompare(b.start));
+}
+function sortedSlots(){
+  return db.slots.slice().sort((a,b) => a.day - b.day || a.start.localeCompare(b.start));
+}
+function studentsOfSlot(slotId){
+  return db.students.filter(s => s.slotId === slotId && s.status !== 'withdrawn');
+}
+
+/* ---- 計算（保存せず毎回出す） ---- */
+function ymd(s){ const [y,m,d] = s.split('-').map(Number); return {y,m,d}; }
+function academicYear(dateStr){ const {y,m} = ymd(dateStr); return y - (m < 4 ? 1 : 0); }
 function cohort(birthStr){
   const {y,m,d} = ymd(birthStr);
-  const early = (m < 4) || (m === 4 && d <= 1);
-  return y - (early ? 1 : 0);
+  return y - (((m < 4) || (m === 4 && d <= 1)) ? 1 : 0);   // 4/1生まれは上の学年
 }
-// 学年番号: -2=年少 -1=年中 0=年長 1..6=小 7..9=中 10..12=高
-function gradeNum(birthStr, onStr){
-  return academicYear(onStr) - cohort(birthStr) - 6;
-}
+function gradeNum(birthStr, onStr){ return academicYear(onStr) - cohort(birthStr) - 6; }
 function gradeLabel(birthStr, onStr = TODAY){
+  if(!birthStr) return '—';
   const g = gradeNum(birthStr, onStr);
   if (g <= -3) return '未就園';
   if (g === -2) return '年少';
@@ -286,70 +377,77 @@ function gradeLabel(birthStr, onStr = TODAY){
   if (g <= 12)  return '高' + (g - 9);
   return '一般';
 }
-// 満年齢
 function age(birthStr, onStr = TODAY){
+  if(!birthStr) return '—';
   const b = ymd(birthStr), o = ymd(onStr);
   let a = o.y - b.y;
   if (o.m < b.m || (o.m === b.m && o.d < b.d)) a--;
   return a;
 }
 
-const STATUS_LABEL = { trial:'体験', active:'在籍', paused:'休会', withdrawn:'退会' };
-
 /* 同名がいる時だけ「ゆうき（土 15:00）」の形にする */
-const NAME_COUNT = {};
-STUDENTS.forEach(s => { NAME_COUNT[s.name] = (NAME_COUNT[s.name] || 0) + 1; });
-
-function slotStart(slotIdx){ return SLOT_TIMES[slotIdx].split(' – ')[0]; }
+function nameCount(name){ return db.students.filter(s => s.name === name).length; }
 function displayName(s){
-  return NAME_COUNT[s.name] > 1
-    ? `${s.name}（${DAY_LABEL[s.day]} ${slotStart(s.slot)}）`
-    : s.name;
+  if(nameCount(s.name) > 1){
+    const sl = slotById(s.slotId);
+    return sl ? `${s.name}（${DAY_LABEL[sl.day]} ${sl.start}）` : s.name;
+  }
+  return s.name;
 }
 function shortSuffix(s){
-  return NAME_COUNT[s.name] > 1 ? `${DAY_LABEL[s.day]} ${slotStart(s.slot)}` : '';
+  if(nameCount(s.name) <= 1) return '';
+  const sl = slotById(s.slotId);
+  return sl ? `${DAY_LABEL[sl.day]} ${sl.start}` : '';
 }
 
-function byId(id){ return STUDENTS.find(s => s.id === id); }
+function teachersOfStudent(s){ return teachersOfSlot(slotById(s.slotId)); }
 function todayDay(){ return new Date(TODAY + 'T00:00:00+09:00').getDay(); }
+function currentTeacher(){ return teacherById(db.currentTeacherId) || db.teachers[0]; }
 
-/* 担当は必ず配列で返す（1人でも複数でも同じ扱いにする） */
-function teachersOf(day, slot){
-  const v = DEFAULT_TEACHER[day + '|' + SLOT_TIMES[slot]];
-  return v ? v.slice() : [];
+/* ---- フォルダ分け ---- */
+function filterList(){
+  return [
+    { key:'all',   label:'ぜんいん' },
+    { key:'mine',  label:'自分の担当' },
+    { key:'trial', label:'体験' },
+  ].concat(db.teachers.map(t => ({ key:'t:' + t.id, label:t.name })));
 }
-function teachersOfStudent(s){ return teachersOf(s.day, s.slot); }
-function teachersLabel(arr){ return arr.length ? arr.join('・') : '未定'; }
-
-/* その曜日に実際にある時間帯だけ返す */
-function slotsOfDay(day){
-  return SLOT_TIMES.map((t, i) => i).filter(i => (DEFAULT_TEACHER[day + '|' + SLOT_TIMES[i]] || []).length);
-}
-
-/* フォルダ分け（絞り込み）。key で1つ選ぶ */
-const FILTERS = [
-  { key:'all',   label:'ぜんいん' },
-  { key:'mine',  label:'自分の担当' },
-  { key:'trial', label:'体験' },
-].concat(TEACHERS.map(t => ({ key:'t:' + t, label:t })));
-
 function passesFilter(s, key){
   if(key === 'all')   return true;
-  if(key === 'mine')  return teachersOfStudent(s).includes(CURRENT_USER);
   if(key === 'trial') return s.status === 'trial';
-  if(key.startsWith('t:')) return teachersOfStudent(s).includes(key.slice(2));
+  const ids = (slotById(s.slotId) || { teacherIds:[] }).teacherIds;
+  if(key === 'mine')  return ids.includes(db.currentTeacherId);
+  if(key.startsWith('t:')) return ids.includes(key.slice(2));
   return true;
+}
+
+/* ---- 新しいIDを作る ---- */
+function newId(prefix){
+  return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+/* ---- 今日の出席記録を取り出す（無ければ作る） ---- */
+function todayRecord(slotId){
+  if(!db.attendance[TODAY]) db.attendance[TODAY] = {};
+  if(!db.attendance[TODAY][slotId]){
+    const slot = slotById(slotId);
+    const rec = { present:{}, extra:[], teacherIds: slot ? slot.teacherIds.slice() : [] };
+    studentsOfSlot(slotId).forEach(s => rec.present[s.id] = true);  // はじめから全員出席
+    db.attendance[TODAY][slotId] = rec;
+  }
+  return db.attendance[TODAY][slotId];
 }
 
 </script>
 <script>
-const DOW = todayDay();
-const DAY_SLOTS = slotsOfDay(DOW);
 let view = 'today';
-let curSlot = DAY_SLOTS.length ? DAY_SLOTS[0] : 0;
+let curSlot = null;
 let curStudent = null;
+let curSlotEdit = null;
 let filterKey = 'all';
 let sortKey = 'day';
+let mode = 'view';     // view / editStudent / editSlot
+let formDraft = {};
 
 const SORTS = [
   { key:'day',   label:'曜日順' },
@@ -357,77 +455,89 @@ const SORTS = [
   { key:'age',   label:'年齢順' },
 ];
 
-function todayMembers(slotIdx){
-  return STUDENTS.filter(s => s.day === DOW && s.slot === slotIdx && s.status !== 'withdrawn');
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function dateLine(){
   const {m,d} = ymd(TODAY);
-  return `${m}月${d}日（${DAY_LABEL[DOW]}）`;
+  return `${m}月${d}日（${DAY_LABEL[todayDay()]}）`;
 }
 
 function setView(v){
   view = v;
-  document.getElementById('navToday').classList.toggle('on', v === 'today');
-  document.getElementById('navStudents').classList.toggle('on', v === 'students');
+  mode = 'view';
+  ['navToday','navStudents','navSlots'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById(v === 'today' ? 'navToday' : v === 'students' ? 'navStudents' : 'navSlots').classList.add('on');
   document.getElementById('q').value = '';
-  renderHead();
-  renderList();
-}
-
-function renderSortBar(){
-  const bar = document.getElementById('sortbar');
-  bar.style.display = (view === 'students') ? 'flex' : 'none';
-  if(view !== 'students') return;
-  bar.innerHTML = '';
-  SORTS.forEach(s => {
-    const b = document.createElement('button');
-    b.className = 'seg' + (s.key === sortKey ? ' on' : '');
-    b.textContent = s.label;
-    b.onclick = () => { sortKey = s.key; renderSortBar(); renderList(); };
-    bar.appendChild(b);
-  });
-}
-
-function renderFilterBar(){
-  const bar = document.getElementById('filterbar');
-  bar.style.display = (view === 'students') ? 'flex' : 'none';
-  if(view !== 'students') return;
-  bar.innerHTML = '';
-  FILTERS.forEach(f => {
-    const b = document.createElement('button');
-    b.className = 'fchip' + (f.key === filterKey ? ' on' : '');
-    b.textContent = f.key === 'mine' ? `自分の担当（${CURRENT_USER}）` : f.label;
-    b.onclick = () => { filterKey = f.key; renderHead(); renderList(); };
-    bar.appendChild(b);
-  });
+  if(v === 'today'){
+    const slots = slotsOfDay(todayDay());
+    curSlot = slots.length ? slots[0].id : null;
+  }
+  renderHead(); renderList();
+  if(v === 'slots'){ curSlotEdit = null; renderDetail(); }
+  else { renderDetail(); }
 }
 
 function renderHead(){
-  const bar = document.getElementById('slotbar');
-  renderSortBar();
-  renderFilterBar();
+  const slotbar = document.getElementById('slotbar');
+  const sortbar = document.getElementById('sortbar');
+  const filterbar = document.getElementById('filterbar');
+  const addbtn = document.getElementById('addbtn');
+  const q = document.getElementById('q');
+
+  slotbar.style.display = 'none';
+  sortbar.style.display = 'none';
+  filterbar.style.display = 'none';
+  q.style.display = 'block';
+  addbtn.style.display = 'block';
+
   if(view === 'today'){
+    const slots = slotsOfDay(todayDay());
     document.getElementById('ltitle').textContent = '今日';
+    document.getElementById('lsub').textContent = slots.length
+      ? dateLine() + '　担当 ' + teachersLabel(teachersOfSlot(slotById(curSlot)))
+      : dateLine() + '　授業はありません';
+    addbtn.style.display = 'none';
+    if(slots.length){
+      slotbar.style.display = 'flex';
+      slotbar.innerHTML = '';
+      slots.forEach(sl => {
+        const b = document.createElement('button');
+        b.className = 'seg' + (sl.id === curSlot ? ' on' : '');
+        b.textContent = sl.start;
+        b.onclick = () => { curSlot = sl.id; renderHead(); renderList(); };
+        slotbar.appendChild(b);
+      });
+    }
+  }else if(view === 'students'){
+    document.getElementById('ltitle').textContent = '生徒';
+    const n = db.students.filter(s => passesFilter(s, filterKey)).length;
+    const f = filterList().find(x => x.key === filterKey);
     document.getElementById('lsub').textContent =
-      DAY_SLOTS.length ? dateLine() + '　担当 ' + teachersLabel(teachersOf(DOW, curSlot))
-                       : dateLine() + '　授業はありません';
-    bar.style.display = DAY_SLOTS.length ? 'flex' : 'none';
-    bar.innerHTML = '';
-    DAY_SLOTS.forEach(i => {
+      filterKey === 'all' ? `${db.students.filter(s => s.status === 'active').length}人 在籍中` : `${f.label}　${n}人`;
+    sortbar.style.display = 'flex';
+    sortbar.innerHTML = '';
+    SORTS.forEach(s => {
       const b = document.createElement('button');
-      b.className = 'seg' + (i === curSlot ? ' on' : '');
-      b.textContent = SLOT_TIMES[i].split(' – ')[0];
-      b.onclick = () => { curSlot = i; renderHead(); renderList(); };
-      bar.appendChild(b);
+      b.className = 'seg' + (s.key === sortKey ? ' on' : '');
+      b.textContent = s.label;
+      b.onclick = () => { sortKey = s.key; renderHead(); renderList(); };
+      sortbar.appendChild(b);
+    });
+    filterbar.style.display = 'flex';
+    filterbar.innerHTML = '';
+    filterList().forEach(f2 => {
+      const b = document.createElement('button');
+      b.className = 'fchip' + (f2.key === filterKey ? ' on' : '');
+      b.textContent = f2.key === 'mine' ? `自分の担当（${currentTeacher().name}）` : f2.label;
+      b.onclick = () => { filterKey = f2.key; renderHead(); renderList(); };
+      filterbar.appendChild(b);
     });
   }else{
-    document.getElementById('ltitle').textContent = '生徒';
-    const n = STUDENTS.filter(s => passesFilter(s, filterKey)).length;
-    const f = FILTERS.find(x => x.key === filterKey);
-    document.getElementById('lsub').textContent =
-      filterKey === 'all' ? `${STUDENTS.filter(s => s.status === 'active').length}人 在籍中`
-                          : `${f.label}　${n}人`;
-    bar.style.display = 'none';
+    document.getElementById('ltitle').textContent = '時間帯';
+    document.getElementById('lsub').textContent = `${db.slots.length}つ　先生 ${db.teachers.length}人`;
+    q.style.display = 'none';
   }
 }
 
@@ -436,20 +546,37 @@ function renderList(){
   const el = document.getElementById('listBody');
   el.innerHTML = '';
 
+  if(view === 'slots'){
+    sortedSlots().forEach(sl => {
+      const n = studentsOfSlot(sl.id).length;
+      const b = document.createElement('button');
+      b.className = 'item' + (sl.id === curSlotEdit ? ' on' : '');
+      b.onclick = () => { curSlotEdit = sl.id; mode = 'view'; renderList(); renderSlotDetail(); };
+      b.innerHTML = `
+        <div>
+          <div class="iname">${esc(slotFullLabel(sl))}</div>
+          <div class="imeta">${esc(teachersLabel(teachersOfSlot(sl)))}　${n}人</div>
+        </div>`;
+      el.appendChild(b);
+    });
+    return;
+  }
+
   let rows;
   if(view === 'today'){
-    if(!DAY_SLOTS.length){
-      el.innerHTML = '<div class="empty">今日は授業がありません<br>左の「生徒」から名簿は見られます</div>';
+    if(!slotsOfDay(todayDay()).length){
+      el.innerHTML = '<div class="empty">今日は授業がありません<br>左の「時間帯」から足せます</div>';
       return;
     }
-    rows = todayMembers(curSlot).filter(s => !q || s.name.includes(q));
+    rows = studentsOfSlot(curSlot).filter(s => !q || s.name.includes(q));
   }else{
-    rows = STUDENTS.filter(s => passesFilter(s, filterKey) && (!q || s.name.includes(q)));
+    rows = db.students.filter(s => passesFilter(s, filterKey) && (!q || s.name.includes(q)));
   }
   if(!rows.length){ el.innerHTML = '<div class="empty">いません</div>'; return; }
 
   if(view === 'students'){
     const byName = (a,b) => a.name.localeCompare(b.name, 'ja');
+    const daySlot = s => { const sl = slotById(s.slotId); return sl ? sl.day * 10000 + Number(sl.start.replace(':','')) : 999999; };
     const groups = [];
     const push = (label, s) => {
       const last = groups[groups.length - 1];
@@ -457,8 +584,8 @@ function renderList(){
       else groups.push({ label, rows:[s] });
     };
     if(sortKey === 'day'){
-      rows.slice().sort((a,b) => a.day - b.day || a.slot - b.slot || byName(a,b))
-          .forEach(s => push(DAY_LABEL[s.day] + '曜', s));
+      rows.slice().sort((a,b) => daySlot(a) - daySlot(b) || byName(a,b))
+          .forEach(s => { const sl = slotById(s.slotId); push(sl ? DAY_LABEL[sl.day] + '曜' : '枠なし', s); });
     }else if(sortKey === 'grade'){
       rows.slice().sort((a,b) => gradeNum(a.birth, TODAY) - gradeNum(b.birth, TODAY) || byName(a,b))
           .forEach(s => push(gradeLabel(s.birth), s));
@@ -468,8 +595,7 @@ function renderList(){
     }
     groups.forEach(g => {
       const h = document.createElement('div');
-      h.className = 'group';
-      h.textContent = g.label;
+      h.className = 'group'; h.textContent = g.label;
       el.appendChild(h);
       g.rows.forEach(s => el.appendChild(itemEl(s)));
     });
@@ -479,67 +605,316 @@ function renderList(){
 }
 
 function itemEl(s){
+  const sl = slotById(s.slotId);
   const b = document.createElement('button');
   b.className = 'item' + (s.id === curStudent ? ' on' : '');
-  b.onclick = () => { curStudent = s.id; renderList(); renderDetail(); };
+  b.onclick = () => { curStudent = s.id; mode = 'view'; renderList(); renderDetail(); };
   const tag = s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : '';
   const meta = view === 'today'
     ? `${gradeLabel(s.birth)}・${age(s.birth)}さい`
-    : `${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? '' : DAY_LABEL[s.day] + '曜 '}${SLOT_TIMES[s.slot]}　${teachersLabel(teachersOfStudent(s))}`;
+    : `${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? slotTimeLabel(sl) : slotFullLabel(sl)}　${teachersLabel(teachersOfStudent(s))}`;
   b.innerHTML = `
     <div>
-      <div class="iname">${view === 'today' ? s.name : displayName(s)}</div>
-      <div class="imeta">${meta}</div>
+      <div class="iname">${esc(view === 'today' ? s.name : displayName(s))}</div>
+      <div class="imeta">${esc(meta)}</div>
     </div>${tag}`;
   return b;
 }
 
+function onAdd(){
+  if(view === 'students') openStudentForm(null);
+  else if(view === 'slots') openSlotForm(null);
+}
+
+/* ---- 生徒の詳細 ---- */
 function renderDetail(){
   const el = document.getElementById('detail');
-  if(!curStudent){
+  if(view === 'slots'){ renderSlotDetail(); return; }
+  if(mode === 'editStudent'){ renderStudentForm(); return; }
+
+  const s = curStudent ? studentById(curStudent) : null;
+  if(!s){
     el.innerHTML = '<div class="blank">左から生徒を選ぶと<br>ここに情報が出ます</div>';
     return;
   }
-  const s = byId(curStudent);
+  const sl = slotById(s.slotId);
   el.innerHTML = `
     <div class="dwrap">
-      <div class="name-big">${s.name}</div>
-      <div class="name-sub">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}　担当 ${teachersLabel(teachersOfStudent(s))}</div>
+      <div class="dhead">
+        <div>
+          <div class="name-big">${esc(s.name)}</div>
+          <div class="name-sub">${esc(slotFullLabel(sl))}　担当 ${esc(teachersLabel(teachersOfStudent(s)))}</div>
+        </div>
+        <button class="btn btn-sec" onclick="openStudentForm('${s.id}')">編集</button>
+      </div>
       <div class="chips">
-        <span class="chip on">${gradeLabel(s.birth)}</span>
-        <span class="chip on">${age(s.birth)}さい</span>
+        <span class="chip on">${esc(gradeLabel(s.birth))}</span>
+        <span class="chip on">${esc(age(s.birth))}さい</span>
         <span class="chip">${STATUS_LABEL[s.status]}</span>
       </div>
 
       <div class="cols">
         <div class="panel">
           <div class="ptitle">きほん じょうほう</div>
-          <div class="kv"><span class="k">なまえ</span><span class="v">${s.name}</span></div>
-          <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth.replace(/-/g,'/')}</span></div>
-          <div class="kv"><span class="k">学年</span><span class="v">${gradeLabel(s.birth)}</span></div>
-          <div class="kv"><span class="k">年齢</span><span class="v">${age(s.birth)}さい</span></div>
-          <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? s.joined.replace(/-/g,'/') : 'まだ（体験）'}</span></div>
-          <div class="kv"><span class="k">通っている枠</span><span class="v">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}</span></div>
-          <div class="kv"><span class="k">担当の先生</span><span class="v">${teachersLabel(teachersOfStudent(s))}</span></div>
+          <div class="kv"><span class="k">なまえ</span><span class="v">${esc(s.name)}</span></div>
+          <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth ? esc(s.birth.replace(/-/g,'/')) : '—'}</span></div>
+          <div class="kv"><span class="k">学年</span><span class="v">${esc(gradeLabel(s.birth))}</span></div>
+          <div class="kv"><span class="k">年齢</span><span class="v">${esc(age(s.birth))}さい</span></div>
+          <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? esc(s.joined.replace(/-/g,'/')) : 'まだ（体験）'}</span></div>
+          <div class="kv"><span class="k">通っている枠</span><span class="v">${esc(slotFullLabel(sl))}</span></div>
+          <div class="kv"><span class="k">担当の先生</span><span class="v">${esc(teachersLabel(teachersOfStudent(s)))}</span></div>
         </div>
-
         <div class="panel">
           <div class="ptitle">ほごしゃ れんらくさき</div>
-          <div class="kv"><span class="k">お名前</span><span class="v">${s.guardian}</span></div>
-          <div class="kv"><span class="k">電話</span><span class="v phone-num">${s.phone}</span></div>
+          <div class="kv"><span class="k">お名前</span><span class="v">${esc(s.guardian) || '—'}</span></div>
+          <div class="kv"><span class="k">電話</span><span class="v phone-num">${esc(s.phone) || '—'}</span></div>
           <div class="kv"><span class="k">在籍</span><span class="v">${STATUS_LABEL[s.status]}</span></div>
         </div>
       </div>
 
       <div class="placeholder">
         このあとここに入る予定：扱い方説明書 ／ 技の時系列（苦戦メモ→練習法→合格） ／ 写真・動画のタイムライン<br>
-        まだ作っていません。順番は海翔が決める
+        まだ作っていません
       </div>
     </div>`;
 }
 
+/* ---- 生徒フォーム ---- */
+function openStudentForm(id){
+  curStudent = id || curStudent;
+  formDraft = id ? Object.assign({}, studentById(id))
+                 : { name:'', birth:'', slotId:(sortedSlots()[0] || {}).id || '', guardian:'', phone:'', status:'trial', joined:'' };
+  formDraft._new = !id;
+  mode = 'editStudent';
+  renderStudentForm();
+}
+function renderStudentForm(){
+  const el = document.getElementById('detail');
+  const slotOpts = sortedSlots().map(sl =>
+    `<option value="${sl.id}" ${sl.id === formDraft.slotId ? 'selected' : ''}>${esc(slotFullLabel(sl))}</option>`).join('');
+  const statusOpts = STATUS_ORDER.map(k =>
+    `<option value="${k}" ${k === formDraft.status ? 'selected' : ''}>${STATUS_LABEL[k]}</option>`).join('');
+  el.innerHTML = `
+    <div class="dwrap">
+      <div class="name-big">${formDraft._new ? '生徒を追加' : '生徒を編集'}</div>
+      <div class="name-sub">学年と年齢は生年月日から毎回計算します</div>
+      <div class="cols">
+        <div class="panel">
+          <div class="field">
+            <div class="flabel">なまえ（ひらがな・下の名前だけ）</div>
+            <input type="text" id="f_name" value="${esc(formDraft.name)}" placeholder="れい：ゆうき" autocomplete="off">
+            <div class="fhint">苗字は入れません。同じ名前の子がいると自動で曜日と時間が付きます</div>
+          </div>
+          <div class="field">
+            <div class="flabel">生年月日</div>
+            <input type="date" id="f_birth" value="${esc(formDraft.birth)}">
+            <div class="fhint" id="f_gradehint"></div>
+          </div>
+          <div class="field">
+            <div class="flabel">通う時間帯</div>
+            <select id="f_slot">${slotOpts}</select>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="field">
+            <div class="flabel">保護者のお名前</div>
+            <input type="text" id="f_guardian" value="${esc(formDraft.guardian)}" autocomplete="off">
+          </div>
+          <div class="field">
+            <div class="flabel">保護者の電話</div>
+            <input type="tel" id="f_phone" value="${esc(formDraft.phone)}" placeholder="090-0000-0000" autocomplete="off">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <div class="flabel">在籍</div>
+              <select id="f_status">${statusOpts}</select>
+            </div>
+            <div class="field">
+              <div class="flabel">入会日</div>
+              <input type="date" id="f_joined" value="${esc(formDraft.joined)}">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" onclick="saveStudentForm()">保存する</button>
+        <button class="btn btn-sec" onclick="mode='view';renderDetail();">やめる</button>
+        ${formDraft._new ? '' : '<button class="btn btn-danger" onclick="deleteStudent()">この生徒を消す</button>'}
+      </div>
+    </div>`;
+  const bi = document.getElementById('f_birth');
+  const upd = () => {
+    const v = bi.value;
+    document.getElementById('f_gradehint').textContent =
+      v ? `いまは ${gradeLabel(v)}・${age(v)}さい` : '入れると学年と年齢が自動で出ます';
+  };
+  bi.oninput = upd; upd();
+}
+function saveStudentForm(){
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ alert('なまえを入れてください'); return; }
+  const data = {
+    name,
+    birth: document.getElementById('f_birth').value,
+    slotId: document.getElementById('f_slot').value,
+    guardian: document.getElementById('f_guardian').value.trim(),
+    phone: document.getElementById('f_phone').value.trim(),
+    status: document.getElementById('f_status').value,
+    joined: document.getElementById('f_joined').value,
+  };
+  if(formDraft._new){
+    const s = Object.assign({ id:newId('st') }, data);
+    db.students.push(s);
+    curStudent = s.id;
+  }else{
+    Object.assign(studentById(formDraft.id), data);
+    curStudent = formDraft.id;
+  }
+  saveDb(); mode = 'view';
+  renderHead(); renderList(); renderDetail();
+}
+function deleteStudent(){
+  const s = studentById(formDraft.id);
+  if(!s) return;
+  if(!confirm(s.name + ' を完全に消しますか。出席の記録からも消えます。')) return;
+  db.students = db.students.filter(x => x.id !== s.id);
+  Object.keys(db.attendance).forEach(d => Object.keys(db.attendance[d]).forEach(sl => {
+    const rec = db.attendance[d][sl];
+    delete rec.present[s.id];
+    rec.extra = rec.extra.filter(e => e.id !== s.id);
+  }));
+  curStudent = null; mode = 'view';
+  saveDb(); renderHead(); renderList(); renderDetail();
+}
+
+/* ---- 時間帯 ---- */
+function renderSlotDetail(){
+  const el = document.getElementById('detail');
+  if(mode === 'editSlot'){ renderSlotForm(); return; }
+  const sl = curSlotEdit ? slotById(curSlotEdit) : null;
+  if(!sl){
+    el.innerHTML = `<div class="blank">左から時間帯を選ぶと<br>ここに出ます<br><br>先生の追加もここから</div>
+      <div class="dwrap"><div class="panel" style="margin-top:24px;">
+        <div class="ptitle">先生（${db.teachers.length}）</div>
+        ${db.teachers.map(t => `<div class="kv"><span class="k">${esc(t.name)}${t.id === db.currentTeacherId ? '（じぶん）' : ''}</span>
+          <span class="v">${db.slots.filter(x => x.teacherIds.includes(t.id)).length}つ担当</span></div>`).join('')}
+        <div class="btnrow"><button class="btn btn-sec" onclick="addTeacherPrompt()">＋ 先生を追加</button></div>
+      </div></div>`;
+    return;
+  }
+  const kids = studentsOfSlot(sl.id);
+  el.innerHTML = `
+    <div class="dwrap">
+      <div class="dhead">
+        <div>
+          <div class="name-big">${esc(slotFullLabel(sl))}</div>
+          <div class="name-sub">担当 ${esc(teachersLabel(teachersOfSlot(sl)))}　${kids.length}人</div>
+        </div>
+        <button class="btn btn-sec" onclick="openSlotForm('${sl.id}')">編集</button>
+      </div>
+      <div class="panel" style="margin-top:24px;">
+        <div class="ptitle">この時間帯の子</div>
+        ${kids.length ? kids.map(s => `<div class="kv">
+            <span class="k">${esc(displayName(s))}</span>
+            <span class="v">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}さい</span></div>`).join('')
+          : '<div class="fhint">まだいません</div>'}
+      </div>
+    </div>`;
+}
+function openSlotForm(id){
+  const sl = id ? slotById(id) : null;
+  formDraft = sl ? Object.assign({}, sl, { teacherIds: sl.teacherIds.slice(), _new:false })
+                 : { day:todayDay(), start:'15:00', end:'16:00', teacherIds:[], _new:true };
+  curSlotEdit = id || curSlotEdit;
+  mode = 'editSlot';
+  renderSlotForm();
+}
+function renderSlotForm(){
+  const el = document.getElementById('detail');
+  const dayOpts = DAY_LABEL.map((d,i) =>
+    `<option value="${i}" ${i === Number(formDraft.day) ? 'selected' : ''}>${d}曜</option>`).join('');
+  const n = formDraft._new ? 0 : studentsOfSlot(formDraft.id).length;
+  el.innerHTML = `
+    <div class="dwrap">
+      <div class="name-big">${formDraft._new ? '時間帯を追加' : '時間帯を編集'}</div>
+      <div class="name-sub">クラス名は持ちません。曜日と時刻だけで区別します</div>
+      <div class="panel" style="margin-top:24px;">
+        <div class="field">
+          <div class="flabel">曜日</div>
+          <select id="g_day">${dayOpts}</select>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <div class="flabel">はじまり</div>
+            <input type="time" id="g_start" value="${esc(formDraft.start)}">
+          </div>
+          <div class="field">
+            <div class="flabel">おわり</div>
+            <input type="time" id="g_end" value="${esc(formDraft.end)}">
+          </div>
+        </div>
+        <div class="field">
+          <div class="flabel">担当の先生（何人でも）</div>
+          <div class="toggles" id="g_teachers"></div>
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" onclick="saveSlotForm()">保存する</button>
+        <button class="btn btn-sec" onclick="mode='view';renderSlotDetail();">やめる</button>
+        ${formDraft._new ? '' : `<button class="btn btn-danger" onclick="deleteSlot()">この時間帯を消す（${n}人）</button>`}
+      </div>
+    </div>`;
+  const tw = document.getElementById('g_teachers');
+  db.teachers.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'tog' + (formDraft.teacherIds.includes(t.id) ? ' on' : '');
+    b.textContent = t.name;
+    b.onclick = () => {
+      formDraft.teacherIds = formDraft.teacherIds.includes(t.id)
+        ? formDraft.teacherIds.filter(x => x !== t.id)
+        : formDraft.teacherIds.concat(t.id);
+      renderSlotForm();
+    };
+    tw.appendChild(b);
+  });
+}
+function saveSlotForm(){
+  const day = Number(document.getElementById('g_day').value);
+  const start = document.getElementById('g_start').value;
+  const end = document.getElementById('g_end').value;
+  if(!start || !end){ alert('時刻を入れてください'); return; }
+  if(end <= start){ alert('おわりは、はじまりより後にしてください'); return; }
+  const data = { day, start, end, teacherIds: formDraft.teacherIds.slice() };
+  if(formDraft._new){
+    const sl = Object.assign({ id:newId('sl') }, data);
+    db.slots.push(sl);
+    curSlotEdit = sl.id;
+  }else{
+    Object.assign(slotById(formDraft.id), data);
+    curSlotEdit = formDraft.id;
+  }
+  saveDb(); mode = 'view';
+  renderHead(); renderList(); renderSlotDetail();
+}
+function deleteSlot(){
+  const sl = slotById(formDraft.id);
+  if(!sl) return;
+  const n = studentsOfSlot(sl.id).length;
+  if(!confirm(slotFullLabel(sl) + ' を消しますか。' + (n ? `${n}人 の枠が空になります。` : ''))) return;
+  db.students.forEach(s => { if(s.slotId === sl.id) s.slotId = ''; });
+  db.slots = db.slots.filter(x => x.id !== sl.id);
+  Object.keys(db.attendance).forEach(d => { delete db.attendance[d][sl.id]; });
+  curSlotEdit = null; mode = 'view';
+  saveDb(); renderHead(); renderList(); renderSlotDetail();
+}
+function addTeacherPrompt(){
+  const name = prompt('先生のなまえ');
+  if(!name || !name.trim()) return;
+  db.teachers.push({ id:newId('tc'), name:name.trim() });
+  saveDb(); renderHead(); renderList(); renderSlotDetail();
+}
+
 setView('today');
-renderDetail();
 </script>
 </body>
 </html>
