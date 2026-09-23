@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>アクロバット教室アプリ モック</title>
+<style>
+  :root{
+    --bg:#FDFDFB; --surface:#FFFFFF; --surface-hover:#F6F8F9;
+    --border:#E3E8EB; --text:#16181A; --text2:#5A6672; --text3:#A6B0B9;
+    --primary:#0EA5E9; --primary-soft:#E0F2FE; --primary-deep:#075985;
+    --shadow-sm:0 1px 4px rgba(28,25,23,0.05);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+    min-height:100vh;display:flex;justify-content:center;
+    padding:48px 16px;
+  }
+  .wrap{width:100%;max-width:560px;}
+  h1{font-size:22px;font-weight:600;letter-spacing:0.02em;line-height:1.45;margin:0;}
+  .lead{font-size:14px;color:var(--text2);line-height:1.8;letter-spacing:0.01em;margin-top:12px;}
+  .cards{margin-top:32px;display:flex;flex-direction:column;gap:16px;}
+  a.card{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    background:var(--surface);border-radius:16px;padding:20px;text-decoration:none;color:inherit;
+    box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
+    transition:transform 120ms cubic-bezier(.2,0,0,1),background 120ms;
+  }
+  a.card:hover{background:var(--surface-hover);transform:translateY(-2px);}
+  .ct{font-size:16px;font-weight:600;letter-spacing:0.01em;}
+  .cd{font-size:12px;color:var(--text2);margin-top:6px;line-height:1.7;letter-spacing:0.02em;}
+  .chev{width:20px;height:20px;flex:none;}
+  .chev svg{width:20px;height:20px;stroke:var(--text3);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .note{
+    margin-top:32px;padding:20px;border:1px dashed var(--border);border-radius:16px;
+    font-size:12px;color:var(--text3);line-height:1.9;letter-spacing:0.02em;
+  }
+  .tag{
+    display:inline-block;font-size:11px;font-weight:500;letter-spacing:0.06em;
+    padding:4px 8px;border-radius:4px;background:var(--primary-soft);color:var(--primary-deep);
+    margin-bottom:16px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="tag">モック</span>
+    <h1>アクロバット教室 生徒管理アプリ</h1>
+    <p class="lead">
+      画面の形を決めるための試作です。中のデータは全部ダミーで、<br>
+      実在の生徒は1人も入っていません。触っても何も保存されません。
+    </p>
+
+    <div class="cards">
+      <a class="card" href="sumaho.html">
+        <div>
+          <div class="ct">スマホ版</div>
+          <div class="cd">出席をつける／生徒を探して保護者に電話する</div>
+        </div>
+        <div class="chev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+      </a>
+
+      <a class="card" href="ipad.html">
+        <div>
+          <div class="ct">iPad・パソコン版</div>
+          <div class="cd">今日のメンバーと、生徒の一覧・個人情報</div>
+        </div>
+        <div class="chev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+      </a>
+    </div>
+
+    <div class="note">
+      まだ入っていないもの：級と技の表、扱い方説明書、技の時系列、写真と動画、ログイン。<br>
+      電話番号は 090-0000-0000 台のダミーです。かけても誰にもつながりません。
+    </div>
+  </div>
+</body>
+</html>

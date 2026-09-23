@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>スマホ版モック</title>
+<style>
+  :root{
+    --bg:#FDFDFB; --surface:#FFFFFF; --surface-hover:#F6F8F9; --surface-active:#EEF2F4;
+    --border:#E3E8EB; --text:#16181A; --text2:#5A6672; --text3:#A6B0B9;
+    --primary:#0EA5E9; --primary-hover:#0284C7; --primary-soft:#E0F2FE; --primary-deep:#075985;
+    --shadow-sm:0 1px 4px rgba(28,25,23,0.05);
+    --shadow-lg:0 8px 24px rgba(28,25,23,0.12), 0 2px 6px rgba(28,25,23,0.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#EEF1F3;color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+    display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 0;
+  }
+  .phone{
+    width:390px;height:812px;background:var(--bg);border-radius:32px;
+    overflow:hidden;position:relative;box-shadow:var(--shadow-lg);
+    display:flex;flex-direction:column;
+  }
+  .stage{flex:1;position:relative;overflow:hidden;}
+  /* 実機（iPhone Safari）では枠を外して全画面 */
+  @media (max-width:600px){
+    body{background:var(--bg);padding:0;display:block;}
+    .phone{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+  }
+
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);}
+  .screen.on{display:flex;}
+
+  header{
+    padding:20px 16px 12px;background:var(--bg);
+    border-bottom:0.5px solid rgba(28,25,23,0.08);
+    display:flex;align-items:center;gap:12px;flex:none;
+  }
+  .back{
+    width:36px;height:36px;border-radius:8px;border:none;background:transparent;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:-8px;
+    transition:background 120ms cubic-bezier(.2,0,0,1);
+  }
+  .back:active{background:rgba(28,25,23,0.08);}
+  .back svg{width:20px;height:20px;stroke:var(--text);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .htitle{font-size:18px;font-weight:600;letter-spacing:0.01em;line-height:1.5;}
+  .hsub{font-size:12px;font-weight:400;color:var(--text2);letter-spacing:0.02em;margin-top:2px;}
+
+  .body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+
+  .card{
+    background:var(--surface);border-radius:16px;padding:20px;
+    box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    width:100%;text-align:left;font-family:inherit;cursor:pointer;
+    transition:transform 120ms cubic-bezier(.2,0,0,1);margin-bottom:16px;
+  }
+  .card:active{transform:scale(0.99);background:var(--surface-hover);}
+  .ctime{font-size:18px;font-weight:600;letter-spacing:0.01em;line-height:1.4;}
+  .cteacher{font-size:12px;font-weight:400;color:var(--text2);margin-top:6px;letter-spacing:0.02em;}
+  .count{text-align:right;white-space:nowrap;}
+  .count .n{font-size:28px;font-weight:600;line-height:1;}
+  .count .d{font-size:16px;font-weight:400;color:var(--text3);}
+  .count .lbl{font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);margin-top:6px;}
+
+  .teacher{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+    background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:12px;margin-bottom:16px;font-family:inherit;text-align:left;cursor:pointer;
+    transition:background 120ms cubic-bezier(.2,0,0,1);
+  }
+  .teacher:active{background:var(--surface-active);}
+  .tlabel{font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);}
+  .tname{font-size:14px;font-weight:400;color:var(--text);margin-top:4px;letter-spacing:0.01em;}
+  .tedit{font-size:12px;font-weight:500;color:var(--primary);letter-spacing:0.02em;white-space:nowrap;}
+
+  /* 出席タイル（はじめから全員出席） */
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .tile{
+    position:relative;min-height:60px;border-radius:8px;
+    background:var(--surface);border:1.5px solid var(--primary);color:var(--text);
+    font-family:inherit;font-size:14px;font-weight:400;letter-spacing:0.01em;line-height:1.5;
+    cursor:pointer;padding:11.5px 31.5px 11.5px 11.5px;text-align:left;
+    transition:background 120ms cubic-bezier(.2,0,0,1),border-color 120ms,color 120ms;
+  }
+  .tile:active{transform:scale(0.98);}
+  .tile.absent{background:var(--surface-hover);border:1px solid var(--border);color:var(--text3);padding:12px 32px 12px 12px;}
+  .tsub{display:block;font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);margin-top:3px;}
+  .tile.absent .tsub{color:var(--text3);}
+  .check{position:absolute;top:10px;right:10px;width:20px;height:20px;opacity:1;transition:opacity 120ms;}
+  .tile.absent .check{opacity:0;}
+  .check svg{width:20px;height:20px;stroke:var(--primary);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .badge{
+    display:inline-block;margin-top:6px;font-size:11px;font-weight:500;letter-spacing:0.06em;
+    padding:2px 8px;border-radius:4px;background:var(--primary-soft);color:var(--primary-deep);
+  }
+  .tile.absent .badge{background:var(--surface-active);color:var(--text3);}
+
+  .seccount{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 16px;}
+  .seccount .big{font-size:28px;font-weight:600;line-height:1;}
+  .seccount .big .den{font-size:16px;font-weight:400;color:var(--text3);}
+  .seccount .note{font-size:12px;color:var(--text2);letter-spacing:0.02em;}
+
+  .footer{flex:none;padding:12px 16px;background:var(--bg);border-top:0.5px solid rgba(28,25,23,0.08);}
+  .btn{
+    width:100%;height:44px;border-radius:8px;border:none;background:var(--primary);color:#fff;
+    font-family:inherit;font-size:15px;font-weight:400;letter-spacing:0.02em;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;
+    transition:background 120ms cubic-bezier(.2,0,0,1);
+  }
+  .btn:active{background:var(--primary-hover);transform:scale(0.98);}
+  .btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+  .btn-sec:active{background:var(--surface-active);}
+
+  .searchwrap{padding:16px;flex:none;}
+  .search{
+    width:100%;height:44px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+    padding:0 12px;font-family:inherit;font-size:16px;color:var(--text);outline:none;
+    transition:border-color 120ms,box-shadow 120ms;
+  }
+  .search:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.2);}
+  .search::placeholder{color:var(--text3);}
+  .slabel{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:0.02em;margin:0 2px 8px;}
+
+  .row{
+    width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 12px;background:transparent;border:none;
+    border-bottom:0.5px solid rgba(28,25,23,0.08);
+    font-family:inherit;text-align:left;cursor:pointer;transition:background 120ms;
+  }
+  .row:active{background:var(--surface-hover);}
+  .row.sel{background:var(--surface-hover);}
+  .row > div:first-child{min-width:0;}
+  .rname{font-size:14px;font-weight:400;color:var(--text);letter-spacing:0.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rmeta{font-size:12px;color:var(--text2);margin-top:3px;letter-spacing:0.02em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .radd{font-size:12px;font-weight:500;color:var(--primary);letter-spacing:0.02em;white-space:nowrap;}
+  .rcur{font-size:12px;font-weight:500;color:var(--text3);letter-spacing:0.02em;white-space:nowrap;}
+  .tag{
+    font-size:11px;font-weight:500;letter-spacing:0.06em;padding:2px 8px;border-radius:4px;
+    background:var(--surface-active);color:var(--text2);white-space:nowrap;flex:none;
+  }
+  .rchev{width:20px;height:20px;flex:none;}
+  .rchev svg{width:20px;height:20px;stroke:var(--text3);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .empty{padding:32px 12px;text-align:center;font-size:14px;color:var(--text3);line-height:1.8;}
+
+  /* 並べ替え */
+  .segbar{display:flex;gap:8px;padding:0 16px 12px;flex:none;}
+  .seg{
+    flex:1;min-height:36px;border:1px solid var(--border);background:var(--surface);
+    border-radius:8px;font-family:inherit;font-size:12px;color:var(--text2);cursor:pointer;
+    letter-spacing:0.02em;transition:background 120ms,border-color 120ms,color 120ms;
+  }
+  .seg:active{transform:scale(0.98);}
+  .seg.on{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-soft);}
+  .group{font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);padding:16px 2px 6px;}
+
+  /* フォルダ分け（横スクロール） */
+  .filterbar{
+    display:flex;gap:6px;padding:0 16px 12px;flex:none;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .filterbar::-webkit-scrollbar{display:none;}
+  .fchip{
+    flex:none;min-height:32px;padding:6px 12px;border:1px solid var(--border);background:var(--surface);
+    border-radius:4px;font-family:inherit;font-size:12px;color:var(--text2);cursor:pointer;
+    letter-spacing:0.02em;white-space:nowrap;transition:background 120ms,border-color 120ms,color 120ms;
+  }
+  .fchip:active{transform:scale(0.98);}
+  .fchip.on{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-soft);}
+
+  /* 生徒の詳細 */
+  .name-big{font-size:28px;font-weight:600;letter-spacing:0.02em;line-height:1.4;}
+  .name-sub{font-size:12px;color:var(--text2);margin-top:6px;letter-spacing:0.02em;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .chip{font-size:11px;font-weight:500;letter-spacing:0.06em;padding:4px 8px;border-radius:4px;
+    background:var(--surface-active);color:var(--text2);}
+  .chip.on{background:var(--primary-soft);color:var(--primary-deep);}
+  .panel{
+    background:var(--surface);border-radius:16px;padding:20px;margin-top:16px;
+    box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
+  }
+  .ptitle{font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);margin-bottom:12px;}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:0.5px solid rgba(28,25,23,0.08);}
+  .kv:last-child{border-bottom:none;padding-bottom:0;}
+  .k{font-size:12px;color:var(--text2);letter-spacing:0.02em;white-space:nowrap;}
+  .v{font-size:14px;color:var(--text);letter-spacing:0.01em;text-align:right;}
+  .phone-num{font-size:18px;font-weight:600;letter-spacing:0.02em;}
+
+  /* 下タブ */
+  .tabbar{
+    flex:none;display:flex;background:var(--bg);
+    border-top:0.5px solid rgba(28,25,23,0.08);
+    padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+  }
+  .tab{
+    flex:1;background:transparent;border:none;font-family:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;
+    color:var(--text3);transition:color 120ms;
+  }
+  .tab.on{color:var(--primary);}
+  .tab svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .tab span{font-size:11px;font-weight:500;letter-spacing:0.06em;}
+
+  .toast{
+    position:absolute;left:16px;right:16px;bottom:16px;
+    background:var(--text);color:#fff;border-radius:8px;padding:12px 16px;
+    font-size:14px;letter-spacing:0.01em;opacity:0;transform:translateY(8px);
+    transition:opacity 200ms,transform 200ms;pointer-events:none;z-index:10;
+  }
+  .toast.on{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="stage">
+
+  <!-- 出席タブ: 今日の時間帯 -->
+  <section class="screen on" id="s1" data-tab="attend">
+    <header><div>
+      <div class="htitle" id="s1date"></div>
+      <div class="hsub">今日の時間帯</div>
+    </div></header>
+    <div class="body" id="slotList"></div>
+  </section>
+
+  <!-- 出席タブ: 出席 -->
+  <section class="screen" id="s2" data-tab="attend">
+    <header>
+      <button class="back" onclick="go('s1')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle" id="s2time"></div>
+        <div class="hsub" id="s2date"></div>
+      </div>
+    </header>
+    <div class="body">
+      <button class="teacher" onclick="go('s4')">
+        <div>
+          <div class="tlabel">担当の先生</div>
+          <div class="tname" id="s2teacher"></div>
+        </div>
+        <div class="tedit">変更</div>
+      </button>
+      <div class="seccount">
+        <div class="big"><span id="s2present">0</span><span class="den" id="s2total">/0</span></div>
+        <div class="note">来ていない子をタップして外す</div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+    <div class="footer"><button class="btn btn-sec" onclick="openSearch()">振替・体験を追加</button></div>
+  </section>
+
+  <!-- 振替検索 -->
+  <section class="screen" id="s3" data-tab="attend">
+    <header>
+      <button class="back" onclick="go('s2')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle">振替・体験を追加</div>
+        <div class="hsub" id="s3ctx"></div>
+      </div>
+    </header>
+    <div class="searchwrap">
+      <div class="slabel">なまえ（ひらがな）で検索</div>
+      <input class="search" id="q" type="search" placeholder="れい：ゆうき" oninput="renderSearch()" autocomplete="off">
+    </div>
+    <div class="body" style="padding-top:0;" id="results"></div>
+    <div class="footer"><button class="btn btn-sec" onclick="addTrial()">名簿にない子を体験で追加</button></div>
+  </section>
+
+  <!-- 担当の先生 -->
+  <section class="screen" id="s4" data-tab="attend">
+    <header>
+      <button class="back" onclick="go('s2')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle">担当の先生</div>
+        <div class="hsub" id="s4ctx"></div>
+      </div>
+    </header>
+    <div class="body" id="teacherList"></div>
+  </section>
+
+  <!-- 生徒タブ: 一覧 -->
+  <section class="screen" id="s5" data-tab="students">
+    <header><div>
+      <div class="htitle">生徒</div>
+      <div class="hsub" id="s5count"></div>
+    </div></header>
+    <div class="searchwrap" style="padding-bottom:8px;">
+      <input class="search" id="sq" type="search" placeholder="なまえ（ひらがな）で検索" oninput="renderStudents()" autocomplete="off">
+    </div>
+    <div class="segbar" id="segbar"></div>
+    <div class="filterbar" id="filterbar"></div>
+    <div class="body" style="padding-top:0;" id="studentList"></div>
+  </section>
+
+  <!-- 生徒タブ: 詳細 -->
+  <section class="screen" id="s6" data-tab="students">
+    <header>
+      <button class="back" onclick="go(fromScreen)" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle">生徒の情報</div>
+        <div class="hsub">けがのときはここから電話</div>
+      </div>
+    </header>
+    <div class="body" id="detail"></div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+  </div><!-- /stage -->
+
+  <nav class="tabbar">
+    <button class="tab on" id="tabAttend" onclick="go('s1')">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span>出席</span>
+    </button>
+    <button class="tab" id="tabStudents" onclick="go('s5')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>生徒</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+/* アクロバット教室モック 共通ダミーデータ + 計算ロジック
+   実在の生徒データは入れない。電話番号は使われないダミー（090-0000-xxxx）。 */
+
+/* 今日（実際の日付を使う。曜日に授業が無ければ画面側で案内を出す） */
+const TODAY = (() => {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+})();
+
+const DAY_LABEL = ['日','月','火','水','木','金','土'];
+const TEACHERS = ['海翔先生','ゆか先生','だいき先生','あやね先生'];
+
+/* いま入っている先生（モック用。本番はログイン中のアカウント） */
+const CURRENT_USER = '海翔先生';
+
+/* 時間帯（クラス分けなし・時間だけ）。細かい時刻は後で差し替える */
+const SLOT_TIMES = ['15:00 – 16:00','16:00 – 17:00','17:00 – 18:00'];
+
+/* 授業がある曜日 */
+const OPEN_DAYS = [2, 3, 5, 6];
+
+/* 曜日・時間帯ごとの担当（毎週同じ） */
+const DEFAULT_TEACHER = {
+  '2|15:00 – 16:00':'あやね先生', '2|16:00 – 17:00':'海翔先生',   '2|17:00 – 18:00':'ゆか先生',
+  '3|15:00 – 16:00':'だいき先生', '3|16:00 – 17:00':'あやね先生',
+  '5|15:00 – 16:00':'海翔先生',   '5|16:00 – 17:00':'だいき先生',
+  '6|15:00 – 16:00':'海翔先生',   '6|16:00 – 17:00':'ゆか先生',   '6|17:00 – 18:00':'だいき先生',
+};
+
+/* 生徒マスタ。name はひらがなの下の名前のみ（苗字を使わない） */
+const STUDENTS = [
+  // 火曜
+  { id:'s23', name:'ともき', birth:'2015-04-18', day:2, slot:0, guardian:'ともきの保護者', phone:'090-0000-0023', status:'active', joined:'2022-04-05' },
+  { id:'s29', name:'ふうか', birth:'2017-09-12', day:2, slot:0, guardian:'ふうかの保護者', phone:'090-0000-0029', status:'active', joined:'2024-05-07' },
+  { id:'s30', name:'そうし', birth:'2018-06-25', day:2, slot:0, guardian:'そうしの保護者', phone:'090-0000-0030', status:'active', joined:'2025-04-08' },
+  { id:'s24', name:'なぎさ', birth:'2013-01-07', day:2, slot:1, guardian:'なぎさの保護者', phone:'090-0000-0024', status:'active', joined:'2020-09-08' },
+  { id:'s31', name:'あゆむ', birth:'2014-08-03', day:2, slot:1, guardian:'あゆむの保護者', phone:'090-0000-0031', status:'active', joined:'2021-06-15' },
+  { id:'s32', name:'ちひろ', birth:'2016-12-19', day:2, slot:1, guardian:'ちひろの保護者', phone:'090-0000-0032', status:'trial',  joined:'' },
+  { id:'s25', name:'まなと', birth:'2011-12-24', day:2, slot:2, guardian:'まなとの保護者', phone:'090-0000-0025', status:'withdrawn', joined:'2018-04-10' },
+  { id:'s33', name:'ゆうた', birth:'2010-03-08', day:2, slot:2, guardian:'ゆうたの保護者', phone:'090-0000-0033', status:'active', joined:'2019-04-09' },
+
+  // 水曜
+  { id:'s20', name:'あさひ', birth:'2017-03-30', day:3, slot:0, guardian:'あさひの保護者', phone:'090-0000-0020', status:'active', joined:'2024-01-10' },
+  { id:'s22', name:'そら',   birth:'2019-09-23', day:3, slot:0, guardian:'そらの保護者',   phone:'090-0000-0022', status:'active', joined:'2026-04-04' },
+  { id:'s19', name:'ゆうき', birth:'2016-06-21', day:3, slot:1, guardian:'ゆうきの保護者', phone:'090-0000-0019', status:'active', joined:'2022-09-07' },
+  { id:'s21', name:'しおり', birth:'2014-11-09', day:3, slot:1, guardian:'しおりの保護者', phone:'090-0000-0021', status:'active', joined:'2021-04-07' },
+  { id:'s28', name:'りお',   birth:'2016-11-11', day:3, slot:1, guardian:'りおの保護者',   phone:'090-0000-0028', status:'trial',  joined:'' },
+
+  // 金曜
+  { id:'s34', name:'いつき', birth:'2016-05-02', day:5, slot:0, guardian:'いつきの保護者', phone:'090-0000-0034', status:'active', joined:'2023-04-07' },
+  { id:'s35', name:'のあ',   birth:'2018-10-17', day:5, slot:0, guardian:'のあの保護者',   phone:'090-0000-0035', status:'active', joined:'2025-04-11' },
+  { id:'s36', name:'みゆ',   birth:'2017-01-29', day:5, slot:0, guardian:'みゆの保護者',   phone:'090-0000-0036', status:'active', joined:'2023-09-01' },
+  { id:'s37', name:'たける', birth:'2012-07-21', day:5, slot:1, guardian:'たけるの保護者', phone:'090-0000-0037', status:'active', joined:'2019-10-04' },
+  { id:'s38', name:'さな',   birth:'2013-11-30', day:5, slot:1, guardian:'さなの保護者',   phone:'090-0000-0038', status:'active', joined:'2021-04-09' },
+  { id:'s39', name:'ひなの', birth:'2015-02-06', day:5, slot:1, guardian:'ひなのの保護者', phone:'090-0000-0039', status:'paused', joined:'2022-07-08' },
+
+  // 土曜 15:00
+  { id:'s01', name:'あおい', birth:'2018-05-12', day:6, slot:0, guardian:'あおいの保護者', phone:'090-0000-0001', status:'active', joined:'2024-04-06' },
+  { id:'s02', name:'はると', birth:'2017-11-03', day:6, slot:0, guardian:'はるとの保護者', phone:'090-0000-0002', status:'active', joined:'2023-09-02' },
+  { id:'s03', name:'さくら', birth:'2019-04-01', day:6, slot:0, guardian:'さくらの保護者', phone:'090-0000-0003', status:'active', joined:'2024-04-06' },
+  { id:'s04', name:'ゆうき', birth:'2019-04-02', day:6, slot:0, guardian:'ゆうきの保護者', phone:'090-0000-0004', status:'active', joined:'2025-04-05' },
+  { id:'s05', name:'みなと', birth:'2016-08-22', day:6, slot:0, guardian:'みなとの保護者', phone:'090-0000-0005', status:'active', joined:'2022-05-14' },
+  { id:'s06', name:'こはる', birth:'2020-02-17', day:6, slot:0, guardian:'こはるの保護者', phone:'090-0000-0006', status:'active', joined:'2026-04-04' },
+  { id:'s07', name:'そうた', birth:'2015-06-30', day:6, slot:0, guardian:'そうたの保護者', phone:'090-0000-0007', status:'active', joined:'2021-10-09' },
+  { id:'s08', name:'いちか', birth:'2018-12-08', day:6, slot:0, guardian:'いちかの保護者', phone:'090-0000-0008', status:'paused', joined:'2024-06-01' },
+  { id:'s26', name:'ひまり', birth:'2018-07-04', day:6, slot:0, guardian:'ひまりの保護者', phone:'090-0000-0026', status:'trial',  joined:'' },
+
+  // 土曜 16:00
+  { id:'s09', name:'れん',   birth:'2014-03-19', day:6, slot:1, guardian:'れんの保護者',   phone:'090-0000-0009', status:'active', joined:'2020-07-11' },
+  { id:'s10', name:'ゆづき', birth:'2016-01-25', day:6, slot:1, guardian:'ゆづきの保護者', phone:'090-0000-0010', status:'active', joined:'2023-04-08' },
+  { id:'s11', name:'かえで', birth:'2017-07-07', day:6, slot:1, guardian:'かえでの保護者', phone:'090-0000-0011', status:'active', joined:'2023-04-08' },
+  { id:'s12', name:'りく',   birth:'2013-09-14', day:6, slot:1, guardian:'りくの保護者',   phone:'090-0000-0012', status:'active', joined:'2019-05-18' },
+  { id:'s13', name:'ひなた', birth:'2015-12-01', day:6, slot:1, guardian:'ひなたの保護者', phone:'090-0000-0013', status:'active', joined:'2022-04-09' },
+  { id:'s14', name:'かいと', birth:'2018-02-11', day:6, slot:1, guardian:'かいとの保護者', phone:'090-0000-0014', status:'active', joined:'2025-04-05' },
+
+  // 土曜 17:00
+  { id:'s15', name:'ゆいと', birth:'2011-05-05', day:6, slot:2, guardian:'ゆいとの保護者', phone:'090-0000-0015', status:'active', joined:'2018-04-14' },
+  { id:'s16', name:'あかり', birth:'2012-10-28', day:6, slot:2, guardian:'あかりの保護者', phone:'090-0000-0016', status:'active', joined:'2020-04-11' },
+  { id:'s17', name:'りょう', birth:'2009-04-02', day:6, slot:2, guardian:'りょうの保護者', phone:'090-0000-0017', status:'active', joined:'2017-06-03' },
+  { id:'s18', name:'けんと', birth:'2010-08-16', day:6, slot:2, guardian:'けんとの保護者', phone:'090-0000-0018', status:'active', joined:'2019-04-13' },
+  { id:'s27', name:'こうき', birth:'2012-02-20', day:6, slot:2, guardian:'こうきの保護者', phone:'090-0000-0027', status:'trial',  joined:'' },
+];
+
+/* ---- 計算ロジック（保存せず毎回計算する） ---- */
+
+function ymd(s){ const [y,m,d] = s.split('-').map(Number); return {y,m,d}; }
+
+// 年度（4月始まり）
+function academicYear(dateStr){
+  const {y,m} = ymd(dateStr);
+  return y - (m < 4 ? 1 : 0);
+}
+// 学年コホート（4/1生まれは上の学年）
+function cohort(birthStr){
+  const {y,m,d} = ymd(birthStr);
+  const early = (m < 4) || (m === 4 && d <= 1);
+  return y - (early ? 1 : 0);
+}
+// 学年番号: -2=年少 -1=年中 0=年長 1..6=小 7..9=中 10..12=高
+function gradeNum(birthStr, onStr){
+  return academicYear(onStr) - cohort(birthStr) - 6;
+}
+function gradeLabel(birthStr, onStr = TODAY){
+  const g = gradeNum(birthStr, onStr);
+  if (g <= -3) return '未就園';
+  if (g === -2) return '年少';
+  if (g === -1) return '年中';
+  if (g === 0)  return '年長';
+  if (g <= 6)   return '小' + g;
+  if (g <= 9)   return '中' + (g - 6);
+  if (g <= 12)  return '高' + (g - 9);
+  return '一般';
+}
+// 満年齢
+function age(birthStr, onStr = TODAY){
+  const b = ymd(birthStr), o = ymd(onStr);
+  let a = o.y - b.y;
+  if (o.m < b.m || (o.m === b.m && o.d < b.d)) a--;
+  return a;
+}
+
+const STATUS_LABEL = { trial:'体験', active:'在籍', paused:'休会', withdrawn:'退会' };
+
+/* 同名がいる時だけ「ゆうき（土 15:00）」の形にする */
+const NAME_COUNT = {};
+STUDENTS.forEach(s => { NAME_COUNT[s.name] = (NAME_COUNT[s.name] || 0) + 1; });
+
+function slotStart(slotIdx){ return SLOT_TIMES[slotIdx].split(' – ')[0]; }
+function displayName(s){
+  return NAME_COUNT[s.name] > 1
+    ? `${s.name}（${DAY_LABEL[s.day]} ${slotStart(s.slot)}）`
+    : s.name;
+}
+function shortSuffix(s){
+  return NAME_COUNT[s.name] > 1 ? `${DAY_LABEL[s.day]} ${slotStart(s.slot)}` : '';
+}
+
+function byId(id){ return STUDENTS.find(s => s.id === id); }
+function todayDay(){ return new Date(TODAY + 'T00:00:00+09:00').getDay(); }
+function teacherOf(day, slot){ return DEFAULT_TEACHER[day + '|' + SLOT_TIMES[slot]] || TEACHERS[0]; }
+function teacherOfStudent(s){ return teacherOf(s.day, s.slot); }
+
+/* その曜日に実際にある時間帯だけ返す */
+function slotsOfDay(day){
+  return SLOT_TIMES.map((t, i) => i).filter(i => DEFAULT_TEACHER[day + '|' + SLOT_TIMES[i]]);
+}
+
+/* フォルダ分け（絞り込み）。key で1つ選ぶ */
+const FILTERS = [
+  { key:'all',   label:'ぜんいん' },
+  { key:'mine',  label:'自分の担当' },
+  { key:'trial', label:'体験' },
+].concat(TEACHERS.map(t => ({ key:'t:' + t, label:t })));
+
+function passesFilter(s, key){
+  if(key === 'all')   return true;
+  if(key === 'mine')  return teacherOfStudent(s) === CURRENT_USER;
+  if(key === 'trial') return s.status === 'trial';
+  if(key.startsWith('t:')) return teacherOfStudent(s) === key.slice(2);
+  return true;
+}
+
+</script>
+<script>
+const DOW = todayDay();
+const SLOTS = slotsOfDay(DOW).map(i => ({
+  id: 't' + i, idx: i, time: SLOT_TIMES[i],
+  roster: STUDENTS.filter(s => s.day === DOW && s.slot === i && s.status !== 'withdrawn').map(s => s.id),
+}));
+
+const state = {};
+SLOTS.forEach(s => {
+  state[s.id] = { present:{}, extra:[], teacher: teacherOf(DOW, s.idx) };
+  s.roster.forEach(id => state[s.id].present[id] = true);   // 毎週同じメンバー → はじめから全員出席
+});
+
+let cur = SLOTS.length ? SLOTS[0].id : null;
+let curStudent = null;
+let fromScreen = 's5';
+let filterKey = 'all';
+let sortKey = 'day';
+
+const SORTS = [
+  { key:'day',   label:'曜日順' },
+  { key:'grade', label:'学年順' },
+  { key:'age',   label:'年齢順' },
+];
+
+function go(id){
+  const el = document.getElementById(id);
+  if(id === 's4') renderTeachers();
+  if(id === 's5'){ renderFilterBar(); renderSortBar(); renderStudents(); }
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+  const tab = el.dataset.tab;
+  document.getElementById('tabAttend').classList.toggle('on', tab === 'attend');
+  document.getElementById('tabStudents').classList.toggle('on', tab === 'students');
+}
+
+function dateLine(){
+  const {m,d} = ymd(TODAY);
+  return `${m}月${d}日（${DAY_LABEL[DOW]}）`;
+}
+
+function members(slotId){
+  const s = SLOTS.find(x => x.id === slotId);
+  const st = state[slotId];
+  return s.roster.map(id => ({ id, kind:null }))
+    .concat(st.extra.map(e => ({ id:e.id, kind:e.kind, tempName:e.tempName })));
+}
+function labelOf(m){
+  if(m.tempName) return { main:m.tempName, sub:'' };
+  const s = byId(m.id);
+  return { main:s.name, sub:shortSuffix(s) };
+}
+
+/* ---- 出席 ---- */
+function renderSlots(){
+  const el = document.getElementById('slotList');
+  el.innerHTML = '';
+  if(!SLOTS.length){
+    el.innerHTML = '<div class="empty">今日は授業がありません<br>下の「生徒」から名簿は見られます</div>';
+    return;
+  }
+  SLOTS.forEach(s => {
+    const st = state[s.id];
+    const list = members(s.id);
+    const n = list.filter(m => st.present[m.id]).length;
+    const b = document.createElement('button');
+    b.className = 'card';
+    b.onclick = () => openSlot(s.id);
+    b.innerHTML = `
+      <div>
+        <div class="ctime">${s.time}</div>
+        <div class="cteacher">担当 ${st.teacher}</div>
+      </div>
+      <div class="count">
+        <div><span class="n">${n}</span><span class="d">/${list.length}</span></div>
+        <div class="lbl">出席</div>
+      </div>`;
+    el.appendChild(b);
+  });
+}
+
+function openSlot(id){
+  cur = id;
+  const s = SLOTS.find(x => x.id === id);
+  document.getElementById('s2time').textContent = s.time;
+  document.getElementById('s2date').textContent = dateLine();
+  document.getElementById('s3ctx').textContent = s.time;
+  document.getElementById('s4ctx').textContent = s.time;
+  renderTiles();
+  go('s2');
+}
+
+function renderTiles(){
+  const st = state[cur];
+  const el = document.getElementById('tiles');
+  const list = members(cur);
+  el.innerHTML = '';
+  list.forEach(m => {
+    const on = !!st.present[m.id];
+    const { main, sub } = labelOf(m);
+    const b = document.createElement('button');
+    b.className = 'tile' + (on ? '' : ' absent');
+    b.onclick = () => { st.present[m.id] = !st.present[m.id]; renderTiles(); };
+    b.innerHTML = `
+      <span class="check"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+      ${main}
+      ${sub ? `<span class="tsub">${sub}</span>` : ''}
+      ${m.kind ? `<span class="badge">${m.kind === 'makeup' ? '振替' : '体験'}</span>` : ''}`;
+    el.appendChild(b);
+  });
+  const n = list.filter(m => st.present[m.id]).length;
+  document.getElementById('s2present').textContent = n;
+  document.getElementById('s2total').textContent = '/' + list.length;
+  document.getElementById('s2teacher').textContent = st.teacher;
+  renderSlots();
+}
+
+function renderTeachers(){
+  const el = document.getElementById('teacherList');
+  const st = state[cur];
+  el.innerHTML = '';
+  TEACHERS.forEach(t => {
+    const isCur = (t === st.teacher);
+    const b = document.createElement('button');
+    b.className = 'row' + (isCur ? ' sel' : '');
+    b.onclick = () => { st.teacher = t; renderTiles(); go('s2'); toast('担当を ' + t + ' にしました'); };
+    b.innerHTML = `<div><div class="rname">${t}</div></div>
+      <div class="${isCur ? 'rcur' : 'radd'}">${isCur ? '今日の担当' : '担当にする'}</div>`;
+    el.appendChild(b);
+  });
+}
+
+/* ---- 振替・体験 ---- */
+function openSearch(){
+  document.getElementById('q').value = '';
+  renderSearch();
+  go('s3');
+  setTimeout(() => document.getElementById('q').focus(), 100);
+}
+
+function renderSearch(){
+  const q = document.getElementById('q').value.trim();
+  const el = document.getElementById('results');
+  const s = SLOTS.find(x => x.id === cur);
+  const st = state[cur];
+  el.innerHTML = '';
+  if(!q){ el.innerHTML = '<div class="empty">なまえを入力すると<br>ほかの曜日・時間帯の子から探します</div>'; return; }
+  const hits = STUDENTS.filter(x =>
+    x.status !== 'withdrawn' && x.name.includes(q) &&
+    !s.roster.includes(x.id) && !st.extra.some(e => e.id === x.id));
+  if(!hits.length){ el.innerHTML = '<div class="empty">見つかりません</div>'; return; }
+  hits.forEach(x => {
+    const b = document.createElement('button');
+    b.className = 'row';
+    b.onclick = () => addMakeup(x.id);
+    b.innerHTML = `
+      <div>
+        <div class="rname">${x.name}</div>
+        <div class="rmeta">ふだんは ${DAY_LABEL[x.day]}曜 ${SLOT_TIMES[x.slot]}</div>
+      </div>
+      <div class="radd">振替で追加</div>`;
+    el.appendChild(b);
+  });
+}
+
+function addMakeup(id){
+  const s = SLOTS.find(x => x.id === cur);
+  const st = state[cur];
+  if(s.roster.includes(id) || st.extra.some(e => e.id === id)){
+    go('s2'); toast(byId(id).name + ' はすでに今日のメンバーに入っています'); return;
+  }
+  st.extra.push({ id, kind:'makeup' });
+  st.present[id] = true;
+  renderTiles(); go('s2');
+  toast(byId(id).name + ' を振替で追加しました');
+}
+
+let trialSeq = 0;
+function addTrial(){
+  const st = state[cur];
+  trialSeq++;
+  const id = 'trial-' + trialSeq;
+  st.extra.push({ id, kind:'trial', tempName:'体験の子 ' + trialSeq });
+  st.present[id] = true;
+  renderTiles(); go('s2');
+  toast('体験を追加しました（なまえは後で入力）');
+}
+
+/* ---- 生徒タブ ---- */
+function renderFilterBar(){
+  const bar = document.getElementById('filterbar');
+  bar.innerHTML = '';
+  FILTERS.forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'fchip' + (f.key === filterKey ? ' on' : '');
+    b.textContent = f.key === 'mine' ? `自分の担当（${CURRENT_USER}）` : f.label;
+    b.onclick = () => { filterKey = f.key; renderFilterBar(); renderStudents(); };
+    bar.appendChild(b);
+  });
+}
+function renderSortBar(){
+  const bar = document.getElementById('segbar');
+  bar.innerHTML = '';
+  SORTS.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'seg' + (s.key === sortKey ? ' on' : '');
+    b.textContent = s.label;
+    b.onclick = () => { sortKey = s.key; renderSortBar(); renderStudents(); };
+    bar.appendChild(b);
+  });
+}
+
+function renderStudents(){
+  const q = document.getElementById('sq').value.trim();
+  const el = document.getElementById('studentList');
+  el.innerHTML = '';
+  const list = STUDENTS.filter(s => passesFilter(s, filterKey) && (!q || s.name.includes(q)));
+  const f = FILTERS.find(x => x.key === filterKey);
+  document.getElementById('s5count').textContent =
+    q ? `${list.length}人 見つかりました`
+      : (filterKey === 'all' ? `${STUDENTS.filter(s => s.status === 'active').length}人 在籍中`
+                             : `${f.label}　${list.length}人`);
+  if(!list.length){ el.innerHTML = '<div class="empty">見つかりません</div>'; return; }
+
+  const byName = (a,b) => a.name.localeCompare(b.name, 'ja');
+  const groups = [];
+  const push = (label, s) => {
+    const last = groups[groups.length - 1];
+    if(last && last.label === label) last.rows.push(s);
+    else groups.push({ label, rows:[s] });
+  };
+  if(sortKey === 'day'){
+    list.slice().sort((a,b) => a.day - b.day || a.slot - b.slot || byName(a,b))
+        .forEach(s => push(DAY_LABEL[s.day] + '曜', s));
+  }else if(sortKey === 'grade'){
+    list.slice().sort((a,b) => gradeNum(a.birth, TODAY) - gradeNum(b.birth, TODAY) || byName(a,b))
+        .forEach(s => push(gradeLabel(s.birth), s));
+  }else{
+    list.slice().sort((a,b) => age(a.birth) - age(b.birth) || byName(a,b))
+        .forEach(s => push(age(s.birth) + 'さい', s));
+  }
+
+  groups.forEach(g => {
+    const h = document.createElement('div');
+    h.className = 'group';
+    h.textContent = g.label;
+    el.appendChild(h);
+    g.rows.forEach(s => {
+      const b = document.createElement('button');
+      b.className = 'row';
+      b.onclick = () => { curStudent = s.id; fromScreen = 's5'; renderDetail(); go('s6'); };
+      b.innerHTML = `
+        <div>
+          <div class="rname">${displayName(s)}</div>
+          <div class="rmeta">${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? '' : DAY_LABEL[s.day] + '曜 '}${SLOT_TIMES[s.slot]}　${teacherOfStudent(s)}</div>
+        </div>
+        ${s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : ''}
+        <div class="rchev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>`;
+      el.appendChild(b);
+    });
+  });
+}
+
+function renderDetail(){
+  const s = byId(curStudent);
+  document.getElementById('detail').innerHTML = `
+    <div class="name-big">${s.name}</div>
+    <div class="name-sub">${DAY_LABEL[s.day]}曜 ${SLOT_TIMES[s.slot]}　担当 ${teacherOfStudent(s)}</div>
+    <div class="chips">
+      <span class="chip on">${gradeLabel(s.birth)}</span>
+      <span class="chip on">${age(s.birth)}さい</span>
+      <span class="chip">${STATUS_LABEL[s.status]}</span>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">ほごしゃ れんらくさき</div>
+      <div class="kv"><span class="k">お名前</span><span class="v">${s.guardian}</span></div>
+      <div class="kv"><span class="k">電話</span><span class="v phone-num">${s.phone}</span></div>
+      <a class="btn" style="margin-top:16px;" href="tel:${s.phone.replace(/-/g,'')}">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+        電話をかける
+      </a>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">きほん じょうほう</div>
+      <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth.replace(/-/g,'/')}</span></div>
+      <div class="kv"><span class="k">学年</span><span class="v">${gradeLabel(s.birth)}</span></div>
+      <div class="kv"><span class="k">年齢</span><span class="v">${age(s.birth)}さい</span></div>
+      <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? s.joined.replace(/-/g,'/') : 'まだ（体験）'}</span></div>
+    </div>`;
+}
+
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('on'), 2200);
+}
+
+document.getElementById('s1date').textContent = dateLine();
+renderSlots();
+</script>
+</body>
+</html>
