@@ -240,6 +240,34 @@
     box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);}
   .listbox .row:last-child{border-bottom:none;}
 
+  /* メモ */
+  textarea{
+    width:100%;min-height:160px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface);padding:12px;font-family:inherit;font-size:16px;
+    line-height:1.8;color:var(--text);outline:none;resize:vertical;
+    transition:border-color 120ms,box-shadow 120ms;
+  }
+  textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.2);}
+  textarea::placeholder{color:var(--text3);}
+  .note-card{
+    background:var(--surface);border-radius:16px;padding:16px 20px;margin-bottom:12px;
+    box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
+    width:100%;text-align:left;font-family:inherit;cursor:pointer;
+    transition:background 120ms;
+  }
+  .note-card:active{background:var(--surface-hover);}
+  .note-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .note-date{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:0.02em;}
+  .note-who{font-size:11px;color:var(--text3);letter-spacing:0.02em;}
+  .note-kind{
+    font-size:11px;font-weight:500;letter-spacing:0.06em;padding:2px 8px;border-radius:4px;
+    background:var(--surface-active);color:var(--text2);
+  }
+  .note-kind.lesson{background:var(--primary-soft);color:var(--primary-deep);}
+  .note-body{font-size:14px;line-height:1.85;color:var(--text);letter-spacing:0.01em;
+    white-space:pre-wrap;word-break:break-word;}
+  .note-for{font-size:12px;color:var(--text2);margin-top:8px;letter-spacing:0.02em;}
+
   /* 下タブ */
   .tabbar{
     flex:none;display:flex;background:var(--bg);
@@ -299,7 +327,11 @@
       </div>
       <div class="tiles" id="tiles"></div>
     </div>
-    <div class="footer"><button class="btn btn-sec" onclick="openMakeup()">振替・体験を追加</button></div>
+    <div class="footer">
+      <button class="btn" onclick="openNoteForm({kind:'student'})">気になった子のメモを書く</button>
+      <button class="btn btn-sec" onclick="openNoteForm({kind:'lesson'})">今日の授業のメモ</button>
+      <button class="btn btn-sec" onclick="openMakeup()">振替・体験を追加</button>
+    </div>
   </section>
 
   <section class="screen" id="s3" data-tab="attend">
@@ -413,6 +445,40 @@
     </div>
   </section>
 
+  <!-- メモ一覧 -->
+  <section class="screen" id="s11" data-tab="notes">
+    <header>
+      <div></div>
+      <div>
+        <div class="htitle">メモ</div>
+        <div class="hsub" id="s11count"></div>
+      </div>
+      <button class="hact" onclick="openNoteForm({kind:'student', pickAll:true, back:'s11'})">＋ 追加</button>
+    </header>
+    <div class="searchwrap" style="padding-bottom:8px;">
+      <input class="search" id="nq" type="text" placeholder="メモの中身・なまえで検索" oninput="renderNotes()" autocomplete="off">
+    </div>
+    <div class="segbar" id="noteKindBar"></div>
+    <div class="filterbar" id="noteWhoBar"></div>
+    <div class="body" style="padding-top:0;" id="noteList"></div>
+  </section>
+
+  <!-- メモを書く -->
+  <section class="screen" id="s12" data-tab="notes">
+    <header>
+      <button class="back" onclick="cancelNote()" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle" id="s12title">メモ</div>
+        <div class="hsub" id="s12sub"></div>
+      </div>
+    </header>
+    <div class="body" id="noteForm"></div>
+    <div class="footer">
+      <button class="btn" onclick="saveNote()">保存する</button>
+      <button class="btn btn-sec" onclick="cancelNote()">やめる</button>
+    </div>
+  </section>
+
   <div class="toast" id="toast"></div>
   </div><!-- /stage -->
 
@@ -424,6 +490,10 @@
     <button class="tab" id="tabStudents" onclick="go('s5')">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       <span>生徒</span>
+    </button>
+    <button class="tab" id="tabNotes" onclick="go('s11')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+      <span>メモ</span>
     </button>
     <button class="tab" id="tabSettings" onclick="go('s8')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9v.09a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -523,6 +593,24 @@ const DEFAULT_DB = {
 
   /* 出席の記録。日付ごとに { slotId: { present, extra, teacherIds } } */
   attendance: {},
+
+  /* メモ。kind は 'student'（その子のこと）か 'lesson'（その日の授業のこと） */
+  notes: [
+    { id:'nt1', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-05', teacherId:'tc1',
+      body:'側転で足が開ききらない。手をつく位置を毎回目印で確認させると、3回目から形になった。次も目印を置くところから始める。' },
+    { id:'nt2', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-12', teacherId:'tc4',
+      body:'目印なしでも形が残っていた。できた直後に本人が振り返るので、すぐ「いまの、足そろってたよ」と言うと嬉しそうにする。褒めるのは技の直後が効く。' },
+    { id:'nt3', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
+      body:'バク転の補助を外そうとすると固まる。「いつも通りでいいよ」と声をかけてから入ると通った。急に外さず、補助の手を軽くするところから。' },
+    { id:'nt4', kind:'student', studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1',
+      body:'できない技があると黙り込む。せかすと余計に固まるので、別の技をはさんで戻ると自分からやり直す。' },
+    { id:'nt5', kind:'student', studentId:'s12', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
+      body:'ロンダートの踏み切りが強すぎて流れる。助走を3歩に減らしたら安定した。当面3歩で固める。' },
+    { id:'nt6', kind:'lesson', studentId:'', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
+      body:'マット3枚で側転のレーンを作った。順番待ちが減って回転数が増えた。次回も同じ並べ方でいく。' },
+    { id:'nt7', kind:'lesson', studentId:'', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
+      body:'後半に集中が切れる子が多かった。最後の10分は遊びを入れた方がよさそう。' },
+  ],
 };
 
 /* ---- 保存と読み出し（その端末の中だけ） ---- */
@@ -655,6 +743,55 @@ function todayRecord(slotId){
   return db.attendance[TODAY][slotId];
 }
 
+
+/* ---- メモ ---- */
+function allNotes(){
+  return (db.notes || []).slice().sort((a,b) =>
+    b.date.localeCompare(a.date) || b.id.localeCompare(a.id));   // 新しい順
+}
+function notesOfStudent(studentId){
+  return allNotes().filter(n => n.kind === 'student' && n.studentId === studentId);
+}
+function notesOfLesson(date, slotId){
+  return allNotes().filter(n => n.kind === 'lesson' && n.date === date && n.slotId === slotId);
+}
+function notesOfDay(date, slotId){
+  return allNotes().filter(n => n.date === date && n.slotId === slotId);
+}
+function addNote({ kind, studentId, slotId, body, date }){
+  if(!db.notes) db.notes = [];
+  const n = {
+    id: newId('nt'), kind,
+    studentId: studentId || '',
+    slotId: slotId || '',
+    date: date || TODAY,
+    teacherId: db.currentTeacherId,
+    body: body.trim(),
+  };
+  db.notes.push(n);
+  saveDb();
+  return n;
+}
+function updateNote(id, body){
+  const n = (db.notes || []).find(x => x.id === id);
+  if(n){ n.body = body.trim(); saveDb(); }
+  return n;
+}
+function deleteNote(id){
+  db.notes = (db.notes || []).filter(x => x.id !== id);
+  saveDb();
+}
+function noteWriter(n){
+  const t = teacherById(n.teacherId);
+  return t ? t.name : '（退職した先生）';
+}
+function dateLabel(d){
+  const {m, y} = ymd(d);
+  const day = ymd(d).d;
+  const w = new Date(d + 'T00:00:00+09:00').getDay();
+  return `${m}月${day}日（${DAY_LABEL[w]}）`;
+}
+
 </script>
 <script>
 let cur = null;          // いま開いている時間帯のid
@@ -683,11 +820,13 @@ function go(id){
   if(id === 's4') renderDayTeachers();
   if(id === 's5'){ renderFilterBar(); renderSortBar(); renderStudents(); }
   if(id === 's8') renderSettings();
+  if(id === 's11'){ renderNoteBars(); renderNotes(); }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   el.classList.add('on');
   const tab = el.dataset.tab;
   document.getElementById('tabAttend').classList.toggle('on', tab === 'attend');
   document.getElementById('tabStudents').classList.toggle('on', tab === 'students');
+  document.getElementById('tabNotes').classList.toggle('on', tab === 'notes');
   document.getElementById('tabSettings').classList.toggle('on', tab === 'settings');
 }
 
@@ -946,6 +1085,7 @@ function renderDetail(){
   const s = studentById(curStudent);
   if(!s){ go('s5'); return; }
   const sl = slotById(s.slotId);
+  const ns = notesOfStudent(s.id);
   document.getElementById('detail').innerHTML = `
     <div class="name-big">${esc(s.name)}</div>
     <div class="name-sub">${esc(slotFullLabel(sl))}　担当 ${esc(teachersLabel(teachersOfStudent(s)))}</div>
@@ -962,6 +1102,20 @@ function renderDetail(){
       ${s.phone ? `<a class="btn" style="margin-top:16px;" href="tel:${esc(s.phone.replace(/-/g,''))}">
         <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
         電話をかける</a>` : ''}
+    </div>
+
+    <div class="panel" style="padding-bottom:12px;">
+      <div class="ptitle">この子のメモ（${ns.length}）</div>
+      ${ns.length ? ns.map(n => `
+        <button class="note-card" style="box-shadow:none;border:none;border-top:0.5px solid rgba(28,25,23,0.08);border-radius:0;padding:14px 0;margin:0;" onclick="openNoteForm({noteId:'${n.id}'})">
+          <div class="note-head">
+            <span class="note-date">${esc(dateLabel(n.date))}</span>
+            <span class="note-who">${esc(noteWriter(n))}</span>
+          </div>
+          <div class="note-body">${esc(n.body)}</div>
+        </button>`).join('')
+        : '<div class="fhint" style="padding-bottom:8px;">まだありません。授業の画面から書けます</div>'}
+      <button class="btn btn-sec" style="margin-top:12px;" onclick="openNoteForm({kind:'student',studentId:'${s.id}'})">この子のメモを書く</button>
     </div>
 
     <div class="panel">
@@ -1297,6 +1451,230 @@ function deleteTeacher(){
   db.teachers = db.teachers.filter(x => x.id !== t.id);
   if(db.currentTeacherId === t.id) db.currentTeacherId = db.teachers[0].id;
   saveDb(); go('s8'); toast('消しました');
+}
+
+/* ================= メモ ================= */
+let noteDraft = {};
+let noteKind = 'all';
+let noteWho = 'all';
+
+function openNoteForm(opt){
+  const back = opt.back || (document.querySelector('.screen.on') || {}).id || 's11';
+  const existing = opt.noteId ? (db.notes || []).find(n => n.id === opt.noteId) : null;
+  if(existing){
+    noteDraft = Object.assign({}, existing, { _new:false, _back:back, _pickAll:!!opt.pickAll });
+  }else{
+    noteDraft = {
+      _new: true,
+      _back: back,
+      _pickAll: !!opt.pickAll,
+      kind: opt.kind || 'student',
+      studentId: opt.studentId || '',
+      slotId: opt.slotId || cur || '',
+      date: TODAY,
+      body: '',
+    };
+    // 子のメモで相手が未指定なら、今日のメンバーの先頭を初期値に
+    if(noteDraft.kind === 'student' && !noteDraft.studentId && noteDraft.slotId){
+      const first = studentsOfSlot(noteDraft.slotId)[0];
+      if(first) noteDraft.studentId = first.id;
+    }
+  }
+  renderNoteForm();
+  go('s12');
+}
+
+function renderNoteForm(){
+  const isLesson = noteDraft.kind === 'lesson';
+  const sl = slotById(noteDraft.slotId);
+  document.getElementById('s12title').textContent =
+    isLesson ? '授業のメモ' : (noteDraft._new ? '子のメモを書く' : '子のメモ');
+  document.getElementById('s12sub').textContent =
+    `${dateLabel(noteDraft.date)}　${sl ? slotTimeLabel(sl) : ''}`;
+
+  // 相手に選べる子：その枠の子 ＋ 振替で来ている子。枠が無ければ全員
+  let choices = [];
+  if(noteDraft._pickAll){
+    choices = db.students.filter(x => x.status !== 'withdrawn');
+  }else if(noteDraft.slotId){
+    const rec = (db.attendance[noteDraft.date] || {})[noteDraft.slotId];
+    const extraIds = rec ? rec.extra.map(e => e.id) : [];
+    choices = studentsOfSlot(noteDraft.slotId)
+      .concat(extraIds.map(studentById).filter(Boolean));
+  }
+  if(!choices.length) choices = db.students.filter(s => s.status !== 'withdrawn');
+  if(noteDraft.studentId && !choices.some(c => c.id === noteDraft.studentId)){
+    const s = studentById(noteDraft.studentId);
+    if(s) choices = [s].concat(choices);
+  }
+
+  const opts = choices.map(c =>
+    `<option value="${c.id}" ${c.id === noteDraft.studentId ? 'selected' : ''}>${esc(displayName(c))}</option>`).join('');
+
+  const slotOpts = '<option value="">指定なし</option>' + sortedSlots().map(x =>
+    `<option value="${x.id}" ${x.id === noteDraft.slotId ? 'selected' : ''}>${esc(slotFullLabel(x))}</option>`).join('');
+
+  document.getElementById('noteForm').innerHTML = `
+    <div class="field">
+      <div class="flabel">メモの種類</div>
+      <div class="toggles">
+        <button class="tog ${isLesson ? '' : 'on'}" onclick="switchNoteKind('student')">子のこと</button>
+        <button class="tog ${isLesson ? 'on' : ''}" onclick="switchNoteKind('lesson')">授業のこと</button>
+      </div>
+    </div>
+    ${isLesson ? '' : `
+    <div class="field">
+      <div class="flabel">だれのこと</div>
+      <select id="n_student">${opts}</select>
+      <div class="fhint">${noteDraft._pickAll ? '全員から選べます' : '今日のメンバーから選べます'}</div>
+    </div>`}
+    <div class="row2">
+      <div class="field">
+        <div class="flabel">日付</div>
+        <input type="date" id="n_date" value="${esc(noteDraft.date)}" onchange="noteDraft.date=this.value">
+      </div>
+      <div class="field">
+        <div class="flabel">時間帯</div>
+        <select id="n_slot" onchange="noteDraft.slotId=this.value">${slotOpts}</select>
+      </div>
+    </div>
+    <div class="field">
+      <div class="flabel">${isLesson ? '今日の授業で気づいたこと' : '気になったこと・効いた練習法'}</div>
+      <textarea id="n_body" placeholder="${isLesson
+        ? 'れい：マット3枚でレーンを作ったら順番待ちが減った'
+        : 'れい：補助を外すと固まる。「いつも通りでいいよ」と声をかけてから入ると通った'}">${esc(noteDraft.body)}</textarea>
+      <div class="fhint">あとで別の先生が読みます。その子にどう関わればいいかが分かるように書くと、そのまま引き継げます</div>
+    </div>
+    ${noteDraft._new ? '' : `
+    <div class="fhint" style="margin-bottom:16px;">書いた人：${esc(noteWriter(noteDraft))}</div>
+    <button class="btn btn-danger" onclick="removeNote()">このメモを消す</button>`}`;
+}
+
+function switchNoteKind(k){
+  // いま入力中の文と選択を保ってから切り替える
+  const b = document.getElementById('n_body');
+  if(b) noteDraft.body = b.value;
+  const st = document.getElementById('n_student');
+  if(st) noteDraft.studentId = st.value;
+  const d = document.getElementById('n_date');
+  if(d) noteDraft.date = d.value;
+  const sl = document.getElementById('n_slot');
+  if(sl) noteDraft.slotId = sl.value;
+  noteDraft.kind = k;
+  renderNoteForm();
+}
+
+function saveNote(){
+  const body = document.getElementById('n_body').value;
+  if(!body.trim()){ toast('なにか書いてください'); return; }
+  const isLesson = noteDraft.kind === 'lesson';
+  const studentId = isLesson ? '' : (document.getElementById('n_student') || {}).value || noteDraft.studentId;
+  if(!isLesson && !studentId){ toast('だれのことか選んでください'); return; }
+  const date = (document.getElementById('n_date') || {}).value || noteDraft.date;
+  const slotId = (document.getElementById('n_slot') || {}).value;
+  if(isLesson && !slotId){ toast('授業のメモは、時間帯を選んでください'); return; }
+  noteDraft.date = date; noteDraft.slotId = slotId;
+
+  if(noteDraft._new){
+    addNote({ kind:noteDraft.kind, studentId, slotId, body, date });
+    toast(isLesson ? '授業のメモを保存しました' : (studentById(studentId) || {}).name + ' のメモを保存しました');
+  }else{
+    const n = (db.notes || []).find(x => x.id === noteDraft.id);
+    if(n){
+      n.body = body.trim();
+      n.date = date; n.slotId = slotId;
+      n.studentId = isLesson ? '' : studentId;
+      n.kind = noteDraft.kind;
+      saveDb();
+    }
+    toast('保存しました');
+  }
+  afterNote();
+}
+function removeNote(){
+  if(!confirm('このメモを消しますか。')) return;
+  deleteNote(noteDraft.id);
+  toast('消しました');
+  afterNote();
+}
+function cancelNote(){ afterNote(); }
+function afterNote(){
+  const back = noteDraft._back || 's11';
+  if(back === 's6' && curStudent && studentById(curStudent)){ renderDetail(); go('s6'); return; }
+  if(back === 's2' && cur && slotById(cur)){ renderTiles(); go('s2'); return; }
+  go(back === 's12' ? 's11' : back);
+}
+
+/* メモ一覧 */
+function renderNoteBars(){
+  const kb = document.getElementById('noteKindBar');
+  kb.innerHTML = '';
+  [{k:'all',l:'ぜんぶ'},{k:'student',l:'子のメモ'},{k:'lesson',l:'授業のメモ'}].forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'seg' + (o.k === noteKind ? ' on' : '');
+    b.textContent = o.l;
+    b.onclick = () => { noteKind = o.k; renderNoteBars(); renderNotes(); };
+    kb.appendChild(b);
+  });
+  const wb = document.getElementById('noteWhoBar');
+  wb.innerHTML = '';
+  [{k:'all',l:'だれでも'},{k:'me',l:'自分が書いたもの'}].forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'fchip' + (o.k === noteWho ? ' on' : '');
+    b.textContent = o.k === 'me' ? `自分が書いたもの（${currentTeacher().name}）` : o.l;
+    b.onclick = () => { noteWho = o.k; renderNoteBars(); renderNotes(); };
+    wb.appendChild(b);
+  });
+}
+
+function renderNotes(){
+  const q = document.getElementById('nq').value.trim();
+  const el = document.getElementById('noteList');
+  el.innerHTML = '';
+  let list = allNotes();
+  if(noteKind !== 'all') list = list.filter(n => n.kind === noteKind);
+  if(noteWho === 'me')   list = list.filter(n => n.teacherId === db.currentTeacherId);
+  if(q){
+    list = list.filter(n => {
+      const s = n.studentId ? studentById(n.studentId) : null;
+      return n.body.includes(q) || (s && s.name.includes(q));
+    });
+  }
+  document.getElementById('s11count').textContent = `${list.length}件`;
+  if(!list.length){
+    el.innerHTML = '<div class="empty">ありません<br>授業の画面から書けます</div>';
+    return;
+  }
+
+  // 日付ごとにまとめる
+  const groups = [];
+  list.forEach(n => {
+    const last = groups[groups.length - 1];
+    if(last && last.date === n.date) last.rows.push(n);
+    else groups.push({ date:n.date, rows:[n] });
+  });
+
+  groups.forEach(g => {
+    const h = document.createElement('div');
+    h.className = 'group';
+    h.textContent = dateLabel(g.date);
+    el.appendChild(h);
+    g.rows.forEach(n => {
+      const s = n.studentId ? studentById(n.studentId) : null;
+      const sl = slotById(n.slotId);
+      const b = document.createElement('button');
+      b.className = 'note-card';
+      b.onclick = () => { noteDraft = {}; openNoteForm({ noteId:n.id }); };
+      b.innerHTML = `
+        <div class="note-head">
+          <span class="note-kind ${n.kind === 'lesson' ? 'lesson' : ''}">${n.kind === 'lesson' ? '授業' : '子'}</span>
+          ${s ? `<span class="note-date">${esc(displayName(s))}</span>` : ''}
+          <span class="note-who">${esc(noteWriter(n))}${sl ? '　' + esc(slotTimeLabel(sl)) : ''}</span>
+        </div>
+        <div class="note-body">${esc(n.body)}</div>`;
+      el.appendChild(b);
+    });
+  });
 }
 
 /* ================= 共通 ================= */

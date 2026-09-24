@@ -124,6 +124,28 @@
   .fchip:hover{background:var(--surface-hover);}
   .fchip.on{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-soft);}
 
+  /* メモ */
+  textarea{
+    width:100%;min-height:110px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface);padding:12px;font-family:inherit;font-size:14px;
+    line-height:1.8;color:var(--text);outline:none;resize:vertical;
+    transition:border-color 120ms,box-shadow 120ms;
+  }
+  textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.2);}
+  textarea::placeholder{color:var(--text3);}
+  .note-item{padding:14px 0;border-top:0.5px solid rgba(28,25,23,0.08);}
+  .note-item:first-of-type{border-top:none;padding-top:0;}
+  .note-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .note-date{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:0.02em;}
+  .note-who{font-size:11px;color:var(--text3);letter-spacing:0.02em;}
+  .note-body{font-size:14px;line-height:1.85;color:var(--text);letter-spacing:0.01em;
+    white-space:pre-wrap;word-break:break-word;}
+  .note-del{
+    border:none;background:transparent;font-family:inherit;font-size:11px;
+    color:var(--text3);cursor:pointer;padding:2px 4px;margin-left:auto;
+  }
+  .note-del:hover{color:var(--danger-deep);}
+
   /* フォーム */
   .field{margin-bottom:16px;}
   .flabel{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:0.02em;margin-bottom:8px;}
@@ -306,6 +328,24 @@ const DEFAULT_DB = {
 
   /* 出席の記録。日付ごとに { slotId: { present, extra, teacherIds } } */
   attendance: {},
+
+  /* メモ。kind は 'student'（その子のこと）か 'lesson'（その日の授業のこと） */
+  notes: [
+    { id:'nt1', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-05', teacherId:'tc1',
+      body:'側転で足が開ききらない。手をつく位置を毎回目印で確認させると、3回目から形になった。次も目印を置くところから始める。' },
+    { id:'nt2', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-12', teacherId:'tc4',
+      body:'目印なしでも形が残っていた。できた直後に本人が振り返るので、すぐ「いまの、足そろってたよ」と言うと嬉しそうにする。褒めるのは技の直後が効く。' },
+    { id:'nt3', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
+      body:'バク転の補助を外そうとすると固まる。「いつも通りでいいよ」と声をかけてから入ると通った。急に外さず、補助の手を軽くするところから。' },
+    { id:'nt4', kind:'student', studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1',
+      body:'できない技があると黙り込む。せかすと余計に固まるので、別の技をはさんで戻ると自分からやり直す。' },
+    { id:'nt5', kind:'student', studentId:'s12', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
+      body:'ロンダートの踏み切りが強すぎて流れる。助走を3歩に減らしたら安定した。当面3歩で固める。' },
+    { id:'nt6', kind:'lesson', studentId:'', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
+      body:'マット3枚で側転のレーンを作った。順番待ちが減って回転数が増えた。次回も同じ並べ方でいく。' },
+    { id:'nt7', kind:'lesson', studentId:'', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
+      body:'後半に集中が切れる子が多かった。最後の10分は遊びを入れた方がよさそう。' },
+  ],
 };
 
 /* ---- 保存と読み出し（その端末の中だけ） ---- */
@@ -436,6 +476,55 @@ function todayRecord(slotId){
     db.attendance[TODAY][slotId] = rec;
   }
   return db.attendance[TODAY][slotId];
+}
+
+
+/* ---- メモ ---- */
+function allNotes(){
+  return (db.notes || []).slice().sort((a,b) =>
+    b.date.localeCompare(a.date) || b.id.localeCompare(a.id));   // 新しい順
+}
+function notesOfStudent(studentId){
+  return allNotes().filter(n => n.kind === 'student' && n.studentId === studentId);
+}
+function notesOfLesson(date, slotId){
+  return allNotes().filter(n => n.kind === 'lesson' && n.date === date && n.slotId === slotId);
+}
+function notesOfDay(date, slotId){
+  return allNotes().filter(n => n.date === date && n.slotId === slotId);
+}
+function addNote({ kind, studentId, slotId, body, date }){
+  if(!db.notes) db.notes = [];
+  const n = {
+    id: newId('nt'), kind,
+    studentId: studentId || '',
+    slotId: slotId || '',
+    date: date || TODAY,
+    teacherId: db.currentTeacherId,
+    body: body.trim(),
+  };
+  db.notes.push(n);
+  saveDb();
+  return n;
+}
+function updateNote(id, body){
+  const n = (db.notes || []).find(x => x.id === id);
+  if(n){ n.body = body.trim(); saveDb(); }
+  return n;
+}
+function deleteNote(id){
+  db.notes = (db.notes || []).filter(x => x.id !== id);
+  saveDb();
+}
+function noteWriter(n){
+  const t = teacherById(n.teacherId);
+  return t ? t.name : '（退職した先生）';
+}
+function dateLabel(d){
+  const {m, y} = ymd(d);
+  const day = ymd(d).d;
+  const w = new Date(d + 'T00:00:00+09:00').getDay();
+  return `${m}月${day}日（${DAY_LABEL[w]}）`;
 }
 
 </script>
@@ -638,6 +727,7 @@ function renderDetail(){
     return;
   }
   const sl = slotById(s.slotId);
+  const ns = notesOfStudent(s.id);
   el.innerHTML = `
     <div class="dwrap">
       <div class="dhead">
@@ -672,8 +762,30 @@ function renderDetail(){
         </div>
       </div>
 
+      <div class="panel" style="margin-top:20px;">
+        <div class="ptitle">この子のメモ（${ns.length}）</div>
+        ${ns.length ? ns.map(n => `
+          <div class="note-item">
+            <div class="note-head">
+              <span class="note-date">${esc(dateLabel(n.date))}</span>
+              <span class="note-who">${esc(noteWriter(n))}${n.slotId ? '　' + esc(slotTimeLabel(slotById(n.slotId))) : ''}</span>
+              <button class="note-del" onclick="removeNoteFor('${n.id}','${s.id}')">消す</button>
+            </div>
+            <div class="note-body">${esc(n.body)}</div>
+          </div>`).join('')
+          : '<div class="fhint">まだありません</div>'}
+        <div style="margin-top:16px;">
+          <div class="flabel">この子のメモを書く</div>
+          <textarea id="newNote" placeholder="れい：補助を外すと固まる。「いつも通りでいいよ」と声をかけてから入ると通った"></textarea>
+          <div class="btnrow" style="margin-top:12px;">
+            <button class="btn" onclick="addNoteFor('${s.id}')">メモを保存</button>
+          </div>
+          <div class="fhint">あとで別の先生が読みます。書いた人と日付が一緒に残ります</div>
+        </div>
+      </div>
+
       <div class="placeholder">
-        このあとここに入る予定：扱い方説明書 ／ 技の時系列（苦戦メモ→練習法→合格） ／ 写真・動画のタイムライン<br>
+        このあとここに入る予定：扱い方説明書（常に最新の1枚） ／ 技の時系列（苦戦メモ→練習法→合格） ／ 写真・動画のタイムライン<br>
         まだ作っていません
       </div>
     </div>`;
@@ -907,6 +1019,21 @@ function deleteSlot(){
   curSlotEdit = null; mode = 'view';
   saveDb(); renderHead(); renderList(); renderSlotDetail();
 }
+function addNoteFor(studentId){
+  const ta = document.getElementById('newNote');
+  const body = ta.value;
+  if(!body.trim()){ alert('なにか書いてください'); return; }
+  const st = studentById(studentId);
+  addNote({ kind:'student', studentId, slotId: st ? st.slotId : '', body });
+  renderDetail();
+}
+function removeNoteFor(noteId, studentId){
+  if(!confirm('このメモを消しますか。')) return;
+  deleteNote(noteId);
+  curStudent = studentId;
+  renderDetail();
+}
+
 function addTeacherPrompt(){
   const name = prompt('先生のなまえ');
   if(!name || !name.trim()) return;
