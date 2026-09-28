@@ -268,6 +268,64 @@
     white-space:pre-wrap;word-break:break-word;}
   .note-for{font-size:12px;color:var(--text2);margin-top:8px;letter-spacing:0.02em;}
 
+  /* バッジテスト */
+  .rankcard{
+    background:var(--surface);border-radius:16px;margin-bottom:12px;overflow:hidden;
+    box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
+  }
+  .rankhead{
+    display:flex;align-items:center;gap:12px;width:100%;padding:16px 20px;
+    background:transparent;border:none;font-family:inherit;text-align:left;cursor:pointer;
+    transition:background 120ms;
+  }
+  .rankhead:active{background:var(--surface-hover);}
+  .rankhead > div:first-child{flex:1;min-width:0;}
+  .ranknum{font-size:20px;font-weight:600;letter-spacing:0.02em;line-height:1.3;}
+  .rankmeta{font-size:12px;color:var(--text2);margin-top:4px;letter-spacing:0.02em;}
+  .rankstat{
+    flex:none;font-size:11px;font-weight:500;letter-spacing:0.06em;padding:3px 8px;border-radius:4px;
+    background:var(--surface-active);color:var(--text2);white-space:nowrap;
+  }
+  .rankstat.pass{background:var(--primary-soft);color:var(--primary-deep);}
+  .rankstat.now{background:#FEF3C7;color:#92400E;}
+  .bar{height:4px;border-radius:999px;background:var(--surface-active);overflow:hidden;margin-top:10px;}
+  .bar > i{display:block;height:100%;background:var(--primary);border-radius:999px;transition:width 200ms;}
+  .rankbody{padding:0 20px 16px;}
+  .srow{
+    display:flex;align-items:flex-start;gap:12px;width:100%;padding:13px 0;
+    background:transparent;border:none;border-top:0.5px solid rgba(28,25,23,0.08);
+    font-family:inherit;text-align:left;cursor:pointer;
+  }
+  .srow:active{opacity:0.6;}
+  .sbox{
+    width:24px;height:24px;border-radius:4px;border:1.5px solid var(--border);flex:none;
+    display:flex;align-items:center;justify-content:center;margin-top:1px;
+    transition:border-color 120ms,background 120ms;
+  }
+  .srow.on .sbox{border-color:var(--primary);background:var(--primary-soft);}
+  .sbox svg{width:16px;height:16px;stroke:var(--primary);stroke-width:2;fill:none;
+    stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity 120ms;}
+  .srow.on .sbox svg{opacity:1;}
+  .stext{font-size:14px;line-height:1.5;letter-spacing:0.01em;min-width:0;}
+  .srow.on .stext{color:var(--text);}
+  .smeta{display:block;font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:0.02em;}
+  .rankbtns{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+
+  /* AI分析の貼り付け */
+  .aiimgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .aiimgs img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:0.5px solid var(--border);}
+  .filebtn{
+    display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:44px;
+    border-radius:8px;border:1px dashed var(--border);background:var(--surface);
+    font-family:inherit;font-size:14px;color:var(--text2);cursor:pointer;letter-spacing:0.02em;
+  }
+  .filebtn:active{background:var(--surface-active);}
+  .copybox{
+    background:var(--surface-hover);border-radius:8px;padding:12px;margin-top:12px;
+    font-size:12px;line-height:1.8;color:var(--text2);white-space:pre-wrap;
+    max-height:220px;overflow-y:auto;word-break:break-word;
+  }
+
   /* 下タブ */
   .tabbar{
     flex:none;display:flex;background:var(--bg);
@@ -479,6 +537,47 @@
     </div>
   </section>
 
+  <!-- バッジテスト -->
+  <section class="screen" id="s13" data-tab="students">
+    <header>
+      <button class="back" onclick="go('s6')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle" id="s13name">バッジテスト</div>
+        <div class="hsub" id="s13sub"></div>
+      </div>
+    </header>
+    <div class="segbar" id="badgeSeg"></div>
+    <div class="body" style="padding-top:0;" id="badgeBody"></div>
+  </section>
+
+  <!-- 所見メモの一括コピー -->
+  <section class="screen" id="s14" data-tab="students">
+    <header>
+      <button class="back" onclick="go('s6')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle">メモをまとめてコピー</div>
+        <div class="hsub" id="s14sub"></div>
+      </div>
+    </header>
+    <div class="body" id="copyBody"></div>
+    <div class="footer">
+      <button class="btn" onclick="doCopy()">コピーする</button>
+      <button class="btn btn-sec" onclick="go('s6')">やめる</button>
+    </div>
+  </section>
+
+  <!-- AI分析の貼り付け -->
+  <section class="screen" id="s15" data-tab="students">
+    <header>
+      <button class="back" onclick="go('s6')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+      <div>
+        <div class="htitle">AI分析の貼り付け</div>
+        <div class="hsub" id="s15sub"></div>
+      </div>
+    </header>
+    <div class="body" id="aiBody"></div>
+  </section>
+
   <div class="toast" id="toast"></div>
   </div><!-- /stage -->
 
@@ -518,16 +617,79 @@ const DAY_LABEL = ['日','月','火','水','木','金','土'];
 const STATUS_LABEL = { trial:'体験', active:'在籍', paused:'休会', withdrawn:'退会' };
 const STATUS_ORDER = ['trial','active','paused','withdrawn'];
 
+/* ---- バッジテストの表（級と技）----
+   海翔がくれた表。15級が入り口で、数字が小さくなるほど上。
+   ここが1か所の正本。技を足す・直すときはこの配列だけ直す。
+   1級は枠だけ用意して技は空（技が決まったら skills に足す）。 */
+const GRADES = [
+  { rank:15, skills:[ {id:'k15a',name:'挨拶ができる'}, {id:'k15b',name:'クラスに入れる'} ] },
+  { rank:14, skills:[ {id:'k14a',name:'前まわり'} ] },
+  { rank:13, skills:[ {id:'k13a',name:'ブリッジ5秒'} ] },
+  { rank:12, skills:[ {id:'k12a',name:'後ろまわり'} ] },
+  { rank:11, skills:[ {id:'k11a',name:'側転'}, {id:'k11b',name:'倒立ブリッジ'}, {id:'k11c',name:'立ちブリッジ'} ] },
+  { rank:10, skills:[ {id:'k10a',name:'ブリッジ立ち'}, {id:'k10b',name:'ブリッジ回転'} ] },
+  { rank:9,  skills:[ {id:'k09a',name:'倒立ブリッジ立ち（止まらない）'}, {id:'k09b',name:'バラ足後方ブリッジ'}, {id:'k09c',name:'側転3回連続'} ] },
+  { rank:8,  skills:[ {id:'k08a',name:'バラ足前ブリッジ'}, {id:'k08b',name:'ロンダード'}, {id:'k08c',name:'倒立前転'} ] },
+  { rank:7,  skills:[ {id:'k07a',name:'両足後方ブリッジ'}, {id:'k07b',name:'チクタク'} ] },
+  { rank:6,  skills:[ {id:'k06a',name:'転回バラ足'}, {id:'k06b',name:'座ブリッジ'} ] },
+  { rank:5,  skills:[ {id:'k05a',name:'転回両足'}, {id:'k05b',name:'転回連続'}, {id:'k05c',name:'バタフライ'} ] },
+  { rank:4,  skills:[ {id:'k04a',name:'バク転'}, {id:'k04b',name:'後転倒立'} ] },
+  { rank:3,  skills:[ {id:'k03a',name:'ロンダードバク転'}, {id:'k03b',name:'側宙'} ] },
+  { rank:2,  skills:[ {id:'k02a',name:'バック宙'}, {id:'k02b',name:'ロンダード宙返り'} ] },
+  { rank:1,  skills:[] },
+];
+const RANKS = GRADES.map(g => g.rank);
+
+function gradeByRank(r){ return GRADES.find(g => g.rank === Number(r)); }
+
+/* ダミーの合格記録。3人だけ進めてある */
+const DEMO = (() => {
+  const checks = {}, hist = [];
+  function seed(sid, tid, ranks, dates, partial){
+    checks[sid] = checks[sid] || {};
+    ranks.forEach((r, i) => {
+      const d = dates[i];
+      gradeByRank(r).skills.forEach(k => { checks[sid][k.id] = { date:d, teacherId:tid }; });
+      hist.push({ id:'gh' + sid + 'r' + r, studentId:sid, rank:r, date:d, teacherId:tid });
+    });
+    (partial || []).forEach(p => { checks[sid][p[0]] = { date:p[1], teacherId:tid }; });
+  }
+  seed('s01','tc1',[15,14,13,12,11,10,9],
+    ['2024-05-11','2024-07-13','2024-09-14','2024-11-09','2025-02-08','2025-05-10','2025-09-13'],
+    [['k08b','2026-09-12']]);
+  seed('s05','tc1',[15,14,13,12],
+    ['2022-06-11','2022-08-13','2022-10-08','2023-01-14'],
+    [['k11a','2026-09-05']]);
+  seed('s12','tc2',[15,14,13,12,11,10,9,8,7,6,5],
+    ['2019-07-13','2019-10-12','2020-02-08','2020-07-11','2020-11-14','2021-04-10',
+     '2021-09-11','2022-03-12','2022-09-10','2023-04-08','2023-11-11'],
+    [['k04b','2026-09-19']]);
+  return { checks, hist };
+})();
+
 /* ---- 初期データ（まだ何も編集していない時の中身） ---- */
 const DEFAULT_DB = {
   /* いまログインしている先生（モック用） */
   currentTeacherId: 'tc1',
 
+  /* 先生。shared は誰でも見ていい情報、private は管理者だけ */
   teachers: [
-    { id:'tc1', name:'海翔先生' },
-    { id:'tc2', name:'ゆか先生' },
-    { id:'tc3', name:'だいき先生' },
-    { id:'tc4', name:'あやね先生' },
+    { id:'tc1', name:'海翔先生', role:'店長',
+      phone:'090-0000-1001', mail:'kaito@example.com', shift:'火・金・土',
+      memo:'とび箱と側転の担当。新人の研修も見る',
+      pay:'時給1,800円（店長手当あり）', hr:'2026年4月から店長。土曜17時の枠を後任に渡す予定' },
+    { id:'tc2', name:'ゆか先生', role:'講師',
+      phone:'090-0000-1002', mail:'yuka@example.com', shift:'火・土',
+      memo:'年少〜年長の担当が得意。保護者対応の見本になる',
+      pay:'時給1,300円', hr:'土曜のコマを増やしたい希望あり' },
+    { id:'tc3', name:'だいき先生', role:'講師',
+      phone:'090-0000-1003', mail:'daiki@example.com', shift:'水・金・土',
+      memo:'バク転の補助が正確。上級の子を任せられる',
+      pay:'時給1,400円', hr:'2026年6月入社。3か月の試用は終了' },
+    { id:'tc4', name:'あやね先生', role:'講師（研修中）',
+      phone:'090-0000-1004', mail:'ayane@example.com', shift:'火・水・土',
+      memo:'研修中。土曜15時は海翔先生と2人で入る',
+      pay:'時給1,100円（研修中）', hr:'マニュアルの4ページまで確認済み。10月に単独デビュー予定' },
   ],
 
   /* 時間帯。クラス名は持たない。担当は何人でも入る */
@@ -611,6 +773,32 @@ const DEFAULT_DB = {
     { id:'nt7', kind:'lesson', studentId:'', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
       body:'後半に集中が切れる子が多かった。最後の10分は遊びを入れた方がよさそう。' },
   ],
+
+  /* 技のチェック。{ 生徒id: { 技id: { date, teacherId } } } */
+  skillChecks: DEMO.checks,
+
+  /* 級の合格履歴。手で確定したものだけが入る */
+  gradeHistory: DEMO.hist,
+
+  /* AIに分析させた結果の貼り付け欄（手で貼る。テキストと画像） */
+  aiNotes: [
+    { id:'ai1', studentId:'s01', date:'2026-09-20', teacherId:'tc1', images:[],
+      body:'所見メモ5件をAIにまとめさせた結果。\n\n・できた直後に言葉をかけると定着が早い。時間が経ってから褒めても効きにくい\n・補助を外すときは、外すと言わずに「いつも通り」と言ってから入ると通る\n・目印を置くと自分で位置を直せる。目印を外すのは2回できてから' },
+  ],
+
+  /* 新人研修用のマニュアル。1ページ＝1枚のスライドのつもり */
+  manual: [
+    { id:'mn1', title:'この教室が何をしているか', images:[],
+      body:'技を増やす場所ではなく、できない状態から抜ける経験を積む場所として見ている。\n\nだから「できた／できない」より「どこで止まっているか」を見て、そこだけ動かす。全部を直そうとしない。\n\n初日は名前を覚えることと、その子が何を怖がっているかを1つ見つけることだけでいい。' },
+    { id:'mn2', title:'60分の流れ', images:[],
+      body:'1. あいさつと整列（3分）\n2. 準備運動（10分）ブリッジと倒立は毎回入れる\n3. その日の課題（25分）学年で分けずに、技の段階で2〜3組に分ける\n4. 自由に挑戦（15分）できる技を通す時間。ここで見つかることが多い\n5. 片づけとあいさつ（7分）\n\n後半に集中が切れる子が多い。最後の10分は遊びを混ぜる。' },
+    { id:'mn3', title:'補助の入り方', images:[],
+      body:'補助は「支える」より「怖さを消す」ために入れる。\n\n・体に触る前に、どこを持つか言う\n・外すときは予告しない。「いつも通りでいいよ」と言ってから入る\n・急に外さず、手を軽くするところから\n・2回連続でできたら、次の1回だけ手を離して様子を見る\n\n固まった子をせかさない。別の技をはさんで戻ると自分からやり直す。' },
+    { id:'mn4', title:'バッジテストの見かた', images:[],
+      body:'15級が入り口で、数字が小さくなるほど上。技が全部チェックできても、合格は先生が手で確定する。ここは自動にしない。\n\n理由は2つ。\n・その日の1回できただけで級を渡すと、次の週にできなくなる子がいる\n・渡す場面そのものが、その子にとって意味を持つから\n\n迷ったら級は渡さず、所見メモに「あと何が足りないか」を書いておく。' },
+    { id:'mn5', title:'所見メモの書き方', images:[],
+      body:'半年後に別の先生が読む前提で書く。\n\n×「側転がうまくなった」\n○「手をつく位置を目印で確認させると、3回目から形になった。次も目印を置くところから始める」\n\n書くのは3つ。\n・何で止まっていたか\n・何をしたら動いたか\n・次にどこから始めるか\n\n生々しい表現でいい。保護者には出さない。' },
+  ],
 };
 
 /* ---- 保存と読み出し（その端末の中だけ） ---- */
@@ -630,14 +818,36 @@ function loadDb(){
   db = deepCopy(DEFAULT_DB);
 }
 function saveDb(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(db)); }
-  catch(e){ /* 保存できなくても画面は動く */ }
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(db)); return true; }
+  catch(e){ return false; }   /* 入りきらない時は false。画面は動き続ける */
 }
 function resetDb(){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   location.reload();
 }
 loadDb();
+
+/* あとから増やした項目を、前に保存したデータにも足す。
+   一度でも本人が空にしたものは、空のまま残す（undefined の時だけ入れる） */
+const DUMMY_SURNAME = ['佐藤','鈴木','高橋','田中','伊藤','渡辺','山本','中村','小林','加藤',
+                       '吉田','山田','佐々木','山口','松本','井上','木村','清水','斎藤','林'];
+const DUMMY_GUARDIAN_MEMO = {
+  s01:'下の子を連れて来ることが多い。迎えは18時前後',
+  s05:'兄が金曜の枠にいる。送りは祖母の場合あり',
+  s12:'大会に出したい希望あり。連絡は母の携帯へ',
+  s26:'体験のみ。入会は9月末までに返事をもらう約束',
+};
+(function migrate(){
+  (db.students || []).forEach((s, i) => {
+    if(s.fullName === undefined) s.fullName = DUMMY_SURNAME[i % DUMMY_SURNAME.length] + '　' + s.name;
+    if(s.guardianNote === undefined) s.guardianNote = DUMMY_GUARDIAN_MEMO[s.id] || '';
+  });
+  (db.teachers || []).forEach(t => {
+    ['role','phone','mail','shift','memo','pay','hr'].forEach(k => { if(t[k] === undefined) t[k] = ''; });
+  });
+  ['skillChecks'].forEach(k => { if(!db[k]) db[k] = {}; });
+  ['gradeHistory','aiNotes','manual','notes'].forEach(k => { if(!db[k]) db[k] = []; });
+})();
 
 /* ---- 取り出し ---- */
 function teacherById(id){ return db.teachers.find(t => t.id === id); }
@@ -791,6 +1001,219 @@ function dateLabel(d){
   const w = new Date(d + 'T00:00:00+09:00').getDay();
   return `${m}月${day}日（${DAY_LABEL[w]}）`;
 }
+function shortDate(d){ return d ? d.replace(/-/g,'/').slice(5) : ''; }
+function fullDate(d){ return d ? d.replace(/-/g,'/') : ''; }
+
+
+/* ================= バッジテスト ================= */
+function skillById(id){
+  for(const g of GRADES){
+    const k = g.skills.find(x => x.id === id);
+    if(k) return { id:k.id, name:k.name, rank:g.rank };
+  }
+  return null;
+}
+function skillCheck(studentId, skillId){
+  return ((db.skillChecks || {})[studentId] || {})[skillId] || null;
+}
+function toggleSkill(studentId, skillId){
+  if(!db.skillChecks) db.skillChecks = {};
+  if(!db.skillChecks[studentId]) db.skillChecks[studentId] = {};
+  const m = db.skillChecks[studentId];
+  if(m[skillId]) delete m[skillId];
+  else m[skillId] = { date:TODAY, teacherId:db.currentTeacherId };
+  saveDb();
+  return !!m[skillId];
+}
+function rankProgress(studentId, rank){
+  const g = gradeByRank(rank);
+  if(!g) return { done:0, total:0, ready:false };
+  const done = g.skills.filter(k => skillCheck(studentId, k.id)).length;
+  return { done, total:g.skills.length, ready: g.skills.length > 0 && done === g.skills.length };
+}
+function hasRank(studentId, rank){
+  return (db.gradeHistory || []).some(h => h.studentId === studentId && h.rank === Number(rank));
+}
+function rankRecord(studentId, rank){
+  return (db.gradeHistory || []).find(h => h.studentId === studentId && h.rank === Number(rank)) || null;
+}
+/* 級位履歴。取った順（古い順） */
+function gradeHistoryOf(studentId){
+  return (db.gradeHistory || []).filter(h => h.studentId === studentId)
+    .slice().sort((a,b) => a.date.localeCompare(b.date) || b.rank - a.rank);
+}
+/* いま持っている級。数字が小さいほど上なので最小値 */
+function currentRank(studentId){
+  const rs = (db.gradeHistory || []).filter(h => h.studentId === studentId).map(h => h.rank);
+  return rs.length ? Math.min.apply(null, rs) : null;
+}
+function currentRankLabel(studentId){
+  const r = currentRank(studentId);
+  return r === null ? 'まだ級なし' : r + '級';
+}
+/* いま挑戦している級。取り終わっていれば null */
+function workingRank(studentId){
+  const cur = currentRank(studentId);
+  if(cur === null) return 15;
+  const lower = RANKS.filter(r => r < cur);
+  return lower.length ? Math.max.apply(null, lower) : null;
+}
+function workingRankLabel(studentId){
+  const r = workingRank(studentId);
+  return r === null ? '全部取り終わり' : r + '級に挑戦中';
+}
+/* 手で合格を確定する。自動では上げない */
+function grantRank(studentId, rank){
+  if(hasRank(studentId, rank)) return null;
+  if(!db.gradeHistory) db.gradeHistory = [];
+  const h = { id:newId('gh'), studentId, rank:Number(rank), date:TODAY, teacherId:db.currentTeacherId };
+  db.gradeHistory.push(h);
+  saveDb();
+  return h;
+}
+function revokeRank(studentId, rank){
+  db.gradeHistory = (db.gradeHistory || [])
+    .filter(h => !(h.studentId === studentId && h.rank === Number(rank)));
+  saveDb();
+}
+/* いま挑戦中の級で、まだできていない技 */
+function remainingSkills(studentId){
+  const r = workingRank(studentId);
+  const g = r === null ? null : gradeByRank(r);
+  if(!g) return [];
+  return g.skills.filter(k => !skillCheck(studentId, k.id));
+}
+function skillCheckCount(studentId){
+  return Object.keys((db.skillChecks || {})[studentId] || {}).length;
+}
+function totalSkillCount(){
+  return GRADES.reduce((n,g) => n + g.skills.length, 0);
+}
+/* 級ごとに何人いるか（ダッシュボード用） */
+function rankDistribution(){
+  const out = {};
+  RANKS.forEach(r => out[r] = 0);
+  out.none = 0;
+  db.students.filter(s => s.status === 'active').forEach(s => {
+    const r = currentRank(s.id);
+    if(r === null) out.none++; else out[r]++;
+  });
+  return out;
+}
+
+
+/* ================= 所見メモの一括コピー ================= */
+function notesInRange(studentId, from, to){
+  return notesOfStudent(studentId)
+    .filter(n => (!from || n.date >= from) && (!to || n.date <= to))
+    .slice().sort((a,b) => a.date.localeCompare(b.date));   // 読み物として古い順
+}
+function notesToText(studentId, from, to){
+  const s = studentById(studentId);
+  const list = notesInRange(studentId, from, to);
+  const head = `${s ? s.name : ''} の所見メモ`;
+  const who = s ? `${gradeLabel(s.birth)}・${age(s.birth)}さい・${currentRankLabel(s.id)}` : '';
+  const period = `期間：${from ? fullDate(from) : 'はじめから'} 〜 ${to ? fullDate(to) : fullDate(TODAY)}`;
+  const body = list.map(n => `${fullDate(n.date)}（${noteWriter(n)}）\n${n.body}`).join('\n\n');
+  return [head, who, period, `${list.length}件`, '', body].join('\n');
+}
+function copyText(text){
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    let ok = false;
+    try{ ok = document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    return ok;
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => fallback());
+  }
+  return Promise.resolve(fallback());
+}
+
+
+/* ================= AI分析の貼り付け欄 ================= */
+function aiNotesOf(studentId){
+  return (db.aiNotes || []).filter(n => n.studentId === studentId)
+    .slice().sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+}
+function addAiNote({ studentId, body, images }){
+  if(!db.aiNotes) db.aiNotes = [];
+  const n = { id:newId('ai'), studentId, date:TODAY, teacherId:db.currentTeacherId,
+              body:(body || '').trim(), images:(images || []).slice() };
+  db.aiNotes.push(n);
+  if(!saveDb()){ db.aiNotes = db.aiNotes.filter(x => x.id !== n.id); return null; }
+  return n;
+}
+function deleteAiNote(id){
+  db.aiNotes = (db.aiNotes || []).filter(x => x.id !== id);
+  saveDb();
+}
+/* 画像は縮めてから入れる。端末の保存枠が小さいので */
+function shrinkImage(file, maxPx, cb){
+  const fr = new FileReader();
+  fr.onerror = () => cb(null);
+  fr.onload = () => {
+    const img = new Image();
+    img.onerror = () => cb(null);
+    img.onload = () => {
+      const sc = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * sc));
+      const h = Math.max(1, Math.round(img.height * sc));
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      try{ cb(cv.toDataURL('image/jpeg', 0.72)); }catch(e){ cb(null); }
+    };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+
+/* ================= マニュアル（新人研修用） ================= */
+function manualPages(){ return db.manual || []; }
+function manualPageById(id){ return (db.manual || []).find(p => p.id === id); }
+function addManualPage(title){
+  if(!db.manual) db.manual = [];
+  const p = { id:newId('mn'), title:title || '新しいページ', body:'', images:[] };
+  db.manual.push(p); saveDb(); return p;
+}
+function updateManualPage(id, data){
+  const p = manualPageById(id);
+  if(p){ Object.assign(p, data); saveDb(); }
+  return p;
+}
+function deleteManualPage(id){
+  db.manual = (db.manual || []).filter(p => p.id !== id);
+  saveDb();
+}
+function moveManualPage(id, dir){
+  const list = db.manual || [];
+  const i = list.findIndex(p => p.id === id);
+  const j = i + dir;
+  if(i < 0 || j < 0 || j >= list.length) return;
+  const t = list[i]; list[i] = list[j]; list[j] = t;
+  saveDb();
+}
+
+
+/* ================= 先生 ================= */
+function updateTeacher(id, data){
+  const t = teacherById(id);
+  if(t){ Object.assign(t, data); saveDb(); }
+  return t;
+}
+function slotsOfTeacher(id){
+  return sortedSlots().filter(sl => sl.teacherIds.includes(id));
+}
+function studentCountOfTeacher(id){
+  return slotsOfTeacher(id).reduce((n, sl) => n + studentsOfSlot(sl.id).length, 0);
+}
 
 </script>
 <script>
@@ -821,6 +1244,8 @@ function go(id){
   if(id === 's5'){ renderFilterBar(); renderSortBar(); renderStudents(); }
   if(id === 's8') renderSettings();
   if(id === 's11'){ renderNoteBars(); renderNotes(); }
+  if(id === 's13'){ renderBadgeSeg(); renderBadge(); }
+  if(id === 's15') renderAi();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   el.classList.add('on');
   const tab = el.dataset.tab;
@@ -1073,6 +1498,7 @@ function renderStudents(){
           <div class="rname">${esc(displayName(s))}</div>
           <div class="rmeta">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}さい　${esc(sortKey === 'day' ? slotTimeLabel(sl) : slotFullLabel(sl))}　${esc(teachersLabel(teachersOfStudent(s)))}</div>
         </div>
+        ${currentRank(s.id) !== null ? `<span class="tag">${currentRank(s.id)}級</span>` : ''}
         ${s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : ''}
         <div class="rchev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>`;
       box.appendChild(b);
@@ -1086,26 +1512,46 @@ function renderDetail(){
   if(!s){ go('s5'); return; }
   const sl = slotById(s.slotId);
   const ns = notesOfStudent(s.id);
+  const ais = aiNotesOf(s.id);
+  const w = workingRank(s.id);
+  const wp = w === null ? null : rankProgress(s.id, w);
+  const rest = remainingSkills(s.id);
   document.getElementById('detail').innerHTML = `
     <div class="name-big">${esc(s.name)}</div>
     <div class="name-sub">${esc(slotFullLabel(sl))}　担当 ${esc(teachersLabel(teachersOfStudent(s)))}</div>
     <div class="chips">
+      <span class="chip on">${esc(currentRankLabel(s.id))}</span>
       <span class="chip on">${esc(gradeLabel(s.birth))}</span>
       <span class="chip on">${esc(age(s.birth))}さい</span>
       <span class="chip">${STATUS_LABEL[s.status]}</span>
     </div>
 
+    <button class="card" style="margin-top:16px;" onclick="openBadge()">
+      <div>
+        <div class="ctime">${esc(currentRankLabel(s.id))}</div>
+        <div class="cteacher">${esc(workingRankLabel(s.id))}${rest.length ? '　のこり ' + esc(rest.map(k => k.name).join('・')) : ''}</div>
+        ${wp && wp.total ? `<div class="bar" style="width:140px;"><i style="width:${Math.round(wp.done / wp.total * 100)}%"></i></div>` : ''}
+      </div>
+      <div class="count">
+        <div><span class="n">${wp ? wp.done : 0}</span><span class="d">/${wp ? wp.total : 0}</span></div>
+        <div class="lbl">技</div>
+      </div>
+    </button>
+
     <div class="panel">
       <div class="ptitle">ほごしゃ れんらくさき</div>
       <div class="kv"><span class="k">お名前</span><span class="v">${esc(s.guardian) || '—'}</span></div>
       <div class="kv"><span class="k">電話</span><span class="v phone-num">${esc(s.phone) || '—'}</span></div>
+      ${s.guardianNote ? `<div class="kv" style="display:block;">
+        <div class="k">備考</div>
+        <div class="note-body" style="margin-top:6px;">${esc(s.guardianNote)}</div></div>` : ''}
       ${s.phone ? `<a class="btn" style="margin-top:16px;" href="tel:${esc(s.phone.replace(/-/g,''))}">
         <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
         電話をかける</a>` : ''}
     </div>
 
     <div class="panel" style="padding-bottom:12px;">
-      <div class="ptitle">この子のメモ（${ns.length}）</div>
+      <div class="ptitle">所見メモ（${ns.length}）</div>
       ${ns.length ? ns.map(n => `
         <button class="note-card" style="box-shadow:none;border:none;border-top:0.5px solid rgba(28,25,23,0.08);border-radius:0;padding:14px 0;margin:0;" onclick="openNoteForm({noteId:'${n.id}'})">
           <div class="note-head">
@@ -1116,16 +1562,33 @@ function renderDetail(){
         </button>`).join('')
         : '<div class="fhint" style="padding-bottom:8px;">まだありません。授業の画面から書けます</div>'}
       <button class="btn btn-sec" style="margin-top:12px;" onclick="openNoteForm({kind:'student',studentId:'${s.id}'})">この子のメモを書く</button>
+      ${ns.length ? `<button class="btn btn-sec" style="margin-top:8px;" onclick="openCopy()">期間を決めてまとめてコピー</button>` : ''}
     </div>
+
+    <button class="card" onclick="go('s15')">
+      <div>
+        <div class="ctime" style="font-size:16px;">AI分析の貼り付け</div>
+        <div class="cteacher">${ais.length ? ais.length + '件　最新 ' + esc(fullDate(ais[0].date)) : 'まだありません'}</div>
+      </div>
+      <div class="rchev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+    </button>
 
     <div class="panel">
       <div class="ptitle">きほん じょうほう</div>
-      <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth ? esc(s.birth.replace(/-/g,'/')) : '—'}</span></div>
+      <div class="kv"><span class="k">正しい氏名</span><span class="v">${esc(s.fullName) || '—'}</span></div>
+      <div class="kv"><span class="k">ひらがな名</span><span class="v">${esc(s.name)}</span></div>
+      <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth ? esc(fullDate(s.birth)) : '—'}</span></div>
       <div class="kv"><span class="k">学年</span><span class="v">${esc(gradeLabel(s.birth))}</span></div>
       <div class="kv"><span class="k">年齢</span><span class="v">${esc(age(s.birth))}さい</span></div>
       <div class="kv"><span class="k">通っている枠</span><span class="v">${esc(slotFullLabel(sl))}</span></div>
-      <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? esc(s.joined.replace(/-/g,'/')) : 'まだ（体験）'}</span></div>
+      <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? esc(fullDate(s.joined)) : 'まだ（体験）'}</span></div>
       <div class="kv"><span class="k">在籍</span><span class="v">${STATUS_LABEL[s.status]}</span></div>
+    </div>
+
+    <div class="panel" style="border-style:dashed;box-shadow:none;">
+      <div class="ptitle">言い換えメモ（あとで作る）</div>
+      <div class="fhint">所見メモをそのまま保護者に見せられる言い方に直したものを、ここに置く予定。
+      いまは場所だけ取っている。所見メモとは別の欄にしてあるので、後から足しても既に書いたメモは動かない。</div>
     </div>`;
 }
 
@@ -1134,7 +1597,8 @@ function openStudentForm(id){
   editingStudent = id;
   const s = id ? studentById(id) : null;
   formDraft = s ? Object.assign({}, s)
-                : { name:'', birth:'', slotId:(db.slots[0] || {}).id || '', guardian:'', phone:'', status:'trial', joined:'' };
+                : { name:'', fullName:'', birth:'', slotId:(db.slots[0] || {}).id || '',
+                    guardian:'', phone:'', guardianNote:'', status:'trial', joined:'' };
   document.getElementById('s7title').textContent = s ? '生徒を編集' : '生徒を追加';
   renderStudentForm();
   go('s7');
@@ -1150,7 +1614,12 @@ function renderStudentForm(){
     <div class="field">
       <div class="flabel">なまえ（ひらがな・下の名前だけ）</div>
       <input type="text" id="f_name" value="${esc(formDraft.name)}" placeholder="れい：ゆうき" autocomplete="off">
-      <div class="fhint">苗字は入れません。同じ名前の子がいると、自動で曜日と時間が後ろに付きます</div>
+      <div class="fhint">画面に出るのはこの名前です。同じ名前の子がいると、自動で曜日と時間が後ろに付きます</div>
+    </div>
+    <div class="field">
+      <div class="flabel">正しい氏名（漢字・苗字あり）</div>
+      <input type="text" id="f_full" value="${esc(formDraft.fullName || '')}" placeholder="れい：佐藤　ゆうき" autocomplete="off">
+      <div class="fhint">書類や保護者への連絡で使う名前。授業中の画面には出しません</div>
     </div>
     <div class="field">
       <div class="flabel">生年月日</div>
@@ -1169,6 +1638,11 @@ function renderStudentForm(){
       <div class="flabel">保護者の電話</div>
       <input type="tel" id="f_phone" value="${esc(formDraft.phone)}" placeholder="090-0000-0000" autocomplete="off">
       <div class="fhint">けがのときにここから直接かけられます</div>
+    </div>
+    <div class="field">
+      <div class="flabel">保護者の備考</div>
+      <textarea id="f_gnote" style="min-height:90px;" placeholder="れい：下の子を連れて来ることが多い。迎えは18時前後">${esc(formDraft.guardianNote || '')}</textarea>
+      <div class="fhint">送り迎え・きょうだい・連絡のくせなど。先生だけが見ます</div>
     </div>
     <div class="row2">
       <div class="field">
@@ -1196,10 +1670,12 @@ function saveStudentForm(){
   if(!name){ toast('なまえを入れてください'); return; }
   const data = {
     name,
+    fullName: document.getElementById('f_full').value.trim(),
     birth: document.getElementById('f_birth').value,
     slotId: document.getElementById('f_slot').value,
     guardian: document.getElementById('f_guardian').value.trim(),
     phone: document.getElementById('f_phone').value.trim(),
+    guardianNote: document.getElementById('f_gnote').value.trim(),
     status: document.getElementById('f_status').value,
     joined: document.getElementById('f_joined').value,
   };
@@ -1228,6 +1704,10 @@ function deleteStudent(){
     delete rec.present[s.id];
     rec.extra = rec.extra.filter(e => e.id !== s.id);
   }));
+  delete (db.skillChecks || {})[s.id];
+  db.gradeHistory = (db.gradeHistory || []).filter(h => h.studentId !== s.id);
+  db.aiNotes = (db.aiNotes || []).filter(n => n.studentId !== s.id);
+  db.notes = (db.notes || []).filter(n => !(n.kind === 'student' && n.studentId === s.id));
   saveDb(); go('s5'); toast(s.name + ' を消しました');
 }
 
@@ -1675,6 +2155,273 @@ function renderNotes(){
       el.appendChild(b);
     });
   });
+}
+
+/* ================= バッジテスト ================= */
+let badgeOpen = {};
+let badgeView = 'work';
+
+function openBadge(){
+  const s = studentById(curStudent);
+  if(!s) return;
+  const w = workingRank(s.id);
+  badgeOpen = {};
+  if(w !== null) badgeOpen[w] = true;
+  badgeView = 'work';
+  go('s13');
+}
+function renderBadgeSeg(){
+  const bar = document.getElementById('badgeSeg');
+  bar.innerHTML = '';
+  [{k:'work',l:'挑戦中'},{k:'passed',l:'合格した級'},{k:'all',l:'ぜんぶ'}].forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'seg' + (o.k === badgeView ? ' on' : '');
+    b.textContent = o.l;
+    b.onclick = () => { badgeView = o.k; renderBadgeSeg(); renderBadge(); };
+    bar.appendChild(b);
+  });
+}
+function renderBadge(){
+  const s = studentById(curStudent);
+  if(!s){ go('s5'); return; }
+  const w = workingRank(s.id);
+  document.getElementById('s13name').textContent = s.name + ' のバッジ';
+  document.getElementById('s13sub').textContent =
+    `${currentRankLabel(s.id)}　${workingRankLabel(s.id)}　技 ${skillCheckCount(s.id)}/${totalSkillCount()}`;
+
+  let ranks;
+  if(badgeView === 'work')        ranks = w === null ? [] : [w];
+  else if(badgeView === 'passed') ranks = RANKS.filter(r => hasRank(s.id, r)).sort((a,b) => a - b);
+  else                            ranks = RANKS.slice();
+
+  const el = document.getElementById('badgeBody');
+  el.innerHTML = '';
+
+  if(!ranks.length){
+    el.innerHTML = badgeView === 'passed'
+      ? '<div class="empty">まだ1つも合格していません<br>「挑戦中」から技をチェックできます</div>'
+      : '<div class="empty">2級まで全部取り終わりました</div>';
+  }
+
+  ranks.forEach(r => {
+    const g = gradeByRank(r);
+    const p = rankProgress(s.id, r);
+    const rec = rankRecord(s.id, r);
+    const open = !!badgeOpen[r];
+    const stat = rec ? `<span class="rankstat pass">合格 ${esc(fullDate(rec.date))}</span>`
+               : (r === w ? '<span class="rankstat now">挑戦中</span>'
+                          : '<span class="rankstat">まだ</span>');
+    const card = document.createElement('div');
+    card.className = 'rankcard';
+    card.innerHTML = `
+      <button class="rankhead" onclick="toggleRank(${r})">
+        <div>
+          <div class="ranknum">${r}級</div>
+          <div class="rankmeta">${g.skills.length
+            ? `技 ${p.done}/${p.total}${rec ? '　' + esc(noteWriter(rec)) + ' が確定' : ''}`
+            : '技はまだ決まっていません'}</div>
+          ${g.skills.length ? `<div class="bar" style="max-width:180px;"><i style="width:${Math.round(p.done / p.total * 100)}%"></i></div>` : ''}
+        </div>
+        ${stat}
+      </button>
+      ${open ? `<div class="rankbody">
+        ${g.skills.length ? g.skills.map(k => {
+          const c = skillCheck(s.id, k.id);
+          return `<button class="srow ${c ? 'on' : ''}" onclick="tapSkill('${k.id}')">
+            <span class="sbox"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span class="stext">${esc(k.name)}
+              ${c ? `<span class="smeta">${esc(fullDate(c.date))}　${esc(teacherById(c.teacherId) ? teacherById(c.teacherId).name : '退職した先生')}</span>` : ''}
+            </span>
+          </button>`;
+        }).join('') : '<div class="fhint" style="padding:12px 0;">この級の技が決まったら、ここに出ます</div>'}
+        <div class="rankbtns">
+          ${rec
+            ? `<button class="btn btn-danger" onclick="tapRevoke(${r})">${r}級の合格を取り消す</button>`
+            : `<button class="btn" onclick="tapGrant(${r})">${r}級の合格を確定する</button>
+               <div class="fhint">${p.ready ? '技は全部できています' : '技が残っていても、先生の判断で確定できます'}</div>`}
+        </div>
+      </div>` : ''}`;
+    el.appendChild(card);
+  });
+
+  // 級位履歴
+  const hist = gradeHistoryOf(s.id);
+  const h = document.createElement('div');
+  h.className = 'panel';
+  h.style.marginTop = '24px';
+  h.innerHTML = `<div class="ptitle">級位履歴（${hist.length}）</div>
+    ${hist.length ? hist.slice().reverse().map(x => `
+      <div class="kv"><span class="k">${esc(fullDate(x.date))}</span>
+        <span class="v">${x.rank}級　${esc(noteWriter(x))}</span></div>`).join('')
+      : '<div class="fhint">まだありません</div>'}`;
+  el.appendChild(h);
+}
+function toggleRank(r){
+  badgeOpen[r] = !badgeOpen[r];
+  renderBadge();
+}
+function tapSkill(skillId){
+  const s = studentById(curStudent);
+  if(!s) return;
+  const on = toggleSkill(s.id, skillId);
+  const k = skillById(skillId);
+  renderBadge();
+  if(on){
+    const p = rankProgress(s.id, k.rank);
+    toast(p.ready && !hasRank(s.id, k.rank)
+      ? `${k.rank}級の技がそろいました。合格は下のボタンで確定します`
+      : `${k.name} をチェックしました`);
+  }else{
+    toast(`${k.name} のチェックを外しました`);
+  }
+}
+function tapGrant(r){
+  const s = studentById(curStudent);
+  if(!s) return;
+  const p = rankProgress(s.id, r);
+  const msg = p.total && !p.ready
+    ? `${r}級は技が ${p.done}/${p.total} です。それでも合格にしますか。`
+    : `${s.name} を ${r}級 の合格にします。よろしいですか。`;
+  if(!confirm(msg)) return;
+  grantRank(s.id, r);
+  badgeOpen[r] = true;
+  const nw = workingRank(s.id);
+  if(nw !== null) badgeOpen[nw] = true;
+  renderBadge();
+  toast(`${s.name} は ${r}級 になりました`);
+}
+function tapRevoke(r){
+  const s = studentById(curStudent);
+  if(!s) return;
+  if(!confirm(`${r}級 の合格を取り消しますか。技のチェックは残ります。`)) return;
+  revokeRank(s.id, r);
+  renderBadge();
+  toast(`${r}級 の合格を取り消しました`);
+}
+
+/* ================= 所見メモの一括コピー ================= */
+let copyFrom = '', copyTo = '';
+
+function openCopy(){
+  const s = studentById(curStudent);
+  if(!s) return;
+  const ns = notesOfStudent(s.id);
+  copyTo = TODAY;
+  copyFrom = ns.length ? ns[ns.length - 1].date : TODAY;   // 一番古いメモの日
+  document.getElementById('s14sub').textContent = s.name + '　所見メモ ' + ns.length + '件';
+  renderCopy();
+  go('s14');
+}
+function renderCopy(){
+  const s = studentById(curStudent);
+  if(!s){ go('s5'); return; }
+  const text = notesToText(s.id, copyFrom, copyTo);
+  const n = notesInRange(s.id, copyFrom, copyTo).length;
+  document.getElementById('copyBody').innerHTML = `
+    <div class="row2">
+      <div class="field">
+        <div class="flabel">いつから</div>
+        <input type="date" id="c_from" value="${esc(copyFrom)}" onchange="copyFrom=this.value;renderCopy();">
+      </div>
+      <div class="field">
+        <div class="flabel">いつまで</div>
+        <input type="date" id="c_to" value="${esc(copyTo)}" onchange="copyTo=this.value;renderCopy();">
+      </div>
+    </div>
+    <div class="toggles" style="margin-bottom:16px;">
+      <button class="tog" onclick="setCopyRange(1)">この1か月</button>
+      <button class="tog" onclick="setCopyRange(3)">3か月</button>
+      <button class="tog" onclick="setCopyRange(0)">ぜんぶ</button>
+    </div>
+    <div class="flabel">この内容がコピーされます（${n}件）</div>
+    <div class="copybox">${esc(text)}</div>
+    <div class="fhint">AIに渡して分析させる時や、引き継ぎに貼る時に使います。名前と日付と書いた先生も一緒に入ります</div>`;
+}
+function setCopyRange(months){
+  const s = studentById(curStudent);
+  const ns = notesOfStudent(s.id);
+  copyTo = TODAY;
+  if(months === 0){
+    copyFrom = ns.length ? ns[ns.length - 1].date : TODAY;
+  }else{
+    const d = new Date(TODAY + 'T00:00:00+09:00');
+    d.setMonth(d.getMonth() - months);
+    const p = x => String(x).padStart(2,'0');
+    copyFrom = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+  renderCopy();
+}
+function doCopy(){
+  const s = studentById(curStudent);
+  if(!s) return;
+  const n = notesInRange(s.id, copyFrom, copyTo).length;
+  if(!n){ toast('その期間にはメモがありません'); return; }
+  copyText(notesToText(s.id, copyFrom, copyTo)).then(ok => {
+    toast(ok ? `${n}件をコピーしました。貼り付けてください` : 'コピーできませんでした。上の枠を長押しして選んでください');
+  });
+}
+
+/* ================= AI分析の貼り付け ================= */
+let aiImages = [];
+
+function renderAi(){
+  const s = studentById(curStudent);
+  if(!s){ go('s5'); return; }
+  const list = aiNotesOf(s.id);
+  document.getElementById('s15sub').textContent = s.name + '　' + list.length + '件';
+  document.getElementById('aiBody').innerHTML = `
+    <div class="panel">
+      <div class="ptitle">貼り付ける</div>
+      <textarea id="ai_body" placeholder="AIにまとめさせた結果をここに貼る"></textarea>
+      <div class="aiimgs" id="ai_prev">${aiImages.map(d => `<img src="${d}" alt="">`).join('')}</div>
+      <button class="filebtn" style="margin-top:12px;" onclick="document.getElementById('ai_file').click()">
+        画像を選ぶ${aiImages.length ? `（${aiImages.length}枚）` : ''}</button>
+      <input type="file" id="ai_file" accept="image/*" multiple style="display:none" onchange="pickAiImages(this)">
+      <button class="btn" style="margin-top:12px;" onclick="saveAi()">保存する</button>
+      <div class="fhint">画像は小さくしてから入れます。この端末の中だけに残ります</div>
+    </div>
+    ${list.map(n => `
+      <div class="panel">
+        <div class="ptitle">${esc(fullDate(n.date))}　${esc(noteWriter(n))}</div>
+        ${n.body ? `<div class="note-body">${esc(n.body)}</div>` : ''}
+        ${(n.images || []).length ? `<div class="aiimgs">${n.images.map(d => `<img src="${d}" alt="">`).join('')}</div>` : ''}
+        <button class="btn btn-danger" style="margin-top:14px;" onclick="removeAi('${n.id}')">これを消す</button>
+      </div>`).join('')}
+    ${list.length ? '' : '<div class="empty">まだありません</div>'}`;
+}
+function pickAiImages(input){
+  const files = Array.prototype.slice.call(input.files || []);
+  input.value = '';
+  if(!files.length) return;
+  let left = files.length;
+  files.forEach(f => {
+    shrinkImage(f, 1000, d => {
+      if(d) aiImages.push(d);
+      if(--left === 0){
+        const body = (document.getElementById('ai_body') || {}).value || '';
+        renderAi();
+        const t = document.getElementById('ai_body');
+        if(t) t.value = body;
+        toast(aiImages.length + '枚 用意しました');
+      }
+    });
+  });
+}
+function saveAi(){
+  const s = studentById(curStudent);
+  const body = document.getElementById('ai_body').value;
+  if(!body.trim() && !aiImages.length){ toast('文章か画像を入れてください'); return; }
+  const n = addAiNote({ studentId:s.id, body, images:aiImages });
+  if(!n){ toast('端末の保存枠がいっぱいです。画像を減らしてください'); return; }
+  aiImages = [];
+  renderAi();
+  toast('保存しました');
+}
+function removeAi(id){
+  if(!confirm('これを消しますか。')) return;
+  deleteAiNote(id);
+  renderAi();
+  toast('消しました');
 }
 
 /* ================= 共通 ================= */
