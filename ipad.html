@@ -10,6 +10,7 @@
     --border:#E3E8EB; --text:#16181A; --text2:#5A6672; --text3:#A6B0B9;
     --primary:#0EA5E9; --primary-hover:#0284C7; --primary-soft:#E0F2FE; --primary-deep:#075985;
     --danger-deep:#B91C1C;
+    --warn-soft:#FEF3C7; --warn-deep:#92400E;
     --shadow-sm:0 1px 4px rgba(28,25,23,0.05);
   }
   *{box-sizing:border-box;}
@@ -79,6 +80,8 @@
     font-size:11px;font-weight:500;letter-spacing:0.06em;padding:2px 8px;border-radius:4px;
     background:var(--surface-active);color:var(--text2);white-space:nowrap;flex:none;
   }
+  .tag.warn{background:var(--warn-soft);color:var(--warn-deep);}
+  .isub{color:var(--text3);}
   .empty{padding:32px 12px;text-align:center;font-size:14px;color:var(--text3);line-height:1.8;}
 
   .detail{flex:1;overflow-y:auto;padding:40px;background:var(--bg);}
@@ -90,6 +93,7 @@
   .chip{font-size:11px;font-weight:500;letter-spacing:0.06em;padding:4px 8px;border-radius:4px;
     background:var(--surface-active);color:var(--text2);}
   .chip.on{background:var(--primary-soft);color:var(--primary-deep);}
+  .chip.warn{background:var(--warn-soft);color:var(--warn-deep);}
   .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:24px;}
   @media (max-width:1100px){ .cols{grid-template-columns:1fr;} }
   .panel{
@@ -155,9 +159,10 @@
   .rankrow:first-child{border-top:none;}
   .rankno{width:78px;flex:none;}
   .ranknum{font-size:16px;font-weight:600;letter-spacing:0.02em;line-height:1.3;}
-  .rankrow.pass .ranknum{color:var(--primary-deep);}
+  /* 合格ずみ＝終わったこと。静かにする */
+  .rankrow.done .ranknum{font-weight:400;color:var(--text2);}
   .rankstate{font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:0.02em;}
-  .rankrow.now .rankstate{color:#92400E;font-weight:500;}
+  .rankrow.ready .rankstate{color:var(--warn-deep);font-weight:500;}
   .rankskills{flex:1;display:flex;flex-wrap:wrap;gap:6px;min-width:0;}
   .skillchip{
     display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:4px;
@@ -176,7 +181,8 @@
     letter-spacing:0.02em;white-space:nowrap;transition:background 120ms,border-color 120ms,color 120ms;
   }
   .minibtn:hover{background:var(--surface-hover);}
-  .minibtn.ready{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-soft);}
+  .minibtn.strong{border-color:transparent;color:#fff;background:var(--primary);}
+  .minibtn.strong:hover{background:var(--primary-hover);}
 
   /* AI分析・コピー */
   .aiimgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
@@ -314,7 +320,7 @@
       <div id="slotbar" class="segrow"></div>
       <div id="sortbar" class="segrow"></div>
       <div id="filterbar" class="filterbar"></div>
-      <input class="search" id="q" type="text" placeholder="なまえ（ひらがな）で検索" oninput="renderList()" autocomplete="off">
+      <input class="search" id="q" type="text" placeholder="名前（ひらがな）で検索" oninput="renderList()" autocomplete="off">
     </div>
     <div class="listbody" id="listBody"></div>
   </section>
@@ -643,7 +649,7 @@ function currentTeacher(){ return teacherById(db.currentTeacherId) || db.teacher
 /* ---- フォルダ分け ---- */
 function filterList(){
   return [
-    { key:'all',   label:'ぜんいん' },
+    { key:'all',   label:'全員' },
     { key:'mine',  label:'自分の担当' },
     { key:'trial', label:'体験' },
   ].concat(db.teachers.map(t => ({ key:'t:' + t.id, label:t.name })));
@@ -833,7 +839,7 @@ function notesToText(studentId, from, to){
   const s = studentById(studentId);
   const list = notesInRange(studentId, from, to);
   const head = `${s ? s.name : ''} の所見メモ`;
-  const who = s ? `${gradeLabel(s.birth)}・${age(s.birth)}さい・${currentRankLabel(s.id)}` : '';
+  const who = s ? `${gradeLabel(s.birth)}・${age(s.birth)}歳・${currentRankLabel(s.id)}` : '';
   const period = `期間：${from ? fullDate(from) : 'はじめから'} 〜 ${to ? fullDate(to) : fullDate(TODAY)}`;
   const body = list.map(n => `${fullDate(n.date)}（${noteWriter(n)}）\n${n.body}`).join('\n\n');
   return [head, who, period, `${list.length}件`, '', body].join('\n');
@@ -1072,7 +1078,7 @@ function renderList(){
       b.onclick = () => { curTeacher = t.id; mode = 'view'; renderList(); renderDetail(); };
       b.innerHTML = `
         <div>
-          <div class="iname">${esc(t.name)}${t.id === db.currentTeacherId ? '（じぶん）' : ''}</div>
+          <div class="iname">${esc(t.name)}${t.id === db.currentTeacherId ? '（自分）' : ''}</div>
           <div class="imeta">${esc(t.role || '講師')}　${esc(t.shift || 'シフト未設定')}</div>
         </div>
         <span class="tag">${slotsOfTeacher(t.id).length}枠</span>`;
@@ -1154,7 +1160,7 @@ function renderList(){
           .forEach(s => push(gradeLabel(s.birth), s));
     }else{
       rows.slice().sort((a,b) => age(a.birth) - age(b.birth) || byName(a,b))
-          .forEach(s => push(age(s.birth) + 'さい', s));
+          .forEach(s => push(age(s.birth) + '歳', s));
     }
     groups.forEach(g => {
       const h = document.createElement('div');
@@ -1174,14 +1180,17 @@ function itemEl(s){
   b.onclick = () => { curStudent = s.id; mode = 'view'; renderList(); renderDetail(); };
   const r = currentRank(s.id);
   const tag = (r !== null ? `<span class="tag">${r}級</span>` : '')
-    + (s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : '');
+    + (s.status !== 'active'
+        ? `<span class="tag ${s.status === 'trial' ? 'warn' : ''}">${STATUS_LABEL[s.status]}</span>` : '');
   const meta = view === 'today'
-    ? `${gradeLabel(s.birth)}・${age(s.birth)}さい`
-    : `${gradeLabel(s.birth)}・${age(s.birth)}さい　${sortKey === 'day' ? slotTimeLabel(sl) : slotFullLabel(sl)}　${teachersLabel(teachersOfStudent(s))}`;
+    ? `${gradeLabel(s.birth)}・${age(s.birth)}歳`
+    : `${gradeLabel(s.birth)}・${age(s.birth)}歳`;
+  const meta2 = view === 'today' ? ''
+    : `${sortKey === 'day' ? slotTimeLabel(sl) : slotFullLabel(sl)}　${teachersLabel(teachersOfStudent(s))}`;
   b.innerHTML = `
     <div>
       <div class="iname">${esc(view === 'today' ? s.name : displayName(s))}</div>
-      <div class="imeta">${esc(meta)}</div>
+      <div class="imeta">${esc(meta)}${meta2 ? `<span class="isub">　${esc(meta2)}</span>` : ''}</div>
     </div>${tag}`;
   return b;
 }
@@ -1219,26 +1228,26 @@ function renderDetail(){
       </div>
       <div class="chips">
         <span class="chip on">${esc(currentRankLabel(s.id))}</span>
-        <span class="chip on">${esc(gradeLabel(s.birth))}</span>
-        <span class="chip on">${esc(age(s.birth))}さい</span>
-        <span class="chip">${STATUS_LABEL[s.status]}</span>
+        <span class="chip">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}歳</span>
+        ${s.status !== 'active'
+          ? `<span class="chip ${s.status === 'trial' ? 'warn' : ''}">${STATUS_LABEL[s.status]}</span>` : ''}
       </div>
 
       <div class="cols">
         <div class="panel">
-          <div class="ptitle">きほん じょうほう</div>
+          <div class="ptitle">基本情報</div>
           <div class="kv"><span class="k">正しい氏名</span><span class="v">${esc(s.fullName) || '—'}</span></div>
           <div class="kv"><span class="k">ひらがな名</span><span class="v">${esc(s.name)}</span></div>
           <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth ? esc(fullDate(s.birth)) : '—'}</span></div>
           <div class="kv"><span class="k">学年</span><span class="v">${esc(gradeLabel(s.birth))}</span></div>
-          <div class="kv"><span class="k">年齢</span><span class="v">${esc(age(s.birth))}さい</span></div>
+          <div class="kv"><span class="k">年齢</span><span class="v">${esc(age(s.birth))}歳</span></div>
           <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? esc(fullDate(s.joined)) : 'まだ（体験）'}</span></div>
           <div class="kv"><span class="k">通っている枠</span><span class="v">${esc(slotFullLabel(sl))}</span></div>
           <div class="kv"><span class="k">担当の先生</span><span class="v">${esc(teachersLabel(teachersOfStudent(s)))}</span></div>
         </div>
         <div class="panel">
-          <div class="ptitle">ほごしゃ れんらくさき</div>
-          <div class="kv"><span class="k">お名前</span><span class="v">${esc(s.guardian) || '—'}</span></div>
+          <div class="ptitle">保護者・連絡先</div>
+          <div class="kv"><span class="k">保護者名</span><span class="v">${esc(s.guardian) || '—'}</span></div>
           <div class="kv"><span class="k">電話</span><span class="v phone-num">${esc(s.phone) || '—'}</span></div>
           <div class="kv"><span class="k">在籍</span><span class="v">${STATUS_LABEL[s.status]}</span></div>
           ${s.guardianNote ? `<div class="kv" style="display:block;">
@@ -1302,10 +1311,11 @@ function badgePanel(s){
         const p = rankProgress(s.id, r);
         const rec = rankRecord(s.id, r);
         return `
-        <div class="rankrow ${rec ? 'pass' : (r === w ? 'now' : '')}">
+        <div class="rankrow ${rec ? 'done' : (p.ready ? 'ready' : '')}">
           <div class="rankno">
             <div class="ranknum">${r}級</div>
-            <div class="rankstate">${rec ? '合格 ' + esc(fullDate(rec.date)) : (r === w ? '挑戦中' : 'まだ')}</div>
+            <div class="rankstate">${rec ? '合格 ' + esc(fullDate(rec.date))
+              : (p.ready ? '合格を出せます' : (r === w ? '挑戦中' : 'まだ'))}</div>
           </div>
           <div class="rankskills">
             ${g.skills.length ? g.skills.map(k => {
@@ -1317,7 +1327,7 @@ function badgePanel(s){
           </div>
           <div class="rankact">
             ${rec ? `<button class="minibtn" onclick="tapRevoke(${r})">取り消す</button>`
-                  : `<button class="minibtn ${p.ready ? 'ready' : ''}" onclick="tapGrant(${r})">合格にする</button>`}
+                  : `<button class="minibtn ${p.ready ? 'strong' : ''}" onclick="tapGrant(${r})">合格にする</button>`}
           </div>
         </div>`;
       }).join('')}
@@ -1369,18 +1379,18 @@ function copyPanel(s){
       <div class="ptitle">所見メモをまとめてコピー</div>
       <div class="row2">
         <div class="field">
-          <div class="flabel">いつから</div>
+          <div class="flabel">開始日</div>
           <input type="date" id="c_from" value="${esc(copyFrom)}" onchange="copyFrom=this.value;renderCopyPreview();">
         </div>
         <div class="field">
-          <div class="flabel">いつまで</div>
+          <div class="flabel">終了日</div>
           <input type="date" id="c_to" value="${esc(copyTo)}" onchange="copyTo=this.value;renderCopyPreview();">
         </div>
       </div>
       <div class="toggles">
         <button class="tog" onclick="setCopyRange(1)">この1か月</button>
         <button class="tog" onclick="setCopyRange(3)">3か月</button>
-        <button class="tog" onclick="setCopyRange(0)">ぜんぶ</button>
+        <button class="tog" onclick="setCopyRange(0)">すべて</button>
       </div>
       <div class="copybox" id="copyPreview"></div>
       <div class="btnrow" style="margin-top:12px;">
@@ -1507,7 +1517,7 @@ function renderStudentForm(){
       <div class="cols">
         <div class="panel">
           <div class="field">
-            <div class="flabel">なまえ（ひらがな・下の名前だけ）</div>
+            <div class="flabel">名前（ひらがな・下の名前だけ）</div>
             <input type="text" id="f_name" value="${esc(formDraft.name)}" placeholder="れい：ゆうき" autocomplete="off">
             <div class="fhint">画面に出るのはこの名前。同じ名前の子がいると自動で曜日と時間が付きます</div>
           </div>
@@ -1528,7 +1538,7 @@ function renderStudentForm(){
         </div>
         <div class="panel">
           <div class="field">
-            <div class="flabel">保護者のお名前</div>
+            <div class="flabel">保護者の保護者名</div>
             <input type="text" id="f_guardian" value="${esc(formDraft.guardian)}" autocomplete="off">
           </div>
           <div class="field">
@@ -1562,13 +1572,13 @@ function renderStudentForm(){
   const upd = () => {
     const v = bi.value;
     document.getElementById('f_gradehint').textContent =
-      v ? `いまは ${gradeLabel(v)}・${age(v)}さい` : '入れると学年と年齢が自動で出ます';
+      v ? `いまは ${gradeLabel(v)}・${age(v)}歳` : '入れると学年と年齢が自動で出ます';
   };
   bi.oninput = upd; upd();
 }
 function saveStudentForm(){
   const name = document.getElementById('f_name').value.trim();
-  if(!name){ alert('なまえを入れてください'); return; }
+  if(!name){ alert('名前を入れてください'); return; }
   const data = {
     name,
     fullName: document.getElementById('f_full').value.trim(),
@@ -1618,7 +1628,7 @@ function renderSlotDetail(){
     el.innerHTML = `<div class="blank">左から時間帯を選ぶと<br>ここに出ます</div>
       <div class="dwrap"><div class="panel" style="margin-top:24px;">
         <div class="ptitle">先生（${db.teachers.length}）</div>
-        ${db.teachers.map(t => `<div class="kv"><span class="k">${esc(t.name)}${t.id === db.currentTeacherId ? '（じぶん）' : ''}</span>
+        ${db.teachers.map(t => `<div class="kv"><span class="k">${esc(t.name)}${t.id === db.currentTeacherId ? '（自分）' : ''}</span>
           <span class="v">${db.slots.filter(x => x.teacherIds.includes(t.id)).length}つ担当</span></div>`).join('')}
         <div class="btnrow"><button class="btn btn-sec" onclick="setView('teachers')">先生の登録・編集へ</button></div>
       </div></div>`;
@@ -1638,7 +1648,7 @@ function renderSlotDetail(){
         <div class="ptitle">この時間帯の子</div>
         ${kids.length ? kids.map(s => `<div class="kv">
             <span class="k">${esc(displayName(s))}</span>
-            <span class="v">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}さい</span></div>`).join('')
+            <span class="v">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}歳</span></div>`).join('')
           : '<div class="fhint">まだいません</div>'}
       </div>
     </div>`;
@@ -1667,11 +1677,11 @@ function renderSlotForm(){
         </div>
         <div class="row2">
           <div class="field">
-            <div class="flabel">はじまり</div>
+            <div class="flabel">開始</div>
             <input type="time" id="g_start" value="${esc(formDraft.start)}">
           </div>
           <div class="field">
-            <div class="flabel">おわり</div>
+            <div class="flabel">終了</div>
             <input type="time" id="g_end" value="${esc(formDraft.end)}">
           </div>
         </div>
@@ -1777,8 +1787,8 @@ function renderDash(){
         <div class="stat"><div class="statn">${here}<span class="unit">/${all}</span></div><div class="statl">今日の出席（${slots.length}枠）</div></div>
       </div>
       <div class="statgrid">
-        <div class="stat"><div class="statn">${monthNotes.length}<span class="unit">件</span></div><div class="statl">今月の所見メモ<br>ぜんぶで ${(db.notes || []).length}件</div></div>
-        <div class="stat"><div class="statn">${thisMonthPass.length}<span class="unit">件</span></div><div class="statl">今月の合格<br>ぜんぶで ${(db.gradeHistory || []).length}件</div></div>
+        <div class="stat"><div class="statn">${monthNotes.length}<span class="unit">件</span></div><div class="statl">今月の所見メモ<br>全部で ${(db.notes || []).length}件</div></div>
+        <div class="stat"><div class="statn">${thisMonthPass.length}<span class="unit">件</span></div><div class="statl">今月の合格<br>全部で ${(db.gradeHistory || []).length}件</div></div>
         <div class="stat"><div class="statn">${checks}<span class="unit">個</span></div><div class="statl">チェック済みの技<br>1人あたり ${act.length ? (checks / db.students.length).toFixed(1) : 0}個</div></div>
         <div class="stat"><div class="statn">${db.slots.length}<span class="unit">枠</span></div><div class="statl">時間帯<br>先生 ${db.teachers.length}人</div></div>
       </div>
@@ -1896,7 +1906,7 @@ function renderTeacherDetail(){
       <div class="cols">
         <div class="panel">
           <div class="ptitle">共有情報（先生みんなが見る）</div>
-          <div class="kv"><span class="k">なまえ</span><span class="v">${esc(t.name)}</span></div>
+          <div class="kv"><span class="k">名前</span><span class="v">${esc(t.name)}</span></div>
           <div class="kv"><span class="k">役割</span><span class="v">${esc(t.role) || '—'}</span></div>
           <div class="kv"><span class="k">電話</span><span class="v">${esc(t.phone) || '—'}</span></div>
           <div class="kv"><span class="k">メール</span><span class="v">${esc(t.mail) || '—'}</span></div>
@@ -1964,7 +1974,7 @@ function renderTeacherForm(){
         <div class="panel">
           <div class="ptitle">共有情報</div>
           <div class="field">
-            <div class="flabel">なまえ</div>
+            <div class="flabel">名前</div>
             <input type="text" id="t_name" value="${esc(formDraft.name)}" placeholder="れい：ゆか先生" autocomplete="off">
           </div>
           <div class="field">
@@ -2012,7 +2022,7 @@ function renderTeacherForm(){
 }
 function saveTeacherForm(){
   const name = document.getElementById('t_name').value.trim();
-  if(!name){ alert('なまえを入れてください'); return; }
+  if(!name){ alert('名前を入れてください'); return; }
   const data = {
     name,
     role: document.getElementById('t_role').value.trim(),

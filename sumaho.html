@@ -11,6 +11,7 @@
     --border:#E3E8EB; --text:#16181A; --text2:#5A6672; --text3:#A6B0B9;
     --primary:#0EA5E9; --primary-hover:#0284C7; --primary-soft:#E0F2FE; --primary-deep:#075985;
     --danger:#DC2626; --danger-deep:#B91C1C;
+    --warn-soft:#FEF3C7; --warn-deep:#92400E;
     --shadow-sm:0 1px 4px rgba(28,25,23,0.05);
     --shadow-lg:0 8px 24px rgba(28,25,23,0.12), 0 2px 6px rgba(28,25,23,0.06);
   }
@@ -90,27 +91,30 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .tedit{font-size:12px;font-weight:500;color:var(--primary);letter-spacing:0.02em;white-space:nowrap;flex:none;}
 
-  /* 出席タイル */
+  /* 出席タイル
+     来ている＝ふつうの状態なので静かにする。目立たせるのは来ていない子と体験の子 */
   .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
   .tile{
     position:relative;min-height:60px;border-radius:8px;
-    background:var(--surface);border:1.5px solid var(--primary);color:var(--text);
+    background:var(--surface);border:1px solid var(--border);color:var(--text);
     font-family:inherit;font-size:14px;font-weight:400;letter-spacing:0.01em;line-height:1.5;
-    cursor:pointer;padding:11.5px 31.5px 11.5px 11.5px;text-align:left;
+    cursor:pointer;padding:12px;text-align:left;
     transition:background 120ms cubic-bezier(.2,0,0,1),border-color 120ms,color 120ms;
   }
   .tile:active{transform:scale(0.98);}
-  .tile.absent{background:var(--surface-hover);border:1px solid var(--border);color:var(--text3);padding:12px 32px 12px 12px;}
+  .tile.absent{background:var(--surface-active);border-color:transparent;color:var(--text3);}
+  .tile.absent .tname2{text-decoration:line-through;text-decoration-thickness:1px;}
+  .tname2{display:block;}
   .tsub{display:block;font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);margin-top:3px;}
   .tile.absent .tsub{color:var(--text3);}
-  .check{position:absolute;top:10px;right:10px;width:20px;height:20px;opacity:1;transition:opacity 120ms;}
-  .tile.absent .check{opacity:0;}
-  .check svg{width:20px;height:20px;stroke:var(--primary);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
   .badge{
-    display:inline-block;margin-top:6px;font-size:11px;font-weight:500;letter-spacing:0.06em;
-    padding:2px 8px;border-radius:4px;background:var(--primary-soft);color:var(--primary-deep);
+    display:inline-block;margin-top:6px;margin-right:4px;font-size:11px;font-weight:500;
+    letter-spacing:0.06em;padding:2px 8px;border-radius:4px;
+    background:var(--surface-active);color:var(--text2);
   }
-  .tile.absent .badge{background:var(--surface-active);color:var(--text3);}
+  .badge.warn{background:var(--warn-soft);color:var(--warn-deep);}
+  .badge.off{background:transparent;color:var(--text3);border:1px solid var(--border);}
+  .tile.absent .badge{background:transparent;color:var(--text3);border:1px solid var(--border);}
 
   .seccount{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 16px;}
   .seccount .big{font-size:28px;font-weight:600;line-height:1;}
@@ -175,10 +179,12 @@
   .rmeta{font-size:12px;color:var(--text2);margin-top:3px;letter-spacing:0.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .radd{font-size:12px;font-weight:500;color:var(--primary);letter-spacing:0.02em;white-space:nowrap;flex:none;}
+  .rsub{color:var(--text3);}
   .tag{
     font-size:11px;font-weight:500;letter-spacing:0.06em;padding:2px 8px;border-radius:4px;
     background:var(--surface-active);color:var(--text2);white-space:nowrap;flex:none;
   }
+  .tag.warn{background:var(--warn-soft);color:var(--warn-deep);}
   .rchev{width:20px;height:20px;flex:none;}
   .rchev svg{width:20px;height:20px;stroke:var(--text3);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
   .check2{width:20px;height:20px;flex:none;}
@@ -218,6 +224,10 @@
   .chip{font-size:11px;font-weight:500;letter-spacing:0.06em;padding:4px 8px;border-radius:4px;
     background:var(--surface-active);color:var(--text2);}
   .chip.on{background:var(--primary-soft);color:var(--primary-deep);}
+  .chip.warn{background:var(--warn-soft);color:var(--warn-deep);}
+  /* 中身が折り返してよいカード（技名を省略したくない） */
+  .card-wrap{align-items:flex-start;}
+  .card-wrap .cteacher{white-space:normal;overflow:visible;text-overflow:clip;}
   .panel{
     background:var(--surface);border-radius:16px;padding:20px;margin-top:16px;
     box-shadow:var(--shadow-sm);border:0.5px solid rgba(28,25,23,0.08);
@@ -281,13 +291,16 @@
   .rankhead:active{background:var(--surface-hover);}
   .rankhead > div:first-child{flex:1;min-width:0;}
   .ranknum{font-size:20px;font-weight:600;letter-spacing:0.02em;line-height:1.3;}
+  /* 合格ずみ＝終わったこと。静かにする */
+  .rankhead.done .ranknum{font-weight:400;color:var(--text2);}
   .rankmeta{font-size:12px;color:var(--text2);margin-top:4px;letter-spacing:0.02em;}
   .rankstat{
     flex:none;font-size:11px;font-weight:500;letter-spacing:0.06em;padding:3px 8px;border-radius:4px;
     background:var(--surface-active);color:var(--text2);white-space:nowrap;
   }
-  .rankstat.pass{background:var(--primary-soft);color:var(--primary-deep);}
-  .rankstat.now{background:#FEF3C7;color:#92400E;}
+  /* 琥珀は「先生の判断を待っているもの」だけに使う */
+  .rankstat.warn{background:var(--warn-soft);color:var(--warn-deep);}
+  .rankstat.off{background:transparent;color:var(--text3);border:1px solid var(--border);}
   .bar{height:4px;border-radius:999px;background:var(--surface-active);overflow:hidden;margin-top:10px;}
   .bar > i{display:block;height:100%;background:var(--primary);border-radius:999px;transition:width 200ms;}
   .rankbody{padding:0 20px 16px;}
@@ -381,12 +394,12 @@
       </button>
       <div class="seccount">
         <div class="big"><span id="s2present">0</span><span class="den" id="s2total">/0</span></div>
-        <div class="note">来ていない子をタップして外す</div>
+        <div class="note" id="s2note">来ていない子をタップして外す</div>
       </div>
       <div class="tiles" id="tiles"></div>
     </div>
     <div class="footer">
-      <button class="btn" onclick="openNoteForm({kind:'student'})">気になった子のメモを書く</button>
+      <button class="btn btn-sec" onclick="openNoteForm({kind:'student'})">気になった子のメモを書く</button>
       <button class="btn btn-sec" onclick="openNoteForm({kind:'lesson'})">今日の授業のメモ</button>
       <button class="btn btn-sec" onclick="openMakeup()">振替・体験を追加</button>
     </div>
@@ -401,7 +414,7 @@
       </div>
     </header>
     <div class="searchwrap">
-      <div class="slabel">なまえ（ひらがな）で検索</div>
+      <div class="slabel">名前（ひらがな）で検索</div>
       <input class="search" id="q" type="text" placeholder="れい：ゆうき" oninput="renderMakeup()" autocomplete="off">
     </div>
     <div class="body" style="padding-top:0;" id="results"></div>
@@ -430,7 +443,7 @@
       <button class="hact" onclick="openStudentForm(null)">＋ 追加</button>
     </header>
     <div class="searchwrap" style="padding-bottom:8px;">
-      <input class="search" id="sq" type="text" placeholder="なまえ（ひらがな）で検索" oninput="renderStudents()" autocomplete="off">
+      <input class="search" id="sq" type="text" placeholder="名前（ひらがな）で検索" oninput="renderStudents()" autocomplete="off">
     </div>
     <div class="segbar" id="segbar"></div>
     <div class="filterbar" id="filterbar"></div>
@@ -442,7 +455,7 @@
       <button class="back" onclick="go('s5')" aria-label="戻る"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
       <div>
         <div class="htitle">生徒の情報</div>
-        <div class="hsub">けがのときはここから電話</div>
+        <div class="hsub">怪我のときはここから電話</div>
       </div>
       <button class="hact" onclick="openStudentForm(curStudent)">編集</button>
     </header>
@@ -514,7 +527,7 @@
       <button class="hact" onclick="openNoteForm({kind:'student', pickAll:true, back:'s11'})">＋ 追加</button>
     </header>
     <div class="searchwrap" style="padding-bottom:8px;">
-      <input class="search" id="nq" type="text" placeholder="メモの中身・なまえで検索" oninput="renderNotes()" autocomplete="off">
+      <input class="search" id="nq" type="text" placeholder="メモの中身・名前で検索" oninput="renderNotes()" autocomplete="off">
     </div>
     <div class="segbar" id="noteKindBar"></div>
     <div class="filterbar" id="noteWhoBar"></div>
@@ -922,7 +935,7 @@ function currentTeacher(){ return teacherById(db.currentTeacherId) || db.teacher
 /* ---- フォルダ分け ---- */
 function filterList(){
   return [
-    { key:'all',   label:'ぜんいん' },
+    { key:'all',   label:'全員' },
     { key:'mine',  label:'自分の担当' },
     { key:'trial', label:'体験' },
   ].concat(db.teachers.map(t => ({ key:'t:' + t.id, label:t.name })));
@@ -1112,7 +1125,7 @@ function notesToText(studentId, from, to){
   const s = studentById(studentId);
   const list = notesInRange(studentId, from, to);
   const head = `${s ? s.name : ''} の所見メモ`;
-  const who = s ? `${gradeLabel(s.birth)}・${age(s.birth)}さい・${currentRankLabel(s.id)}` : '';
+  const who = s ? `${gradeLabel(s.birth)}・${age(s.birth)}歳・${currentRankLabel(s.id)}` : '';
   const period = `期間：${from ? fullDate(from) : 'はじめから'} 〜 ${to ? fullDate(to) : fullDate(TODAY)}`;
   const body = list.map(n => `${fullDate(n.date)}（${noteWriter(n)}）\n${n.body}`).join('\n\n');
   return [head, who, period, `${list.length}件`, '', body].join('\n');
@@ -1320,20 +1333,25 @@ function renderTiles(){
   list.forEach(m => {
     const on = !!rec.present[m.id];
     const { main, sub } = memberLabel(m);
+    const st = studentById(m.id);
+    const trial = m.kind === 'trial' || (st && st.status === 'trial');
     const b = document.createElement('button');
     b.className = 'tile' + (on ? '' : ' absent');
     b.onclick = () => { rec.present[m.id] = !rec.present[m.id]; saveDb(); renderTiles(); };
     b.innerHTML = `
-      <span class="check"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
-      ${esc(main)}
+      <span class="tname2">${esc(main)}</span>
       ${sub ? `<span class="tsub">${esc(sub)}</span>` : ''}
-      ${m.kind ? `<span class="badge">${m.kind === 'makeup' ? '振替' : '体験'}</span>` : ''}`;
+      ${trial ? '<span class="badge warn">体験</span>' : ''}
+      ${m.kind === 'makeup' ? '<span class="badge">振替</span>' : ''}
+      ${on ? '' : '<span class="badge off">休み</span>'}`;
     el.appendChild(b);
   });
   const n = list.filter(m => rec.present[m.id]).length;
   const ts = rec.teacherIds.map(teacherById).filter(Boolean);
   document.getElementById('s2present').textContent = n;
   document.getElementById('s2total').textContent = '/' + list.length;
+  document.getElementById('s2note').textContent =
+    list.length - n > 0 ? `休み ${list.length - n}人` : '来ていない子をタップして外す';
   document.getElementById('s2teacher').textContent = teachersLabel(ts);
   document.getElementById('s2tlabel').textContent =
     ts.length > 1 ? `担当の先生（${ts.length}人）` : '担当の先生';
@@ -1383,7 +1401,7 @@ function renderMakeup(){
   const el = document.getElementById('results');
   const rec = todayRecord(cur);
   el.innerHTML = '';
-  if(!q){ el.innerHTML = '<div class="empty">なまえを入力すると<br>ほかの曜日・時間帯の子から探します</div>'; return; }
+  if(!q){ el.innerHTML = '<div class="empty">名前を入力すると<br>ほかの曜日・時間帯の子から探します</div>'; return; }
   const inSlot = studentsOfSlot(cur).map(s => s.id);
   const hits = db.students.filter(s =>
     s.status !== 'withdrawn' && s.name.includes(q) &&
@@ -1398,7 +1416,7 @@ function renderMakeup(){
     b.innerHTML = `
       <div>
         <div class="rname">${esc(s.name)}</div>
-        <div class="rmeta">ふだんは ${esc(slotFullLabel(slotById(s.slotId)))}</div>
+        <div class="rmeta">普段は ${esc(slotFullLabel(slotById(s.slotId)))}</div>
       </div>
       <div class="radd">振替で追加</div>`;
     box.appendChild(b);
@@ -1423,7 +1441,7 @@ function addTrialQuick(){
   rec.extra.push({ id, kind:'trial', tempName:'体験の子 ' + n });
   rec.present[id] = true;
   saveDb(); renderTiles(); go('s2');
-  toast('体験を追加しました（なまえは後で生徒に登録）');
+  toast('体験を追加しました（名前は後で生徒に登録）');
 }
 
 /* ================= 生徒 ================= */
@@ -1478,7 +1496,7 @@ function renderStudents(){
         .forEach(s => push(gradeLabel(s.birth), s));
   }else{
     list.slice().sort((a,b) => age(a.birth) - age(b.birth) || byName(a,b))
-        .forEach(s => push(age(s.birth) + 'さい', s));
+        .forEach(s => push(age(s.birth) + '歳', s));
   }
 
   groups.forEach(g => {
@@ -1496,10 +1514,10 @@ function renderStudents(){
       b.innerHTML = `
         <div>
           <div class="rname">${esc(displayName(s))}</div>
-          <div class="rmeta">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}さい　${esc(sortKey === 'day' ? slotTimeLabel(sl) : slotFullLabel(sl))}　${esc(teachersLabel(teachersOfStudent(s)))}</div>
+          <div class="rmeta">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}歳<span class="rsub">　${esc(sortKey === 'day' ? slotTimeLabel(sl) : slotFullLabel(sl))}　${esc(teachersLabel(teachersOfStudent(s)))}</span></div>
         </div>
         ${currentRank(s.id) !== null ? `<span class="tag">${currentRank(s.id)}級</span>` : ''}
-        ${s.status !== 'active' ? `<span class="tag">${STATUS_LABEL[s.status]}</span>` : ''}
+        ${s.status !== 'active' ? `<span class="tag ${s.status === 'trial' ? 'warn' : ''}">${STATUS_LABEL[s.status]}</span>` : ''}
         <div class="rchev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>`;
       box.appendChild(b);
     });
@@ -1521,16 +1539,16 @@ function renderDetail(){
     <div class="name-sub">${esc(slotFullLabel(sl))}　担当 ${esc(teachersLabel(teachersOfStudent(s)))}</div>
     <div class="chips">
       <span class="chip on">${esc(currentRankLabel(s.id))}</span>
-      <span class="chip on">${esc(gradeLabel(s.birth))}</span>
-      <span class="chip on">${esc(age(s.birth))}さい</span>
-      <span class="chip">${STATUS_LABEL[s.status]}</span>
+      <span class="chip">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}歳</span>
+      ${s.status !== 'active'
+        ? `<span class="chip ${s.status === 'trial' ? 'warn' : ''}">${STATUS_LABEL[s.status]}</span>` : ''}
     </div>
 
-    <button class="card" style="margin-top:16px;" onclick="openBadge()">
+    <button class="card card-wrap" style="margin-top:16px;" onclick="openBadge()">
       <div>
-        <div class="ctime">${esc(currentRankLabel(s.id))}</div>
-        <div class="cteacher">${esc(workingRankLabel(s.id))}${rest.length ? '　のこり ' + esc(rest.map(k => k.name).join('・')) : ''}</div>
-        ${wp && wp.total ? `<div class="bar" style="width:140px;"><i style="width:${Math.round(wp.done / wp.total * 100)}%"></i></div>` : ''}
+        <div class="ctime">${esc(workingRankLabel(s.id))}</div>
+        <div class="cteacher">${rest.length ? '残り ' + esc(rest.map(k => k.name).join('・')) : (wp ? '技はそろっています' : '')}</div>
+        ${wp && wp.total ? `<div class="bar" style="max-width:180px;"><i style="width:${Math.round(wp.done / wp.total * 100)}%"></i></div>` : ''}
       </div>
       <div class="count">
         <div><span class="n">${wp ? wp.done : 0}</span><span class="d">/${wp ? wp.total : 0}</span></div>
@@ -1539,8 +1557,8 @@ function renderDetail(){
     </button>
 
     <div class="panel">
-      <div class="ptitle">ほごしゃ れんらくさき</div>
-      <div class="kv"><span class="k">お名前</span><span class="v">${esc(s.guardian) || '—'}</span></div>
+      <div class="ptitle">保護者・連絡先</div>
+      <div class="kv"><span class="k">保護者名</span><span class="v">${esc(s.guardian) || '—'}</span></div>
       <div class="kv"><span class="k">電話</span><span class="v phone-num">${esc(s.phone) || '—'}</span></div>
       ${s.guardianNote ? `<div class="kv" style="display:block;">
         <div class="k">備考</div>
@@ -1574,12 +1592,12 @@ function renderDetail(){
     </button>
 
     <div class="panel">
-      <div class="ptitle">きほん じょうほう</div>
+      <div class="ptitle">基本情報</div>
       <div class="kv"><span class="k">正しい氏名</span><span class="v">${esc(s.fullName) || '—'}</span></div>
       <div class="kv"><span class="k">ひらがな名</span><span class="v">${esc(s.name)}</span></div>
       <div class="kv"><span class="k">生年月日</span><span class="v">${s.birth ? esc(fullDate(s.birth)) : '—'}</span></div>
       <div class="kv"><span class="k">学年</span><span class="v">${esc(gradeLabel(s.birth))}</span></div>
-      <div class="kv"><span class="k">年齢</span><span class="v">${esc(age(s.birth))}さい</span></div>
+      <div class="kv"><span class="k">年齢</span><span class="v">${esc(age(s.birth))}歳</span></div>
       <div class="kv"><span class="k">通っている枠</span><span class="v">${esc(slotFullLabel(sl))}</span></div>
       <div class="kv"><span class="k">入会日</span><span class="v">${s.joined ? esc(fullDate(s.joined)) : 'まだ（体験）'}</span></div>
       <div class="kv"><span class="k">在籍</span><span class="v">${STATUS_LABEL[s.status]}</span></div>
@@ -1612,7 +1630,7 @@ function renderStudentForm(){
 
   el.innerHTML = `
     <div class="field">
-      <div class="flabel">なまえ（ひらがな・下の名前だけ）</div>
+      <div class="flabel">名前（ひらがな・下の名前だけ）</div>
       <input type="text" id="f_name" value="${esc(formDraft.name)}" placeholder="れい：ゆうき" autocomplete="off">
       <div class="fhint">画面に出るのはこの名前です。同じ名前の子がいると、自動で曜日と時間が後ろに付きます</div>
     </div>
@@ -1631,13 +1649,13 @@ function renderStudentForm(){
       <select id="f_slot">${slotOpts}</select>
     </div>
     <div class="field">
-      <div class="flabel">保護者のお名前</div>
+      <div class="flabel">保護者の保護者名</div>
       <input type="text" id="f_guardian" value="${esc(formDraft.guardian)}" autocomplete="off">
     </div>
     <div class="field">
       <div class="flabel">保護者の電話</div>
       <input type="tel" id="f_phone" value="${esc(formDraft.phone)}" placeholder="090-0000-0000" autocomplete="off">
-      <div class="fhint">けがのときにここから直接かけられます</div>
+      <div class="fhint">怪我のときにここから直接かけられます</div>
     </div>
     <div class="field">
       <div class="flabel">保護者の備考</div>
@@ -1661,13 +1679,13 @@ function renderStudentForm(){
   const upd = () => {
     const v = bi.value;
     document.getElementById('f_gradehint').textContent =
-      v ? `いまは ${gradeLabel(v)}・${age(v)}さい（保存せず毎回計算します）` : '入れると学年と年齢が自動で出ます';
+      v ? `いまは ${gradeLabel(v)}・${age(v)}歳（保存せず毎回計算します）` : '入れると学年と年齢が自動で出ます';
   };
   bi.oninput = upd; upd();
 }
 function saveStudentForm(){
   const name = document.getElementById('f_name').value.trim();
-  if(!name){ toast('なまえを入れてください'); return; }
+  if(!name){ toast('名前を入れてください'); return; }
   const data = {
     name,
     fullName: document.getElementById('f_full').value.trim(),
@@ -1766,7 +1784,7 @@ function renderSettings(){
     b.onclick = () => openTeacherForm(t.id);
     b.innerHTML = `
       <div>
-        <div class="rname">${esc(t.name)}${t.id === db.currentTeacherId ? '（じぶん）' : ''}</div>
+        <div class="rname">${esc(t.name)}${t.id === db.currentTeacherId ? '（自分）' : ''}</div>
         <div class="rmeta">${cnt}つの時間帯を担当</div>
       </div>
       <div class="rchev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>`;
@@ -1777,7 +1795,7 @@ function renderSettings(){
   // ログイン中の先生
   const h3 = document.createElement('div');
   h3.className = 'sechead';
-  h3.innerHTML = '<span>いま使っている先生</span>';
+  h3.innerHTML = '<span>ログイン中の先生</span>';
   el.appendChild(h3);
   const box3 = document.createElement('div');
   box3.className = 'listbox';
@@ -1833,11 +1851,11 @@ function renderSlotForm(){
     </div>
     <div class="row2">
       <div class="field">
-        <div class="flabel">はじまり</div>
+        <div class="flabel">開始</div>
         <input type="time" id="g_start" value="${esc(formDraft.start)}">
       </div>
       <div class="field">
-        <div class="flabel">おわり</div>
+        <div class="flabel">終了</div>
         <input type="time" id="g_end" value="${esc(formDraft.end)}">
       </div>
     </div>
@@ -1899,7 +1917,7 @@ function openTeacherForm(id){
   const cnt = id ? db.slots.filter(sl => sl.teacherIds.includes(id)).length : 0;
   document.getElementById('teacherForm').innerHTML = `
     <div class="field">
-      <div class="flabel">なまえ</div>
+      <div class="flabel">名前</div>
       <input type="text" id="t_name" value="${esc(formDraft.name)}" placeholder="れい：ゆか先生" autocomplete="off">
     </div>
     ${id ? `<button class="btn btn-danger" onclick="deleteTeacher()">この先生を消す</button>
@@ -1908,7 +1926,7 @@ function openTeacherForm(id){
 }
 function saveTeacherForm(){
   const name = document.getElementById('t_name').value.trim();
-  if(!name){ toast('なまえを入れてください'); return; }
+  if(!name){ toast('名前を入れてください'); return; }
   if(editingTeacher){
     teacherById(editingTeacher).name = name;
     toast('保存しました');
@@ -2004,7 +2022,7 @@ function renderNoteForm(){
     </div>
     ${isLesson ? '' : `
     <div class="field">
-      <div class="flabel">だれのこと</div>
+      <div class="flabel">誰のこと</div>
       <select id="n_student">${opts}</select>
       <div class="fhint">${noteDraft._pickAll ? '全員から選べます' : '今日のメンバーから選べます'}</div>
     </div>`}
@@ -2049,7 +2067,7 @@ function saveNote(){
   if(!body.trim()){ toast('なにか書いてください'); return; }
   const isLesson = noteDraft.kind === 'lesson';
   const studentId = isLesson ? '' : (document.getElementById('n_student') || {}).value || noteDraft.studentId;
-  if(!isLesson && !studentId){ toast('だれのことか選んでください'); return; }
+  if(!isLesson && !studentId){ toast('誰のことか選んでください'); return; }
   const date = (document.getElementById('n_date') || {}).value || noteDraft.date;
   const slotId = (document.getElementById('n_slot') || {}).value;
   if(isLesson && !slotId){ toast('授業のメモは、時間帯を選んでください'); return; }
@@ -2089,7 +2107,7 @@ function afterNote(){
 function renderNoteBars(){
   const kb = document.getElementById('noteKindBar');
   kb.innerHTML = '';
-  [{k:'all',l:'ぜんぶ'},{k:'student',l:'子のメモ'},{k:'lesson',l:'授業のメモ'}].forEach(o => {
+  [{k:'all',l:'すべて'},{k:'student',l:'子のメモ'},{k:'lesson',l:'授業のメモ'}].forEach(o => {
     const b = document.createElement('button');
     b.className = 'seg' + (o.k === noteKind ? ' on' : '');
     b.textContent = o.l;
@@ -2098,10 +2116,10 @@ function renderNoteBars(){
   });
   const wb = document.getElementById('noteWhoBar');
   wb.innerHTML = '';
-  [{k:'all',l:'だれでも'},{k:'me',l:'自分が書いたもの'}].forEach(o => {
+  [{k:'all',l:'全員'},{k:'me',l:'自分だけ'}].forEach(o => {
     const b = document.createElement('button');
     b.className = 'fchip' + (o.k === noteWho ? ' on' : '');
-    b.textContent = o.k === 'me' ? `自分が書いたもの（${currentTeacher().name}）` : o.l;
+    b.textContent = o.k === 'me' ? `自分だけ（${currentTeacher().name}）` : o.l;
     b.onclick = () => { noteWho = o.k; renderNoteBars(); renderNotes(); };
     wb.appendChild(b);
   });
@@ -2160,6 +2178,7 @@ function renderNotes(){
 /* ================= バッジテスト ================= */
 let badgeOpen = {};
 let badgeView = 'work';
+let histAll = false;
 
 function openBadge(){
   const s = studentById(curStudent);
@@ -2173,7 +2192,7 @@ function openBadge(){
 function renderBadgeSeg(){
   const bar = document.getElementById('badgeSeg');
   bar.innerHTML = '';
-  [{k:'work',l:'挑戦中'},{k:'passed',l:'合格した級'},{k:'all',l:'ぜんぶ'}].forEach(o => {
+  [{k:'work',l:'挑戦中'},{k:'passed',l:'合格した級'},{k:'all',l:'すべて'}].forEach(o => {
     const b = document.createElement('button');
     b.className = 'seg' + (o.k === badgeView ? ' on' : '');
     b.textContent = o.l;
@@ -2208,19 +2227,20 @@ function renderBadge(){
     const p = rankProgress(s.id, r);
     const rec = rankRecord(s.id, r);
     const open = !!badgeOpen[r];
-    const stat = rec ? `<span class="rankstat pass">合格 ${esc(fullDate(rec.date))}</span>`
-               : (r === w ? '<span class="rankstat now">挑戦中</span>'
-                          : '<span class="rankstat">まだ</span>');
+    const ready = p.ready && !rec;
+    const stat = rec ? `<span class="rankstat">合格 ${esc(fullDate(rec.date))}</span>`
+               : ready ? '<span class="rankstat warn">合格を出せます</span>'
+               : (r === w ? '<span class="rankstat">挑戦中</span>'
+                          : '<span class="rankstat off">まだ</span>');
     const card = document.createElement('div');
     card.className = 'rankcard';
     card.innerHTML = `
-      <button class="rankhead" onclick="toggleRank(${r})">
+      <button class="rankhead ${rec ? 'done' : ''}" onclick="toggleRank(${r})">
         <div>
           <div class="ranknum">${r}級</div>
-          <div class="rankmeta">${g.skills.length
-            ? `技 ${p.done}/${p.total}${rec ? '　' + esc(noteWriter(rec)) + ' が確定' : ''}`
-            : '技はまだ決まっていません'}</div>
-          ${g.skills.length ? `<div class="bar" style="max-width:180px;"><i style="width:${Math.round(p.done / p.total * 100)}%"></i></div>` : ''}
+          <div class="rankmeta">${rec ? esc(noteWriter(rec)) + ' が確定'
+            : (g.skills.length ? `技 ${p.done}/${p.total}` : '技はまだ決まっていません')}</div>
+          ${!rec && g.skills.length ? `<div class="bar" style="max-width:180px;"><i style="width:${Math.round(p.done / p.total * 100)}%"></i></div>` : ''}
         </div>
         ${stat}
       </button>
@@ -2236,8 +2256,8 @@ function renderBadge(){
         }).join('') : '<div class="fhint" style="padding:12px 0;">この級の技が決まったら、ここに出ます</div>'}
         <div class="rankbtns">
           ${rec
-            ? `<button class="btn btn-danger" onclick="tapRevoke(${r})">${r}級の合格を取り消す</button>`
-            : `<button class="btn" onclick="tapGrant(${r})">${r}級の合格を確定する</button>
+            ? `<button class="btn btn-sec" onclick="tapRevoke(${r})">${r}級の合格を取り消す</button>`
+            : `<button class="btn ${p.ready ? '' : 'btn-sec'}" onclick="tapGrant(${r})">${r}級の合格を確定する</button>
                <div class="fhint">${p.ready ? '技は全部できています' : '技が残っていても、先生の判断で確定できます'}</div>`}
         </div>
       </div>` : ''}`;
@@ -2245,15 +2265,18 @@ function renderBadge(){
   });
 
   // 級位履歴
-  const hist = gradeHistoryOf(s.id);
+  const hist = gradeHistoryOf(s.id).slice().reverse();
+  const shown = histAll ? hist : hist.slice(0, 5);
   const h = document.createElement('div');
   h.className = 'panel';
   h.style.marginTop = '24px';
   h.innerHTML = `<div class="ptitle">級位履歴（${hist.length}）</div>
-    ${hist.length ? hist.slice().reverse().map(x => `
-      <div class="kv"><span class="k">${esc(fullDate(x.date))}</span>
-        <span class="v">${x.rank}級　${esc(noteWriter(x))}</span></div>`).join('')
-      : '<div class="fhint">まだありません</div>'}`;
+    ${hist.length ? shown.map(x => `
+      <div class="kv"><span class="k" style="color:var(--text);">${x.rank}級</span>
+        <span class="v" style="color:var(--text2);font-size:12px;">${esc(fullDate(x.date))}　${esc(noteWriter(x))}</span></div>`).join('')
+      : '<div class="fhint">まだありません</div>'}
+    ${hist.length > 5 ? `<button class="btn btn-sec" style="margin-top:14px;" onclick="histAll=!histAll;renderBadge();">
+      ${histAll ? '最近の5件だけ表示' : `古い${hist.length - 5}件も表示`}</button>` : ''}`;
   el.appendChild(h);
 }
 function toggleRank(r){
@@ -2320,18 +2343,18 @@ function renderCopy(){
   document.getElementById('copyBody').innerHTML = `
     <div class="row2">
       <div class="field">
-        <div class="flabel">いつから</div>
+        <div class="flabel">開始日</div>
         <input type="date" id="c_from" value="${esc(copyFrom)}" onchange="copyFrom=this.value;renderCopy();">
       </div>
       <div class="field">
-        <div class="flabel">いつまで</div>
+        <div class="flabel">終了日</div>
         <input type="date" id="c_to" value="${esc(copyTo)}" onchange="copyTo=this.value;renderCopy();">
       </div>
     </div>
     <div class="toggles" style="margin-bottom:16px;">
       <button class="tog" onclick="setCopyRange(1)">この1か月</button>
       <button class="tog" onclick="setCopyRange(3)">3か月</button>
-      <button class="tog" onclick="setCopyRange(0)">ぜんぶ</button>
+      <button class="tog" onclick="setCopyRange(0)">すべて</button>
     </div>
     <div class="flabel">この内容がコピーされます（${n}件）</div>
     <div class="copybox">${esc(text)}</div>
