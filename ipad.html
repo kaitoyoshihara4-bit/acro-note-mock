@@ -526,6 +526,50 @@ const DEFAULT_DB = {
     { id:'mn5', title:'所見メモの書き方', images:[],
       body:'半年後に別の先生が読む前提で書く。\n\n×「側転がうまくなった」\n○「手をつく位置を目印で確認させると、3回目から形になった。次も目印を置くところから始める」\n\n書くのは3つ。\n・何で止まっていたか\n・何をしたら動いたか\n・次にどこから始めるか\n\n生々しい表現でいい。保護者には出さない。' },
   ],
+
+  /* 体験の記録。その日の担当を一緒に残すので「この先生の体験は入会しやすいか」が出せる。
+     result は pending（結果待ち）／joined（入会）／declined（入会しなかった）。
+     名簿に無い子（入会しなかった子）は studentId を空にして name だけ持つ */
+  trials: [
+    { id:'tr01', studentId:'s01', name:'', date:'2024-03-23', slotId:'sl8',  teacherIds:['tc1'],        result:'joined',   resultDate:'2024-04-06' },
+    { id:'tr02', studentId:'s03', name:'', date:'2024-03-23', slotId:'sl8',  teacherIds:['tc1'],        result:'joined',   resultDate:'2024-04-06' },
+    { id:'tr03', studentId:'s29', name:'', date:'2024-04-23', slotId:'sl1',  teacherIds:['tc4'],        result:'joined',   resultDate:'2024-05-07' },
+    { id:'tr04', studentId:'s04', name:'', date:'2025-03-22', slotId:'sl8',  teacherIds:['tc1'],        result:'joined',   resultDate:'2025-04-05' },
+    { id:'tr05', studentId:'s14', name:'', date:'2025-03-22', slotId:'sl9',  teacherIds:['tc2'],        result:'joined',   resultDate:'2025-04-05' },
+    { id:'tr06', studentId:'s30', name:'', date:'2025-03-25', slotId:'sl1',  teacherIds:['tc4'],        result:'joined',   resultDate:'2025-04-08' },
+    { id:'tr07', studentId:'s35', name:'', date:'2025-03-28', slotId:'sl6',  teacherIds:['tc1'],        result:'joined',   resultDate:'2025-04-11' },
+    { id:'tr08', studentId:'',    name:'れい',     date:'2025-06-17', slotId:'sl1',  teacherIds:['tc4'],  result:'declined', resultDate:'2025-06-30' },
+    { id:'tr09', studentId:'',    name:'ゆな',     date:'2025-10-04', slotId:'sl8',  teacherIds:['tc1'],  result:'declined', resultDate:'2025-10-18' },
+    { id:'tr10', studentId:'s10', name:'', date:'2023-03-25', slotId:'sl9',  teacherIds:['tc2'],        result:'joined',   resultDate:'2023-04-08' },
+    { id:'tr11', studentId:'',    name:'そうま',   date:'2025-12-10', slotId:'sl4',  teacherIds:['tc3'],  result:'declined', resultDate:'2025-12-24' },
+    { id:'tr12', studentId:'',    name:'みお',     date:'2026-01-14', slotId:'sl4',  teacherIds:['tc3'],  result:'declined', resultDate:'2026-01-28' },
+    { id:'tr13', studentId:'',    name:'しゅん',   date:'2026-02-17', slotId:'sl1',  teacherIds:['tc4'],  result:'declined', resultDate:'2026-03-03' },
+    { id:'tr14', studentId:'s22', name:'', date:'2026-03-18', slotId:'sl4',  teacherIds:['tc3'],        result:'joined',   resultDate:'2026-04-04' },
+    { id:'tr15', studentId:'s06', name:'', date:'2026-03-21', slotId:'sl8',  teacherIds:['tc1','tc4'],  result:'joined',   resultDate:'2026-04-04' },
+    { id:'tr16', studentId:'',    name:'たいき',   date:'2026-05-16', slotId:'sl10', teacherIds:['tc3'],  result:'declined', resultDate:'2026-05-30' },
+    { id:'tr17', studentId:'',    name:'めい',     date:'2026-06-13', slotId:'sl9',  teacherIds:['tc2'],  result:'declined', resultDate:'2026-06-27' },
+    { id:'tr18', studentId:'',    name:'そうすけ', date:'2026-07-11', slotId:'sl8',  teacherIds:['tc1'],  result:'declined', resultDate:'2026-07-25' },
+    { id:'tr19', studentId:'s32', name:'', date:'2026-09-15', slotId:'sl2',  teacherIds:['tc1'],        result:'pending',  resultDate:'' },
+    { id:'tr20', studentId:'s28', name:'', date:'2026-09-16', slotId:'sl5',  teacherIds:['tc4'],        result:'pending',  resultDate:'' },
+    { id:'tr21', studentId:'s26', name:'', date:'2026-09-19', slotId:'sl8',  teacherIds:['tc1','tc4'],  result:'pending',  resultDate:'' },
+    { id:'tr22', studentId:'s27', name:'', date:'2026-09-26', slotId:'sl10', teacherIds:['tc3'],        result:'pending',  resultDate:'' },
+  ],
+
+  /* 枠を移った記録。viaMakeup＝移る前に、移った先の枠へ振替で来ていたか。
+     先生はその時点の担当を残す（担当は後で変わるので） */
+  moves: [
+    { id:'mv1', studentId:'s12', date:'2022-04-09', fromSlotId:'sl10', toSlotId:'sl9',
+      fromTeacherIds:['tc3'], toTeacherIds:['tc2'], viaMakeup:false, makeupDate:'' },
+    { id:'mv2', studentId:'s19', date:'2024-04-10', fromSlotId:'sl4',  toSlotId:'sl5',
+      fromTeacherIds:['tc3'], toTeacherIds:['tc4'], viaMakeup:true,  makeupDate:'2024-03-27' },
+    { id:'mv3', studentId:'s05', date:'2024-09-07', fromSlotId:'sl7',  toSlotId:'sl8',
+      fromTeacherIds:['tc3'], toTeacherIds:['tc1'], viaMakeup:true,  makeupDate:'2024-08-24' },
+  ],
+
+  /* 時間帯の担当が変わった記録。いまの担当は slots 側に上書きされるので、履歴はここに残す */
+  teacherLog: [
+    { id:'tl1', slotId:'sl8', date:'2026-04-04', from:['tc1'], to:['tc1','tc4'] },
+  ],
 };
 
 /* ---- 保存と読み出し（その端末の中だけ） ---- */
@@ -573,7 +617,7 @@ const DUMMY_GUARDIAN_MEMO = {
     ['role','phone','mail','shift','memo','pay','hr'].forEach(k => { if(t[k] === undefined) t[k] = ''; });
   });
   ['skillChecks'].forEach(k => { if(!db[k]) db[k] = {}; });
-  ['gradeHistory','aiNotes','manual','notes'].forEach(k => { if(!db[k]) db[k] = []; });
+  ['gradeHistory','aiNotes','manual','notes','trials','moves','teacherLog'].forEach(k => { if(!db[k]) db[k] = []; });
 })();
 
 /* ---- 取り出し ---- */
@@ -942,6 +986,169 @@ function studentCountOfTeacher(id){
   return slotsOfTeacher(id).reduce((n, sl) => n + studentsOfSlot(sl.id).length, 0);
 }
 
+
+/* ================= 体験→入会 ================= */
+const TRIAL_RESULT_LABEL = { pending:'結果待ち', joined:'入会', declined:'入会しなかった' };
+
+function trialName(t){
+  const s = t.studentId ? studentById(t.studentId) : null;
+  return s ? displayName(s) : (t.name || '（名前なし）');
+}
+function trialKey(t){ return t.studentId || t.tempId || ('n:' + t.name + ':' + t.id); }
+/* 同じ子の体験が複数ある時は、新しい1件だけ残す */
+function latestPerKid(list){
+  const seen = {}, out = [];
+  list.slice().sort((a,b) => b.date.localeCompare(a.date)).forEach(t => {
+    const k = trialKey(t);
+    if(!seen[k]){ seen[k] = true; out.push(t); }
+  });
+  return out;
+}
+function trialsOfStudent(studentId){
+  return (db.trials || []).filter(t => t.studentId === studentId)
+    .slice().sort((a,b) => a.date.localeCompare(b.date));
+}
+/* 先生ごとの体験→入会。2人で担当した日は両方に数える。
+   率は結果が出たものだけで割る（結果待ちは分母に入れない） */
+function trialStatsOfTeacher(teacherId){
+  const list = latestPerKid((db.trials || []).filter(t => (t.teacherIds || []).includes(teacherId)));
+  const joined = list.filter(t => t.result === 'joined').length;
+  const declined = list.filter(t => t.result === 'declined').length;
+  const pending = list.filter(t => t.result === 'pending').length;
+  const decided = joined + declined;
+  return { list, joined, declined, pending, decided, rate: decided ? joined / decided : null };
+}
+function pendingTrials(){
+  return latestPerKid((db.trials || []).filter(t => t.result === 'pending'))
+    .sort((a,b) => a.date.localeCompare(b.date));
+}
+function rateLabel(r){ return r === null ? '—' : Math.round(r * 100) + '%'; }
+
+/* 出席画面で、体験の子が「来た」になっていたら記録を作る。外したら消す。
+   同じ子・同じ日は1件だけ */
+function syncTrialAttendance(date, slotId, members, present, teacherIds){
+  if(!db.trials) db.trials = [];
+  let changed = false;
+  members.forEach(m => {
+    const st = m.id ? studentById(m.id) : null;
+    const isTrial = m.kind === 'trial' || (st && st.status === 'trial');
+    if(!isTrial) return;
+    const key = t => t.date === date && (st ? t.studentId === st.id : t.tempId === m.id);
+    const existing = db.trials.find(key);
+    if(present[m.id] && !existing){
+      db.trials.push({ id:newId('tr'), studentId: st ? st.id : '', tempId: st ? '' : m.id,
+        name: st ? '' : (m.tempName || ''), date, slotId, teacherIds:(teacherIds || []).slice(),
+        result:'pending', resultDate:'', auto:true });
+      changed = true;
+    }else if(!present[m.id] && existing && existing.auto && existing.result === 'pending'){
+      db.trials = db.trials.filter(t => t !== existing);
+      changed = true;
+    }else if(existing && existing.auto && existing.result === 'pending'){
+      // その日の担当を変えたら追従させる
+      const a = existing.teacherIds.join(','), b = (teacherIds || []).join(',');
+      if(a !== b){ existing.teacherIds = (teacherIds || []).slice(); changed = true; }
+    }
+  });
+  if(changed) saveDb();
+}
+function setTrialResult(trialId, result){
+  const t = (db.trials || []).find(x => x.id === trialId);
+  if(!t) return;
+  const k = trialKey(t);
+  (db.trials || []).filter(x => trialKey(x) === k && x.result === 'pending').forEach(x => {
+    x.result = result;
+    x.resultDate = result === 'pending' ? '' : TODAY;
+  });
+  saveDb();
+}
+
+
+/* ================= 枠の移動・担当の変更 ================= */
+/* 移る前の60日に、移った先の枠へ振替で来ていたか */
+function makeupBeforeMove(studentId, toSlotId, moveDate){
+  const from = new Date(moveDate + 'T00:00:00+09:00');
+  from.setDate(from.getDate() - 60);
+  const p = x => String(x).padStart(2,'0');
+  const lower = `${from.getFullYear()}-${p(from.getMonth() + 1)}-${p(from.getDate())}`;
+  const dates = Object.keys(db.attendance || {}).filter(d => d >= lower && d <= moveDate).sort().reverse();
+  for(const d of dates){
+    const rec = db.attendance[d][toSlotId];
+    if(rec && rec.present[studentId] && rec.extra.some(e => e.id === studentId && e.kind === 'makeup')) return d;
+  }
+  return '';
+}
+function movesOfStudent(studentId){
+  return (db.moves || []).filter(m => m.studentId === studentId)
+    .slice().sort((a,b) => a.date.localeCompare(b.date));
+}
+/* 振替でこの先生の枠に来て、そのまま枠ごと移ってきた子 */
+function makeupMovesInto(teacherId){
+  return (db.moves || []).filter(m => m.viaMakeup && (m.toTeacherIds || []).includes(teacherId))
+    .slice().sort((a,b) => b.date.localeCompare(a.date));
+}
+
+/* 生徒を保存した時に呼ぶ。在籍の変化と枠の移動を記録する（スマホ・Mac共通） */
+function onStudentSaved(before, after){
+  if(!before) return;   // 新しく追加した子は記録しない
+  // 体験 → 在籍／退会
+  if(before.status === 'trial' && after.status !== 'trial'){
+    const result = after.status === 'active' ? 'joined' : (after.status === 'withdrawn' ? 'declined' : null);
+    if(result){
+      const pend = (db.trials || []).filter(t => t.studentId === after.id && t.result === 'pending');
+      if(pend.length){
+        pend.forEach(t => { t.result = result; t.resultDate = TODAY; });
+      }else{
+        // 体験の記録が無いまま在籍に変えた時は、いまの枠の担当で1件作っておく
+        const sl = slotById(before.slotId);
+        (db.trials = db.trials || []).push({ id:newId('tr'), studentId:after.id, name:'', date:TODAY,
+          slotId:before.slotId, teacherIds: sl ? sl.teacherIds.slice() : [], result, resultDate:TODAY, inferred:true });
+      }
+    }
+  }
+  // 枠の移動
+  if(before.slotId && after.slotId && before.slotId !== after.slotId){
+    const fs = slotById(before.slotId), ts = slotById(after.slotId);
+    const mk = makeupBeforeMove(after.id, after.slotId, TODAY);
+    (db.moves = db.moves || []).push({ id:newId('mv'), studentId:after.id, date:TODAY,
+      fromSlotId:before.slotId, toSlotId:after.slotId,
+      fromTeacherIds: fs ? fs.teacherIds.slice() : [], toTeacherIds: ts ? ts.teacherIds.slice() : [],
+      viaMakeup: !!mk, makeupDate: mk });
+  }
+  saveDb();
+}
+/* 時間帯を保存した時に呼ぶ。担当が変わっていたら履歴に残す */
+function onSlotSaved(before, after){
+  if(!before) return;
+  const a = (before.teacherIds || []).slice().sort().join(','), b = (after.teacherIds || []).slice().sort().join(',');
+  if(a === b) return;
+  (db.teacherLog = db.teacherLog || []).push({ id:newId('tl'), slotId:after.id, date:TODAY,
+    from:(before.teacherIds || []).slice(), to:(after.teacherIds || []).slice() });
+  saveDb();
+}
+function teacherLogOfSlot(slotId){
+  return (db.teacherLog || []).filter(l => l.slotId === slotId)
+    .slice().sort((a,b) => b.date.localeCompare(a.date));
+}
+function namesOf(ids){ return teachersLabel((ids || []).map(teacherById).filter(Boolean)); }
+
+/* その子の経緯（体験・入会・枠の移動）を古い順に並べる */
+function historyOfStudent(studentId){
+  const s = studentById(studentId);
+  const out = [];
+  trialsOfStudent(studentId).forEach(t => {
+    const sl = slotById(t.slotId);
+    out.push({ date:t.date, label:'体験', text:`${sl ? slotFullLabel(sl) : ''}　担当 ${namesOf(t.teacherIds)}` });
+  });
+  if(s && s.joined) out.push({ date:s.joined, label:'入会', text:'' });
+  movesOfStudent(studentId).forEach(m => {
+    const f = slotById(m.fromSlotId), t = slotById(m.toSlotId);
+    out.push({ date:m.date, label:'枠の移動',
+      text:`${f ? slotFullLabel(f) : '?'} → ${t ? slotFullLabel(t) : '?'}`
+         + (m.viaMakeup ? `（${fullDate(m.makeupDate)}に振替で来ていた。担当 ${namesOf(m.toTeacherIds)}）` : '') });
+  });
+  return out.sort((a,b) => a.date.localeCompare(b.date));
+}
+
 </script>
 <script>
 let view = 'dash';
@@ -1280,6 +1487,7 @@ function renderDetail(){
         </div>
       </div>
 
+      ${historyPanel(s)}
       ${copyPanel(s)}
       ${aiPanel(s)}
 
@@ -1494,6 +1702,91 @@ function removeAi(id){
   renderDetail();
 }
 
+/* ---- 経緯（体験・入会・枠の移動） ---- */
+function historyPanel(s){
+  const h = historyOfStudent(s.id);
+  if(!h.length) return '';
+  return `
+    <div class="panel" style="margin-top:20px;">
+      <div class="ptitle">経緯</div>
+      ${h.map(x => `<div class="kv">
+        <span class="k" style="color:var(--text);min-width:72px;">${esc(x.label)}</span>
+        <span class="v" style="font-size:13px;color:var(--text2);">${esc(fullDate(x.date))}${x.text ? '　' + esc(x.text) : ''}</span>
+      </div>`).join('')}
+    </div>`;
+}
+
+/* ---- 体験→入会（先生ページ用） ---- */
+function teacherTrialPanel(t){
+  const st = trialStatsOfTeacher(t.id);
+  const moves = makeupMovesInto(t.id);
+  return `
+    <div class="cols" style="margin-top:20px;">
+      <div class="panel">
+        <div class="ptitle">体験→入会</div>
+        <div class="statn">${rateLabel(st.rate)}</div>
+        <div class="statl">${st.decided}人中 ${st.joined}人が入会${st.pending ? `<span class="tag warn" style="margin-left:8px;">結果待ち ${st.pending}人</span>` : ''}</div>
+        <div style="margin-top:16px;">
+          ${st.list.slice(0, 8).map(x => `<div class="kv">
+            <span class="k" style="color:var(--text);">${esc(trialName(x))}</span>
+            <span class="v" style="font-size:12px;color:${x.result === 'pending' ? 'var(--warn-deep)' : 'var(--text2)'};">
+              ${esc(fullDate(x.date))}　${TRIAL_RESULT_LABEL[x.result]}</span></div>`).join('')
+            || '<div class="fhint">まだありません</div>'}
+        </div>
+        <div class="fhint" style="margin-top:12px;">2人で担当した日の体験は、両方の先生に数えます。率は結果が出た人だけで計算します</div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">振替で来て、そのまま移ってきた子</div>
+        <div class="statn">${moves.length}<span class="unit">人</span></div>
+        <div style="margin-top:16px;">
+          ${moves.map(m => {
+            const s2 = studentById(m.studentId);
+            const f = slotById(m.fromSlotId);
+            return `<div class="kv">
+              <span class="k" style="color:var(--text);">${esc(s2 ? displayName(s2) : '（退会した子）')}</span>
+              <span class="v" style="font-size:12px;color:var(--text2);">${esc(fullDate(m.date))}　${esc(f ? slotFullLabel(f) : '')}から</span></div>`;
+          }).join('') || '<div class="fhint">まだありません</div>'}
+        </div>
+        <div class="fhint" style="margin-top:12px;">枠を移る前の60日に、移った先の枠へ振替で来ていた子です</div>
+      </div>
+    </div>`;
+}
+
+/* ---- ダッシュボード：先生ごとの体験→入会と、結果待ち ---- */
+function dashTrialPanels(){
+  const rows = db.teachers.map(t => ({ t, st: trialStatsOfTeacher(t.id) }))
+    .sort((a,b) => (b.st.rate === null ? -1 : b.st.rate) - (a.st.rate === null ? -1 : a.st.rate));
+  const pend = pendingTrials();
+  return `
+    <div class="cols">
+      <div class="panel">
+        <div class="ptitle">先生ごとの体験→入会</div>
+        ${rows.map(r => `<div class="distrow">
+          <div class="distlab" style="width:84px;">${esc(r.t.name)}</div>
+          <div class="distbar"><i style="width:${r.st.rate === null ? 0 : Math.round(r.st.rate * 100)}%"></i></div>
+          <div class="distn" style="width:88px;">${rateLabel(r.st.rate)}（${r.st.joined}/${r.st.decided}）</div>
+        </div>`).join('')}
+        <div class="fhint" style="margin-top:12px;">結果待ちの子は入れずに計算しています</div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">結果待ちの体験（${pend.length}）</div>
+        ${pend.map(x => {
+          const sl = slotById(x.slotId);
+          return `<div class="kv" style="align-items:center;">
+            <div>
+              <div style="font-size:14px;">${esc(trialName(x))}</div>
+              <div class="fhint" style="margin-top:2px;">${esc(fullDate(x.date))}　${esc(sl ? slotFullLabel(sl) : '')}　${esc(namesOf(x.teacherIds))}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex:none;">
+              <button class="minibtn" onclick="setTrialResult('${x.id}','joined');renderDash();">入会した</button>
+              <button class="minibtn" onclick="setTrialResult('${x.id}','declined');renderDash();">しなかった</button>
+            </div></div>`;
+        }).join('') || '<div class="fhint">ありません</div>'}
+        <div class="fhint" style="margin-top:12px;">生徒の在籍を「体験」から「在籍」に変えた時も、ここが自動で「入会」になります</div>
+      </div>
+    </div>`;
+}
+
 /* ---- 生徒フォーム ---- */
 function openStudentForm(id){
   curStudent = id || curStudent;
@@ -1595,7 +1888,9 @@ function saveStudentForm(){
     db.students.push(s);
     curStudent = s.id;
   }else{
+    const before = Object.assign({}, studentById(formDraft.id));
     Object.assign(studentById(formDraft.id), data);
+    onStudentSaved(before, studentById(formDraft.id));
     curStudent = formDraft.id;
   }
   saveDb(); mode = 'view';
@@ -1615,6 +1910,8 @@ function deleteStudent(){
   db.gradeHistory = (db.gradeHistory || []).filter(h => h.studentId !== s.id);
   db.aiNotes = (db.aiNotes || []).filter(n => n.studentId !== s.id);
   db.notes = (db.notes || []).filter(n => !(n.kind === 'student' && n.studentId === s.id));
+  db.trials = (db.trials || []).filter(t => t.studentId !== s.id);
+  db.moves = (db.moves || []).filter(m => m.studentId !== s.id);
   curStudent = null; mode = 'view';
   saveDb(); renderHead(); renderList(); renderDetail();
 }
@@ -1651,6 +1948,12 @@ function renderSlotDetail(){
             <span class="v">${esc(gradeLabel(s.birth))}・${esc(age(s.birth))}歳</span></div>`).join('')
           : '<div class="fhint">まだいません</div>'}
       </div>
+      ${teacherLogOfSlot(sl.id).length ? `<div class="panel" style="margin-top:20px;">
+        <div class="ptitle">担当の履歴</div>
+        ${teacherLogOfSlot(sl.id).map(l => `<div class="kv">
+          <span class="k">${esc(fullDate(l.date))}</span>
+          <span class="v">${esc(namesOf(l.from))} → ${esc(namesOf(l.to))}</span></div>`).join('')}
+      </div>` : ''}
     </div>`;
 }
 function openSlotForm(id){
@@ -1722,7 +2025,9 @@ function saveSlotForm(){
     db.slots.push(sl);
     curSlotEdit = sl.id;
   }else{
+    const before = Object.assign({}, slotById(formDraft.id), { teacherIds: slotById(formDraft.id).teacherIds.slice() });
     Object.assign(slotById(formDraft.id), data);
+    onSlotSaved(before, slotById(formDraft.id));
     curSlotEdit = formDraft.id;
   }
   saveDb(); mode = 'view';
@@ -1826,6 +2131,8 @@ function renderDash(){
         </div>
       </div>
 
+      ${dashTrialPanels()}
+
       <div class="panel" style="margin-top:20px;">
         <div class="ptitle">最近の所見メモ</div>
         ${allNotes().slice(0, 5).map(n => {
@@ -1923,6 +2230,8 @@ function renderTeacherDetail(){
             : '<div class="fhint">まだありません</div>'}
         </div>
       </div>
+
+      ${teacherTrialPanel(t)}
 
       <div class="panel lockpanel" style="margin-top:20px;">
         <div class="lockrow">
