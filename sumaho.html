@@ -324,6 +324,12 @@
   .smeta{display:block;font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:0.02em;}
   .rankbtns{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
 
+  /* 様子 → 関わり → 変化 */
+  .chain-row{display:flex;gap:12px;padding-top:12px;}
+  .chain-lab{flex:none;width:44px;font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);padding-top:3px;}
+  .chain-txt{font-size:14px;line-height:1.75;color:var(--text);letter-spacing:0.01em;word-break:break-word;}
+  .chain-date{font-size:11px;color:var(--text3);margin-top:2px;letter-spacing:0.02em;}
+
   /* AI分析の貼り付け */
   .aiimgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
   .aiimgs img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:0.5px solid var(--border);}
@@ -770,21 +776,50 @@ const DEFAULT_DB = {
   /* 出席の記録。日付ごとに { slotId: { present, extra, teacherIds } } */
   attendance: {},
 
-  /* メモ。kind は 'student'（その子のこと）か 'lesson'（その日の授業のこと） */
+  /* メモ。kind は 'student'（その子のこと）か 'lesson'（その日の授業のこと）。
+     子のメモは step で種類を持つ：state（様子）／act（関わり）／change（変化）。
+     change は linkId で、どの関わりの結果かを指す。
+     ラベル（「負けず嫌い」など）ではなく、場面と行動で書く */
   notes: [
-    { id:'nt1', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-05', teacherId:'tc1',
-      body:'側転で足が開ききらない。手をつく位置を毎回目印で確認させると、3回目から形になった。次も目印を置くところから始める。' },
-    { id:'nt2', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-12', teacherId:'tc4',
-      body:'目印なしでも形が残っていた。できた直後に本人が振り返るので、すぐ「いまの、足そろってたよ」と言うと嬉しそうにする。褒めるのは技の直後が効く。' },
-    { id:'nt3', kind:'student', studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
-      body:'バク転の補助を外そうとすると固まる。「いつも通りでいいよ」と声をかけてから入ると通った。急に外さず、補助の手を軽くするところから。' },
-    { id:'nt4', kind:'student', studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1',
-      body:'できない技があると黙り込む。せかすと余計に固まるので、別の技をはさんで戻ると自分からやり直す。' },
-    { id:'nt5', kind:'student', studentId:'s12', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
-      body:'ロンダートの踏み切りが強すぎて流れる。助走を3歩に減らしたら安定した。当面3歩で固める。' },
-    { id:'nt6', kind:'lesson', studentId:'', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
+    // あおい：目印の関わり → 形が残った
+    { id:'nt01', kind:'student', step:'state',  studentId:'s01', slotId:'sl8', date:'2026-09-05', teacherId:'tc1', linkId:'',
+      body:'側転で足が開ききらない。手をつく位置が毎回ずれている。' },
+    { id:'nt02', kind:'student', step:'act',    studentId:'s01', slotId:'sl8', date:'2026-09-05', teacherId:'tc1', linkId:'',
+      body:'手をつく位置にマットの目印を置いて、毎回そこを見てから入らせた。' },
+    { id:'nt03', kind:'student', step:'change', studentId:'s01', slotId:'sl8', date:'2026-09-12', teacherId:'tc4', linkId:'nt02',
+      body:'目印なしでも形が残っていた。できた直後に本人が振り返るので、すぐ「いまの、足そろってたよ」と言うと嬉しそうにする。' },
+    // あおい：補助を外す時に固まる → 予告しない声かけ
+    { id:'nt04', kind:'student', step:'state',  studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1', linkId:'',
+      body:'バク転の補助を外そうとすると固まる。' },
+    { id:'nt05', kind:'student', step:'act',    studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1', linkId:'',
+      body:'外すとは言わずに「いつも通りでいいよ」と声をかけてから入った。補助の手は軽くするだけにした。' },
+    { id:'nt06', kind:'student', step:'change', studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1', linkId:'nt05',
+      body:'補助をほぼ外した状態で通った。本人は気づいていない様子。' },
+    // みなと：できない技が続くと黙り込む → 別の技をはさむ
+    { id:'nt07', kind:'student', step:'state',  studentId:'s05', slotId:'sl8', date:'2026-09-05', teacherId:'tc1', linkId:'',
+      body:'できない技が2回続くと、黙り込んで列から外れる。せかすと余計に固まる。' },
+    { id:'nt08', kind:'student', step:'act',    studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1', linkId:'',
+      body:'せかさずに、得意な前転を1本はさんでから元の技に戻した。' },
+    { id:'nt09', kind:'student', step:'change', studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1', linkId:'nt08',
+      body:'自分から元の技に戻ってやり直した。そのあと最後まで列に戻っていた。' },
+    // ゆうき（水）：同じ関わりが別の子・別の先生でも効いた
+    { id:'nt10', kind:'student', step:'state',  studentId:'s19', slotId:'sl5', date:'2026-09-16', teacherId:'tc4', linkId:'',
+      body:'倒立ブリッジで失敗が続くと、黙ってマットの端に座る。' },
+    { id:'nt11', kind:'student', step:'act',    studentId:'s19', slotId:'sl5', date:'2026-09-23', teacherId:'tc4', linkId:'',
+      body:'みなとのメモを見て、できるブリッジを1本はさんでから戻した。' },
+    { id:'nt12', kind:'student', step:'change', studentId:'s19', slotId:'sl5', date:'2026-09-23', teacherId:'tc4', linkId:'nt11',
+      body:'座らずに続けた。2本目で倒立ブリッジも形になった。' },
+    // りく：助走を減らす
+    { id:'nt13', kind:'student', step:'state',  studentId:'s12', slotId:'sl9', date:'2026-09-19', teacherId:'tc2', linkId:'',
+      body:'ロンダートの踏み切りが強すぎて、着地で前に流れる。' },
+    { id:'nt14', kind:'student', step:'act',    studentId:'s12', slotId:'sl9', date:'2026-09-19', teacherId:'tc2', linkId:'',
+      body:'助走を5歩から3歩に減らした。' },
+    { id:'nt15', kind:'student', step:'change', studentId:'s12', slotId:'sl9', date:'2026-09-19', teacherId:'tc2', linkId:'nt14',
+      body:'着地で止まれるようになった。当面3歩で固める。' },
+    // 授業のメモ
+    { id:'nt16', kind:'lesson', studentId:'', slotId:'sl8', date:'2026-09-19', teacherId:'tc1',
       body:'マット3枚で側転のレーンを作った。順番待ちが減って回転数が増えた。次回も同じ並べ方でいく。' },
-    { id:'nt7', kind:'lesson', studentId:'', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
+    { id:'nt17', kind:'lesson', studentId:'', slotId:'sl9', date:'2026-09-19', teacherId:'tc2',
       body:'後半に集中が切れる子が多かった。最後の10分は遊びを入れた方がよさそう。' },
   ],
 
@@ -811,7 +846,7 @@ const DEFAULT_DB = {
     { id:'mn4', title:'バッジテストの見かた', images:[],
       body:'15級が入り口で、数字が小さくなるほど上。技が全部チェックできても、合格は先生が手で確定する。ここは自動にしない。\n\n理由は2つ。\n・その日の1回できただけで級を渡すと、次の週にできなくなる子がいる\n・渡す場面そのものが、その子にとって意味を持つから\n\n迷ったら級は渡さず、所見メモに「あと何が足りないか」を書いておく。' },
     { id:'mn5', title:'所見メモの書き方', images:[],
-      body:'半年後に別の先生が読む前提で書く。\n\n×「側転がうまくなった」\n○「手をつく位置を目印で確認させると、3回目から形になった。次も目印を置くところから始める」\n\n書くのは3つ。\n・何で止まっていたか\n・何をしたら動いたか\n・次にどこから始めるか\n\n生々しい表現でいい。保護者には出さない。' },
+      body:'半年後に別の先生が読む前提で書く。メモは3種類から選ぶ。\n\n・様子：どういう場面で、どうなったか\n・関わり：何をしたか\n・変化：その後どうなったか（どの関わりの結果かを選ぶ）\n\n×「負けず嫌いで、くよくよしやすい」\n○「できない技が2回続くと、黙り込んで列から外れる」\n\nラベルはその子を固定する。場面と行動なら、関わりで変えられる。\n他の子と比べない。比べるのは同じ子の前と後。\n\n生々しい表現でいい。保護者には出さない。' },
   ],
 
   /* 体験の記録。その日の担当を一緒に残すので「この先生の体験は入会しやすいか」が出せる。
@@ -908,6 +943,10 @@ const DUMMY_GUARDIAN_MEMO = {
   });
   ['skillChecks'].forEach(k => { if(!db[k]) db[k] = {}; });
   ['gradeHistory','aiNotes','manual','notes','trials','moves','teacherLog'].forEach(k => { if(!db[k]) db[k] = []; });
+  (db.notes || []).forEach(n => {
+    if(n.kind === 'student' && !n.step) n.step = 'state';
+    if(n.linkId === undefined) n.linkId = '';
+  });
 })();
 
 /* ---- 取り出し ---- */
@@ -1032,10 +1071,12 @@ function notesOfLesson(date, slotId){
 function notesOfDay(date, slotId){
   return allNotes().filter(n => n.date === date && n.slotId === slotId);
 }
-function addNote({ kind, studentId, slotId, body, date }){
+function addNote({ kind, studentId, slotId, body, date, step, linkId }){
   if(!db.notes) db.notes = [];
   const n = {
     id: newId('nt'), kind,
+    step: kind === 'student' ? (step || 'state') : '',
+    linkId: kind === 'student' && step === 'change' ? (linkId || '') : '',
     studentId: studentId || '',
     slotId: slotId || '',
     date: date || TODAY,
@@ -1053,8 +1094,43 @@ function updateNote(id, body){
 }
 function deleteNote(id){
   db.notes = (db.notes || []).filter(x => x.id !== id);
+  // 消した関わりを指していた変化は、つながりだけ外す（変化のメモ自体は残す）
+  db.notes.forEach(x => { if(x.linkId === id) x.linkId = ''; });
   saveDb();
 }
+/* ---- 関わりと変化 ---- */
+const STEP_LABEL = { state:'様子', act:'関わり', change:'変化' };
+const STEP_ORDER = { state:0, act:1, change:2 };
+const STEP_HINT = {
+  state:'どういう場面で、どうなったか。れい：できない技が2回続くと、黙り込んで列から外れる',
+  act:'何をしたか。れい：せかさずに、得意な前転を1本はさんでから元の技に戻した',
+  change:'その後どうなったか。れい：自分から元の技に戻ってやり直した',
+};
+function noteById(id){ return (db.notes || []).find(n => n.id === id) || null; }
+/* その子の関わり（新しい順） */
+function actsOfStudent(studentId){
+  return notesOfStudent(studentId).filter(n => n.step === 'act');
+}
+/* その関わりの結果として書かれた変化（古い順） */
+function changesOf(actId){
+  return (db.notes || []).filter(n => n.step === 'change' && n.linkId === actId)
+    .slice().sort((a,b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+}
+/* 関わりの直前の様子（同じ子・その日まで・一番新しいもの） */
+function stateBefore(act){
+  return notesOfStudent(act.studentId)
+    .filter(n => n.step === 'state' && n.date <= act.date)[0] || null;
+}
+/* 変化がついた関わりを、子をまたいで集める。q は様子・関わり・変化の本文を検索 */
+function effectiveActs(q){
+  q = (q || '').trim();
+  return allNotes().filter(n => n.kind === 'student' && n.step === 'act')
+    .map(act => ({ act, changes: changesOf(act.id), state: stateBefore(act), student: studentById(act.studentId) }))
+    .filter(x => x.changes.length)
+    .filter(x => !q || [x.act.body, x.state ? x.state.body : '']
+      .concat(x.changes.map(c => c.body)).some(t => t.includes(q)));
+}
+
 function noteWriter(n){
   const t = teacherById(n.teacherId);
   return t ? t.name : '（退職した先生）';
@@ -1170,16 +1246,59 @@ function rankDistribution(){
 function notesInRange(studentId, from, to){
   return notesOfStudent(studentId)
     .filter(n => (!from || n.date >= from) && (!to || n.date <= to))
-    .slice().sort((a,b) => a.date.localeCompare(b.date));   // 読み物として古い順
+    .slice().sort((a,b) => a.date.localeCompare(b.date)          // 読み物として古い順
+      || (STEP_ORDER[a.step] || 0) - (STEP_ORDER[b.step] || 0)     // 同じ日は 様子→関わり→変化
+      || a.id.localeCompare(b.id));
 }
-function notesToText(studentId, from, to){
+/* AIに貼る時の頭書き。誰がどのAIに貼っても同じ見方で分析されるように */
+const AI_HEADER = [
+  '以下は、アクロバット教室の講師が書いた、1人の子どもの観察記録です。',
+  'この子への関わり方を、次の先生に引き継げる形で整理してください。',
+  '',
+  '守ってほしいこと：',
+  '・性格のラベル（負けず嫌い、内気など）を付けない。場面と行動で書く',
+  '・「いつも」「必ず」と一般化しない',
+  '・他の子と比べない。比べるのはこの子の前と後だけ',
+  '・記録に無いことを推測で足さない',
+  '',
+  '整理の形：',
+  '1. どういう場面で、どうなりやすいか',
+  '2. 効いた関わり（どの場面で、何をしたら、どう変わったか。日付つき）',
+  '3. 効かなかった関わり、またはまだ結果が分からない関わり',
+  '4. 次の授業で試すこと',
+].join('\n');
+
+function notesToText(studentId, from, to, opt){
+  opt = opt || {};
+  const hide = opt.hideName !== false;     // 既定は名前を伏せる
   const s = studentById(studentId);
   const list = notesInRange(studentId, from, to);
-  const head = `${s ? s.name : ''} の所見メモ`;
-  const who = s ? `${gradeLabel(s.birth)}・${age(s.birth)}歳・${currentRankLabel(s.id)}` : '';
+  // 先生の名前は、出てきた順に 先生A・先生B… に置き換える
+  const tmap = {};
+  const writer = n => {
+    if(!hide) return noteWriter(n);
+    if(!tmap[n.teacherId]) tmap[n.teacherId] = '先生' + 'ABCDEFGHIJ'.charAt(Object.keys(tmap).length);
+    return tmap[n.teacherId];
+  };
+  const name = s ? s.name : '';
+  const clean = t => hide && name ? t.split(name).join('この子') : t;
+  const label = hide ? 'この子' : name;
+  const who = s ? `${label}（${gradeLabel(s.birth)}・${age(s.birth)}歳・${currentRankLabel(s.id)}）` : '';
   const period = `期間：${from ? fullDate(from) : 'はじめから'} 〜 ${to ? fullDate(to) : fullDate(TODAY)}`;
-  const body = list.map(n => `${fullDate(n.date)}（${noteWriter(n)}）\n${n.body}`).join('\n\n');
-  return [head, who, period, `${list.length}件`, '', body].join('\n');
+  const line = n => {
+    const link = n.step === 'change' && n.linkId && noteById(n.linkId)
+      ? `（${shortDate(noteById(n.linkId).date)}の関わりの結果）` : '';
+    return `[${STEP_LABEL[n.step] || '様子'}] ${fullDate(n.date)}　${writer(n)}${link}\n${clean(n.body)}`;
+  };
+  const parts = [AI_HEADER, '', '---', '', who, period, `${list.length}件`, '', list.map(line).join('\n\n')];
+  if(opt.withAi){
+    const ais = aiNotesOf(studentId).slice().reverse();   // 古い順
+    if(ais.length){
+      parts.push('', '---', '', '前回までのAI分析（古い順）', '');
+      parts.push(ais.map(a => `${fullDate(a.date)}\n${clean(a.body || '（画像のみ）')}`).join('\n\n'));
+    }
+  }
+  return parts.join('\n');
 }
 function copyText(text){
   const fallback = () => {
@@ -1788,15 +1907,19 @@ function renderDetail(){
       ${ns.length ? ns.map(n => `
         <button class="note-card" style="box-shadow:none;border:none;border-top:0.5px solid rgba(28,25,23,0.08);border-radius:0;padding:14px 0;margin:0;" onclick="openNoteForm({noteId:'${n.id}'})">
           <div class="note-head">
+            <span class="note-kind">${STEP_LABEL[n.step] || '様子'}</span>
             <span class="note-date">${esc(dateLabel(n.date))}</span>
             <span class="note-who">${esc(noteWriter(n))}</span>
           </div>
           <div class="note-body">${esc(n.body)}</div>
+          ${linkLine(n)}
         </button>`).join('')
         : '<div class="fhint" style="padding-bottom:8px;">まだありません。授業の画面から書けます</div>'}
       <button class="btn btn-sec" style="margin-top:12px;" onclick="openNoteForm({kind:'student',studentId:'${s.id}'})">この子のメモを書く</button>
       ${ns.length ? `<button class="btn btn-sec" style="margin-top:8px;" onclick="openCopy()">期間を決めてまとめてコピー</button>` : ''}
     </div>
+
+    ${chainPanel(s)}
 
     <button class="card" onclick="go('s15')">
       <div>
@@ -1825,6 +1948,36 @@ function renderDetail(){
       <div class="fhint">所見メモをそのまま保護者に見せられる言い方に直したものを、ここに置く予定。
       いまは場所だけ取っている。所見メモとは別の欄にしてあるので、後から足しても既に書いたメモは動かない。</div>
     </div>`;
+}
+
+/* 変化のメモに「どの関わりの結果か」を1行で */
+function linkLine(n){
+  if(n.step !== 'change' || !n.linkId) return '';
+  const a = noteById(n.linkId);
+  if(!a) return '';
+  const cut = t => t.length > 24 ? t.slice(0, 24) + '…' : t;
+  return `<div class="note-for">${esc(shortDate(a.date))}の関わり「${esc(cut(a.body))}」の結果</div>`;
+}
+/* 様子 → 関わり → 変化 を上から順に */
+function chainHtml(x, showStudent){
+  const row = (lab, n) => `<div class="chain-row">
+      <span class="chain-lab">${lab}</span>
+      <div style="min-width:0;"><div class="chain-txt">${esc(n.body)}</div>
+        <div class="chain-date">${esc(fullDate(n.date))}　${esc(noteWriter(n))}</div></div>
+    </div>`;
+  return `${showStudent && x.student ? `<div class="ptitle" style="margin-bottom:4px;">${esc(displayName(x.student))}</div>` : ''}
+    ${x.state ? row('様子', x.state) : ''}
+    ${row('関わり', x.act)}
+    ${x.changes.map(c => row('変化', c)).join('')}`;
+}
+/* その子の、変化まで書かれた関わり */
+function chainPanel(s){
+  const xs = effectiveActs('').filter(x => x.act.studentId === s.id);
+  if(!xs.length) return '';
+  return `<div class="panel">
+    <div class="ptitle">効いた関わり（${xs.length}）</div>
+    ${xs.map((x, i) => `<div style="${i ? 'border-top:0.5px solid rgba(28,25,23,0.08);margin-top:14px;padding-top:4px;' : ''}">${chainHtml(x, false)}</div>`).join('')}
+  </div>`;
 }
 
 /* その子の経緯（体験・入会・枠の移動） */
@@ -2227,6 +2380,8 @@ function openNoteForm(opt){
       slotId: opt.slotId || cur || '',
       date: TODAY,
       body: '',
+      step: opt.step || 'state',
+      linkId: '',
     };
     // 子のメモで相手が未指定なら、今日のメンバーの先頭を初期値に
     if(noteDraft.kind === 'student' && !noteDraft.studentId && noteDraft.slotId){
@@ -2279,9 +2434,17 @@ function renderNoteForm(){
     ${isLesson ? '' : `
     <div class="field">
       <div class="flabel">誰のこと</div>
-      <select id="n_student">${opts}</select>
+      <select id="n_student" onchange="keepNoteInputs();noteDraft.linkId='';renderNoteForm();">${opts}</select>
       <div class="fhint">${noteDraft._pickAll ? '全員から選べます' : '今日のメンバーから選べます'}</div>
-    </div>`}
+    </div>
+    <div class="field">
+      <div class="flabel">何のメモか</div>
+      <div class="toggles">
+        ${Object.keys(STEP_LABEL).map(k => `<button class="tog ${(noteDraft.step || 'state') === k ? 'on' : ''}"
+          onclick="keepNoteInputs();noteDraft.step='${k}';renderNoteForm();">${STEP_LABEL[k]}</button>`).join('')}
+      </div>
+    </div>
+    ${(noteDraft.step === 'change') ? linkField() : ''}`}
     <div class="row2">
       <div class="field">
         <div class="flabel">日付</div>
@@ -2293,19 +2456,20 @@ function renderNoteForm(){
       </div>
     </div>
     <div class="field">
-      <div class="flabel">${isLesson ? '今日の授業で気づいたこと' : '気になったこと・効いた練習法'}</div>
+      <div class="flabel">${isLesson ? '今日の授業で気づいたこと' : STEP_LABEL[noteDraft.step || 'state']}</div>
       <textarea id="n_body" placeholder="${isLesson
         ? 'れい：マット3枚でレーンを作ったら順番待ちが減った'
-        : 'れい：補助を外すと固まる。「いつも通りでいいよ」と声をかけてから入ると通った'}">${esc(noteDraft.body)}</textarea>
-      <div class="fhint">あとで別の先生が読みます。その子にどう関わればいいかが分かるように書くと、そのまま引き継げます</div>
+        : esc(STEP_HINT[noteDraft.step || 'state'])}">${esc(noteDraft.body)}</textarea>
+      <div class="fhint">${isLesson ? 'あとで別の先生が読みます'
+        : '「負けず嫌い」のような性格の言葉ではなく、場面と行動で書きます。あとで別の先生が読んで、そのまま引き継げるように'}</div>
     </div>
     ${noteDraft._new ? '' : `
     <div class="fhint" style="margin-bottom:16px;">書いた人：${esc(noteWriter(noteDraft))}</div>
     <button class="btn btn-danger" onclick="removeNote()">このメモを消す</button>`}`;
 }
 
-function switchNoteKind(k){
-  // いま入力中の文と選択を保ってから切り替える
+/* いま入力中の文と選択を下書きに移す。描き直しても消えないように */
+function keepNoteInputs(){
   const b = document.getElementById('n_body');
   if(b) noteDraft.body = b.value;
   const st = document.getElementById('n_student');
@@ -2314,14 +2478,35 @@ function switchNoteKind(k){
   if(d) noteDraft.date = d.value;
   const sl = document.getElementById('n_slot');
   if(sl) noteDraft.slotId = sl.value;
+  const lk = document.getElementById('n_link');
+  if(lk) noteDraft.linkId = lk.value;
+}
+function switchNoteKind(k){
+  keepNoteInputs();
   noteDraft.kind = k;
   renderNoteForm();
+}
+/* 変化のメモ：どの関わりの結果か */
+function linkField(){
+  const acts = noteDraft.studentId ? actsOfStudent(noteDraft.studentId).filter(a => a.id !== noteDraft.id) : [];
+  if(!acts.length) return `<div class="field"><div class="fhint">この子の「関わり」のメモがまだありません。先に関わりを書くと、ここでつなげられます</div></div>`;
+  if(noteDraft.linkId === '' && noteDraft._new) noteDraft.linkId = acts[0].id;   // 新しく書く時は一番新しい関わりを初期値に
+  const cut = t => t.length > 22 ? t.slice(0, 22) + '…' : t;
+  return `<div class="field">
+    <div class="flabel">どの関わりの結果か</div>
+    <select id="n_link">
+      <option value="">つなげない</option>
+      ${acts.map(a => `<option value="${a.id}" ${a.id === noteDraft.linkId ? 'selected' : ''}>${esc(shortDate(a.date))}　${esc(cut(a.body))}</option>`).join('')}
+    </select>
+  </div>`;
 }
 
 function saveNote(){
   const body = document.getElementById('n_body').value;
-  if(!body.trim()){ toast('なにか書いてください'); return; }
+  if(!body.trim()){ toast('内容を入力してください'); return; }
   const isLesson = noteDraft.kind === 'lesson';
+  const step = isLesson ? '' : (noteDraft.step || 'state');
+  const linkId = step === 'change' ? ((document.getElementById('n_link') || {}).value || '') : '';
   const studentId = isLesson ? '' : (document.getElementById('n_student') || {}).value || noteDraft.studentId;
   if(!isLesson && !studentId){ toast('誰のことか選んでください'); return; }
   const date = (document.getElementById('n_date') || {}).value || noteDraft.date;
@@ -2330,7 +2515,7 @@ function saveNote(){
   noteDraft.date = date; noteDraft.slotId = slotId;
 
   if(noteDraft._new){
-    addNote({ kind:noteDraft.kind, studentId, slotId, body, date });
+    addNote({ kind:noteDraft.kind, studentId, slotId, body, date, step, linkId });
     toast(isLesson ? '授業のメモを保存しました' : (studentById(studentId) || {}).name + ' のメモを保存しました');
   }else{
     const n = (db.notes || []).find(x => x.id === noteDraft.id);
@@ -2339,6 +2524,8 @@ function saveNote(){
       n.date = date; n.slotId = slotId;
       n.studentId = isLesson ? '' : studentId;
       n.kind = noteDraft.kind;
+      n.step = step;
+      n.linkId = linkId;
       saveDb();
     }
     toast('保存しました');
@@ -2363,11 +2550,12 @@ function afterNote(){
 function renderNoteBars(){
   const kb = document.getElementById('noteKindBar');
   kb.innerHTML = '';
-  [{k:'all',l:'すべて'},{k:'student',l:'子のメモ'},{k:'lesson',l:'授業のメモ'}].forEach(o => {
+  [{k:'all',l:'すべて'},{k:'student',l:'子'},{k:'lesson',l:'授業'},{k:'effective',l:'効いた関わり'}].forEach(o => {
     const b = document.createElement('button');
     b.className = 'seg' + (o.k === noteKind ? ' on' : '');
     b.textContent = o.l;
     b.onclick = () => { noteKind = o.k; renderNoteBars(); renderNotes(); };
+    if(o.k === 'effective') b.style.flex = '1.7';   // 長い名前なので幅を多めに（折り返さないように）
     kb.appendChild(b);
   });
   const wb = document.getElementById('noteWhoBar');
@@ -2385,6 +2573,18 @@ function renderNotes(){
   const q = document.getElementById('nq').value.trim();
   const el = document.getElementById('noteList');
   el.innerHTML = '';
+  if(noteKind === 'effective'){
+    // 変化がついた関わりを、子をまたいで出す。検索は様子・関わり・変化の本文と名前
+    const xs = effectiveActs('').filter(x => !q || [x.act.body, x.state ? x.state.body : '', x.student ? x.student.name : '']
+      .concat(x.changes.map(c => c.body)).some(t => t.includes(q)))
+      .filter(x => noteWho !== 'me' || x.act.teacherId === db.currentTeacherId);
+    document.getElementById('s11count').textContent = `${xs.length}件`;
+    el.innerHTML = xs.length
+      ? `<div class="fhint" style="margin:4px 2px 12px;">変化まで書かれた関わりだけを出しています。別の子に試す時の手がかりに</div>`
+        + xs.map(x => `<div class="panel" style="margin-top:12px;">${chainHtml(x, true)}</div>`).join('')
+      : '<div class="empty">まだありません<br>「変化」のメモを、どの関わりの結果かとつなげて書くと出てきます</div>';
+    return;
+  }
   let list = allNotes();
   if(noteKind !== 'all') list = list.filter(n => n.kind === noteKind);
   if(noteWho === 'me')   list = list.filter(n => n.teacherId === db.currentTeacherId);
@@ -2421,7 +2621,7 @@ function renderNotes(){
       b.onclick = () => { noteDraft = {}; openNoteForm({ noteId:n.id }); };
       b.innerHTML = `
         <div class="note-head">
-          <span class="note-kind ${n.kind === 'lesson' ? 'lesson' : ''}">${n.kind === 'lesson' ? '授業' : '子'}</span>
+          <span class="note-kind ${n.kind === 'lesson' ? 'lesson' : ''}">${n.kind === 'lesson' ? '授業' : (STEP_LABEL[n.step] || '様子')}</span>
           ${s ? `<span class="note-date">${esc(displayName(s))}</span>` : ''}
           <span class="note-who">${esc(noteWriter(n))}${sl ? '　' + esc(slotTimeLabel(sl)) : ''}</span>
         </div>
@@ -2580,6 +2780,8 @@ function tapRevoke(r){
 
 /* ================= 所見メモの一括コピー ================= */
 let copyFrom = '', copyTo = '';
+let copyHide = true, copyWithAi = false;
+function copyOpt(){ return { hideName: copyHide, withAi: copyWithAi }; }
 
 function openCopy(){
   const s = studentById(curStudent);
@@ -2594,7 +2796,7 @@ function openCopy(){
 function renderCopy(){
   const s = studentById(curStudent);
   if(!s){ go('s5'); return; }
-  const text = notesToText(s.id, copyFrom, copyTo);
+  const text = notesToText(s.id, copyFrom, copyTo, copyOpt());
   const n = notesInRange(s.id, copyFrom, copyTo).length;
   document.getElementById('copyBody').innerHTML = `
     <div class="row2">
@@ -2607,6 +2809,11 @@ function renderCopy(){
         <input type="date" id="c_to" value="${esc(copyTo)}" onchange="copyTo=this.value;renderCopy();">
       </div>
     </div>
+    <div class="toggles" style="margin-bottom:8px;">
+      <button class="tog ${copyHide ? 'on' : ''}" onclick="copyHide=!copyHide;renderCopy();">名前を伏せる</button>
+      <button class="tog ${copyWithAi ? 'on' : ''}" onclick="copyWithAi=!copyWithAi;renderCopy();">前回までのAI分析も入れる</button>
+    </div>
+    <div class="fhint" style="margin-bottom:16px;">名前を伏せると、子は「この子」、先生は「先生A」になります。本文に他の子の名前を書いていたら、貼る前に消してください</div>
     <div class="toggles" style="margin-bottom:16px;">
       <button class="tog" onclick="setCopyRange(1)">この1か月</button>
       <button class="tog" onclick="setCopyRange(3)">3か月</button>
@@ -2635,7 +2842,7 @@ function doCopy(){
   if(!s) return;
   const n = notesInRange(s.id, copyFrom, copyTo).length;
   if(!n){ toast('その期間にはメモがありません'); return; }
-  copyText(notesToText(s.id, copyFrom, copyTo)).then(ok => {
+  copyText(notesToText(s.id, copyFrom, copyTo, copyOpt())).then(ok => {
     toast(ok ? `${n}件をコピーしました。貼り付けてください` : 'コピーできませんでした。上の枠を長押しして選んでください');
   });
 }
