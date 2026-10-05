@@ -717,6 +717,7 @@ const DEFAULT_DB = {
     { id:'sl8',  day:6, start:'15:00', end:'16:00', teacherIds:['tc1','tc4'] },
     { id:'sl9',  day:6, start:'16:00', end:'17:00', teacherIds:['tc2'] },
     { id:'sl10', day:6, start:'17:00', end:'18:00', teacherIds:['tc3'] },
+    { id:'sl11', day:4, start:'19:00', end:'20:00', teacherIds:['tc3'], kind:'adult' },
   ],
 
   students: [
@@ -902,6 +903,9 @@ const DUMMY_GUARDIAN_MEMO = {
   (db.teachers || []).forEach(t => {
     ['role','phone','mail','shift','memo','pay','hr'].forEach(k => { if(t[k] === undefined) t[k] = ''; });
   });
+  (db.slots || []).forEach(sl => {
+    if(!sl.kind) sl.kind = 'kids';   // 種別を足す前に保存したデータはキッズ扱い
+  });
   ['skillChecks'].forEach(k => { if(!db[k]) db[k] = {}; });
   ['gradeHistory','aiNotes','manual','notes','trials','moves','teacherLog'].forEach(k => { if(!db[k]) db[k] = []; });
 })();
@@ -916,8 +920,11 @@ function teachersOfSlot(slot){
   return slot.teacherIds.map(teacherById).filter(Boolean);
 }
 function teachersLabel(arr){ return arr.length ? arr.map(t => t.name).join('・') : '未定'; }
-function slotTimeLabel(slot){ return slot ? `${slot.start} – ${slot.end}` : '未設定'; }
-function slotFullLabel(slot){ return slot ? `${DAY_LABEL[slot.day]}曜 ${slot.start} – ${slot.end}` : '未設定'; }
+function slotTimeLabel(slot){ return slot ? `${slot.start} – ${slot.end}${kindSuffix(slot)}` : '未設定'; }
+/* 時間帯の種別。キッズが普通なので、大人の時だけ表示に出す */
+const SLOT_KIND_LABEL = { kids:'キッズ', adult:'大人' };
+function kindSuffix(slot){ return slot && slot.kind === 'adult' ? '（大人）' : ''; }
+function slotFullLabel(slot){ return slot ? `${DAY_LABEL[slot.day]}曜 ${slot.start} – ${slot.end}${kindSuffix(slot)}` : '未設定'; }
 
 function slotsOfDay(day){
   return db.slots.filter(s => s.day === day).sort((a,b) => a.start.localeCompare(b.start));
@@ -2065,7 +2072,7 @@ function openSlotForm(id){
   editingSlot = id;
   const sl = id ? slotById(id) : null;
   formDraft = sl ? Object.assign({}, sl, { teacherIds: sl.teacherIds.slice() })
-                 : { day:todayDay(), start:'15:00', end:'16:00', teacherIds:[] };
+                 : { day:todayDay(), start:'15:00', end:'16:00', teacherIds:[], kind:'kids' };
   document.getElementById('s9title').textContent = sl ? '時間帯を編集' : '時間帯を追加';
   renderSlotForm();
   go('s9');
@@ -2091,19 +2098,28 @@ function renderSlotForm(){
       </div>
     </div>
     <div class="field">
-      <div class="flabel">担当の先生（何人でも）</div>
+      <div class="flabel">種別</div><div class="toggles" id="g_kind"></div><div class="fhint">大人クラスは料金も報酬も別なので、書き出した時に見分けられるようにします</div></div><div class="field"><div class="flabel">担当の先生（何人でも）</div>
       <div class="toggles" id="g_teachers"></div>
       <div class="fhint">毎週この人たちが担当します。その日だけ違うときは、出席の画面から変えられます</div>
     </div>
     ${editingSlot ? `<button class="btn btn-danger" onclick="deleteSlot()">この時間帯を消す</button>
       <div class="fhint" style="margin-top:8px;">いま ${n}人 が入っています。消すとこの子たちの枠が空になります</div>` : ''}`;
 
+  const kw = document.getElementById('g_kind');
+  Object.keys(SLOT_KIND_LABEL).forEach(k => {
+    const b = document.createElement('button');
+    b.className = 'tog' + ((formDraft.kind || 'kids') === k ? ' on' : '');
+    b.textContent = SLOT_KIND_LABEL[k];
+    b.onclick = () => { keepSlotInputs(); formDraft.kind = k; renderSlotForm(); };
+    kw.appendChild(b);
+  });
   const tw = document.getElementById('g_teachers');
   db.teachers.forEach(t => {
     const b = document.createElement('button');
     b.className = 'tog' + (formDraft.teacherIds.includes(t.id) ? ' on' : '');
     b.textContent = t.name;
     b.onclick = () => {
+      keepSlotInputs();
       formDraft.teacherIds = formDraft.teacherIds.includes(t.id)
         ? formDraft.teacherIds.filter(x => x !== t.id)
         : formDraft.teacherIds.concat(t.id);
@@ -2112,13 +2128,20 @@ function renderSlotForm(){
     tw.appendChild(b);
   });
 }
+/* 描き直す前に、入力途中の曜日と時刻を下書きに移す */
+function keepSlotInputs(){
+  const d = document.getElementById('g_day'), a = document.getElementById('g_start'), e = document.getElementById('g_end');
+  if(d) formDraft.day = Number(d.value);
+  if(a) formDraft.start = a.value;
+  if(e) formDraft.end = e.value;
+}
 function saveSlotForm(){
   const day = Number(document.getElementById('g_day').value);
   const start = document.getElementById('g_start').value;
   const end = document.getElementById('g_end').value;
   if(!start || !end){ toast('時刻を入れてください'); return; }
   if(end <= start){ toast('おわりは、はじまりより後にしてください'); return; }
-  const data = { day, start, end, teacherIds: formDraft.teacherIds.slice() };
+  const data = { day, start, end, teacherIds: formDraft.teacherIds.slice(), kind: formDraft.kind || 'kids' };
   if(editingSlot){
     const before = Object.assign({}, slotById(editingSlot), { teacherIds: slotById(editingSlot).teacherIds.slice() });
     Object.assign(slotById(editingSlot), data);
