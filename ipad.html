@@ -184,6 +184,9 @@
   .minibtn.strong{border-color:transparent;color:#fff;background:var(--primary);}
   .minibtn.strong:hover{background:var(--primary-hover);}
 
+  .vguide{background:var(--surface-hover);border-radius:8px;padding:10px 12px;margin-top:10px;
+    font-size:12px;line-height:1.8;color:var(--text2);letter-spacing:0.01em;}
+  .vguide b{font-weight:600;color:var(--text);}
   /* 様子 → 関わり → 変化 */
   .chain-row{display:flex;gap:16px;padding-top:12px;}
   .chain-lab{flex:none;width:52px;font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text2);padding-top:3px;}
@@ -508,21 +511,26 @@ const DEFAULT_DB = {
       body:'目印なしでも形が残っていた。できた直後に本人が振り返るので、すぐ「いまの、足そろってたよ」と言うと嬉しそうにする。' },
     // あおい：補助を外す時に固まる → 予告しない声かけ
     { id:'nt04', kind:'student', step:'state',  studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1', linkId:'',
-      body:'バク転の補助を外そうとすると固まる。' },
+      body:'バク転の補助を外そうとすると固まる。', view:'start' },
     { id:'nt05', kind:'student', step:'act',    studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1', linkId:'',
       body:'外すとは言わずに「いつも通りでいいよ」と声をかけてから入った。補助の手は軽くするだけにした。' },
     { id:'nt06', kind:'student', step:'change', studentId:'s01', slotId:'sl8', date:'2026-09-19', teacherId:'tc1', linkId:'nt05',
       body:'補助をほぼ外した状態で通った。本人は気づいていない様子。' },
     // みなと：できない技が続くと黙り込む → 別の技をはさむ
     { id:'nt07', kind:'student', step:'state',  studentId:'s05', slotId:'sl8', date:'2026-09-05', teacherId:'tc1', linkId:'',
-      body:'できない技が2回続くと、黙り込んで列から外れる。せかすと余計に固まる。' },
+      body:'できない技が2回続くと、黙り込んで列から外れる。せかすと余計に固まる。', view:'stumble' },
     { id:'nt08', kind:'student', step:'act',    studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1', linkId:'',
       body:'せかさずに、得意な前転を1本はさんでから元の技に戻した。' },
     { id:'nt09', kind:'student', step:'change', studentId:'s05', slotId:'sl8', date:'2026-09-12', teacherId:'tc1', linkId:'nt08',
       body:'自分から元の技に戻ってやり直した。そのあと最後まで列に戻っていた。' },
+    // みなと：決めてから動き出すまでが、時間で変わった
+    { id:'nt20', kind:'student', step:'state',  studentId:'s05', slotId:'sl8', date:'2026-09-05', teacherId:'tc1', linkId:'', view:'move',
+      body:'「次やる」と言ったあと、順番が来ても声をかけるまで動かない。' },
+    { id:'nt21', kind:'student', step:'state',  studentId:'s05', slotId:'sl8', date:'2026-09-26', teacherId:'tc4', linkId:'', view:'move',
+      body:'順番が来たら、声をかける前に自分から入った。' },
     // ゆうき（水）：同じ関わりが別の子・別の先生でも効いた
     { id:'nt10', kind:'student', step:'state',  studentId:'s19', slotId:'sl5', date:'2026-09-16', teacherId:'tc4', linkId:'',
-      body:'倒立ブリッジで失敗が続くと、黙ってマットの端に座る。' },
+      body:'倒立ブリッジで失敗が続くと、黙ってマットの端に座る。', view:'stumble' },
     { id:'nt11', kind:'student', step:'act',    studentId:'s19', slotId:'sl5', date:'2026-09-23', teacherId:'tc4', linkId:'',
       body:'みなとのメモを見て、できるブリッジを1本はさんでから戻した。' },
     { id:'nt12', kind:'student', step:'change', studentId:'s19', slotId:'sl5', date:'2026-09-23', teacherId:'tc4', linkId:'nt11',
@@ -564,7 +572,9 @@ const DEFAULT_DB = {
     { id:'mn4', title:'バッジテストの見かた', images:[],
       body:'15級が入り口で、数字が小さくなるほど上。技が全部チェックできても、合格は先生が手で確定する。ここは自動にしない。\n\n理由は2つ。\n・その日の1回できただけで級を渡すと、次の週にできなくなる子がいる\n・渡す場面そのものが、その子にとって意味を持つから\n\n迷ったら級は渡さず、所見メモに「あと何が足りないか」を書いておく。' },
     { id:'mn5', title:'所見メモの書き方', images:[],
-      body:'半年後に別の先生が読む前提で書く。メモは3種類から選ぶ。\n\n・様子：どういう場面で、どうなったか\n・関わり：何をしたか\n・変化：その後どうなったか（どの関わりの結果かを選ぶ）\n\n×「負けず嫌いで、くよくよしやすい」\n○「できない技が2回続くと、黙り込んで列から外れる」\n\nラベルはその子を固定する。場面と行動なら、関わりで変えられる。\n他の子と比べない。比べるのは同じ子の前と後。\n\n生々しい表現でいい。保護者には出さない。' },
+      body:'半年後に別の先生が読む前提で書く。何を見るかは次のページ。メモは3種類から選ぶ。\n\n・様子：どういう場面で、どうなったか\n・関わり：何をしたか\n・変化：その後どうなったか（どの関わりの結果かを選ぶ）\n\n×「負けず嫌いで、くよくよしやすい」\n○「できない技が2回続くと、黙り込んで列から外れる」\n\nラベルはその子を固定する。場面と行動なら、関わりで変えられる。\n他の子と比べない。比べるのは同じ子の前と後。\n\n生々しい表現でいい。保護者には出さない。' },
+    { id:'mn6', title:'何を見てメモを書くか', images:[],
+      body:'全部を見ようとしなくていい。1つの行動の流れに沿って、5つの所を見る。\n\n1. 始める前　何がその子に火をつけるかを知るために、始める前の様子を見る（自分から／声をかけられてから／渋る）\n2. 決める　自分で決められるかを知るために、選べる時に決めるまでの速さを見る\n3. 動き出す　決めたことを行動に移せるかを知るために、決めてから動き出すまでの時間を見る\n4. つまずく　崩れた時にどう立て直すかを知るために、できなかった直後の行動を見る\n5. やり切る　最後まで持っていけるかを知るために、終わり方を見る\n\n「様子」のメモを書く時に、どの所を見たかを選ぶ。同じ所を何回か書くと、その子が前と後でどう変わったかが見えてくる。\n\n性格を言い当てるためではない。行動が変わったかを見るため。' },
   ],
 
   /* 体験の記録。その日の担当を一緒に残すので「この先生の体験は入会しやすいか」が出せる。
@@ -664,6 +674,7 @@ const DUMMY_GUARDIAN_MEMO = {
   (db.notes || []).forEach(n => {
     if(n.kind === 'student' && !n.step) n.step = 'state';
     if(n.linkId === undefined) n.linkId = '';
+    if(n.view === undefined) n.view = '';
   });
 })();
 
@@ -789,12 +800,13 @@ function notesOfLesson(date, slotId){
 function notesOfDay(date, slotId){
   return allNotes().filter(n => n.date === date && n.slotId === slotId);
 }
-function addNote({ kind, studentId, slotId, body, date, step, linkId }){
+function addNote({ kind, studentId, slotId, body, date, step, linkId, view }){
   if(!db.notes) db.notes = [];
   const n = {
     id: newId('nt'), kind,
     step: kind === 'student' ? (step || 'state') : '',
     linkId: kind === 'student' && step === 'change' ? (linkId || '') : '',
+    view: kind === 'student' && (step || 'state') === 'state' ? (view || '') : '',
     studentId: studentId || '',
     slotId: slotId || '',
     date: date || TODAY,
@@ -816,6 +828,32 @@ function deleteNote(id){
   db.notes.forEach(x => { if(x.linkId === id) x.linkId = ''; });
   saveDb();
 }
+/* ---- 観察の観点：何を知るために、どこを見るか ----
+   1つの行動の流れに沿って5つ。一覧で覚えさせず、流れで思い出せるように（2026-10-06 海翔確定） */
+const VIEWPOINTS = [
+  { key:'start',   label:'始める前', want:'何がその子に火をつけるか',
+    look:'始める前の様子。自分から／声をかけられてから／渋る。何がきっかけで始めたか', ex:'順番が来る前に自分から並ぶか' },
+  { key:'decide',  label:'決める',   want:'自分で決められるか',
+    look:'選べる時に、決めるまでの速さ。人に合わせるか', ex:'どの技をやるか選ばせた時' },
+  { key:'move',    label:'動き出す', want:'決めたことを行動に移せるか',
+    look:'決めてから動き出すまでの時間', ex:'「やる」と言ってから入るまで' },
+  { key:'stumble', label:'つまずく', want:'崩れた時にどう立て直すか',
+    look:'できなかった直後の行動', ex:'失敗した後、次の1本に入るか' },
+  { key:'finish',  label:'やり切る', want:'最後まで持っていけるか',
+    look:'終わり方。やり切る／途中でやめる／次に持ち越す', ex:'最後の1本までやるか' },
+];
+function viewByKey(k){ return VIEWPOINTS.find(v => v.key === k) || null; }
+function stepLabel(n){
+  const v = n.step === 'state' ? viewByKey(n.view) : null;
+  return (STEP_LABEL[n.step] || '様子') + (v ? '・' + v.label : '');
+}
+/* その子の様子を、観点ごとに古い順で並べる（時間でどう変わったかを見るため） */
+function notesByView(studentId){
+  const ns = notesOfStudent(studentId).filter(n => n.step === 'state' && n.view)
+    .slice().sort((a,b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  return VIEWPOINTS.map(v => ({ v, notes: ns.filter(n => n.view === v.key) })).filter(x => x.notes.length);
+}
+
 /* ---- 関わりと変化 ---- */
 const STEP_LABEL = { state:'様子', act:'関わり', change:'変化' };
 const STEP_ORDER = { state:0, act:1, change:2 };
@@ -983,7 +1021,8 @@ const AI_HEADER = [
   '1. どういう場面で、どうなりやすいか',
   '2. 効いた関わり（どの場面で、何をしたら、どう変わったか。日付つき）',
   '3. 効かなかった関わり、またはまだ結果が分からない関わり',
-  '4. 次の授業で試すこと',
+  '4. 観点（始める前・決める・動き出す・つまずく・やり切る）ごとに、前と後でどう変わったか',
+  '5. 次の授業で試すこと',
 ].join('\n');
 
 function notesToText(studentId, from, to, opt){
@@ -1006,7 +1045,7 @@ function notesToText(studentId, from, to, opt){
   const line = n => {
     const link = n.step === 'change' && n.linkId && noteById(n.linkId)
       ? `（${shortDate(noteById(n.linkId).date)}の関わりの結果）` : '';
-    return `[${STEP_LABEL[n.step] || '様子'}] ${fullDate(n.date)}　${writer(n)}${link}\n${clean(n.body)}`;
+    return `[${stepLabel(n)}] ${fullDate(n.date)}　${writer(n)}${link}\n${clean(n.body)}`;
   };
   const parts = [AI_HEADER, '', '---', '', who, period, `${list.length}件`, '', list.map(line).join('\n\n')];
   if(opt.withAi){
@@ -1555,7 +1594,7 @@ function renderDetail(){
   }
   const sl = slotById(s.slotId);
   const ns = notesOfStudent(s.id);
-  if(noteFor !== s.id){ noteFor = s.id; newNoteText = ''; noteLink = ''; noteStep = 'state'; }   // 別の子に移ったら書きかけを持ち越さない
+  if(noteFor !== s.id){ noteFor = s.id; newNoteText = ''; noteLink = ''; noteStep = 'state'; noteView = ''; }   // 別の子に移ったら書きかけを持ち越さない
   el.innerHTML = `
     <div class="dwrap">
       <div class="dhead">
@@ -1602,7 +1641,7 @@ function renderDetail(){
         ${ns.length ? ns.map(n => `
           <div class="note-item">
             <div class="note-head">
-              <span class="tag">${STEP_LABEL[n.step] || '様子'}</span>
+              <span class="tag">${esc(stepLabel(n))}</span>
               <span class="note-date">${esc(dateLabel(n.date))}</span>
               <span class="note-who">${esc(noteWriter(n))}${n.slotId ? '　' + esc(slotTimeLabel(slotById(n.slotId))) : ''}</span>
               <button class="note-del" onclick="removeNoteFor('${n.id}','${s.id}')">消す</button>
@@ -1617,6 +1656,7 @@ function renderDetail(){
             ${Object.keys(STEP_LABEL).map(k => `<button class="tog ${noteStep === k ? 'on' : ''}"
               onclick="keepNewNote();noteStep='${k}';renderDetail();">${STEP_LABEL[k]}</button>`).join('')}
           </div>
+          ${noteStep === 'state' ? ipViewField() : ''}
           ${noteStep === 'change' ? ipLinkField(s) : ''}
           <textarea id="newNote" placeholder="${esc(STEP_HINT[noteStep])}">${esc(newNoteText)}</textarea>
           <div class="btnrow" style="margin-top:12px;">
@@ -1626,6 +1666,7 @@ function renderDetail(){
         </div>
       </div>
 
+      ${viewPanel(s)}
       ${chainPanel(s)}
       ${historyPanel(s)}
       ${copyPanel(s)}
@@ -2207,7 +2248,18 @@ function deleteSlot(){
   curSlotEdit = null; mode = 'view';
   saveDb(); renderHead(); renderList(); renderSlotDetail();
 }
-let noteStep = 'state', newNoteText = '', noteLink = '', noteFor = '';
+let noteStep = 'state', newNoteText = '', noteLink = '', noteFor = '', noteView = '';
+function ipViewField(){
+  const v = viewByKey(noteView);
+  return `<div class="field" style="margin-bottom:10px;">
+    <div class="flabel">どこを見たか（選ばなくてもいい）</div>
+    <div class="toggles">
+      ${VIEWPOINTS.map(x => `<button class="tog ${noteView === x.key ? 'on' : ''}"
+        onclick="keepNewNote();noteView=noteView==='${x.key}'?'':'${x.key}';renderDetail();">${x.label}</button>`).join('')}
+    </div>
+    ${v ? `<div class="vguide"><b>${esc(v.want)}を知るために</b><br>見るところ：${esc(v.look)}<br><span style="color:var(--text3);">教室では：${esc(v.ex)}</span></div>` : ''}
+  </div>`;
+}
 function keepNewNote(){
   const ta = document.getElementById('newNote'); if(ta) newNoteText = ta.value;
   const lk = document.getElementById('newNoteLink'); if(lk) noteLink = lk.value;
@@ -2229,8 +2281,8 @@ function addNoteFor(studentId){
   if(!newNoteText.trim()){ alert('内容を入力してください'); return; }
   const st = studentById(studentId);
   addNote({ kind:'student', studentId, slotId: st ? st.slotId : '', body:newNoteText,
-            step:noteStep, linkId: noteStep === 'change' ? noteLink : '' });
-  newNoteText = ''; noteLink = '';
+            step:noteStep, linkId: noteStep === 'change' ? noteLink : '', view: noteStep === 'state' ? noteView : '' });
+  newNoteText = ''; noteLink = ''; noteView = '';
   renderDetail();
 }
 /* 変化のメモに「どの関わりの結果か」を1行で */
@@ -2252,6 +2304,19 @@ function chainHtml(x, showStudent){
     ${x.state ? row('様子', x.state) : ''}
     ${row('関わり', x.act)}
     ${x.changes.map(c => row('変化', c)).join('')}`;
+}
+function viewPanel(s){
+  const gs = notesByView(s.id);
+  if(!gs.length) return '';
+  return `<div class="panel" style="margin-top:20px;">
+    <div class="ptitle">見る所ごとの様子</div>
+    ${gs.map((g, i) => `<div style="${i ? 'border-top:0.5px solid rgba(28,25,23,0.08);margin-top:14px;padding-top:12px;' : ''}">
+      <div style="font-size:14px;font-weight:600;">${esc(g.v.label)}<span class="fhint" style="font-weight:400;margin-left:10px;">${esc(g.v.want)}</span></div>
+      ${g.notes.map(n => `<div class="chain-row">
+        <span class="chain-lab">${esc(shortDate(n.date))}</span>
+        <div class="chain-txt">${esc(n.body)}</div></div>`).join('')}
+    </div>`).join('')}
+  </div>`;
 }
 function chainPanel(s){
   const xs = effectiveActs('').filter(x => x.act.studentId === s.id);
