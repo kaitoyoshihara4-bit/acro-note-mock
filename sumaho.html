@@ -113,6 +113,7 @@
     background:var(--surface-active);color:var(--text2);
   }
   .badge.warn{background:var(--warn-soft);color:var(--warn-deep);}
+  .warnbox{background:var(--warn-soft);color:var(--warn-deep);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600;}
   .badge.off{background:transparent;color:var(--text3);border:1px solid var(--border);}
   .tile.absent .badge{background:transparent;color:var(--text3);border:1px solid var(--border);}
 
@@ -736,7 +737,7 @@ const DEFAULT_DB = {
     { id:'s24', name:'なぎさ', birth:'2013-01-07', slotId:'sl2', guardian:'なぎさの保護者', phone:'090-0000-0024', status:'active', joined:'2020-09-08' },
     { id:'s31', name:'あゆむ', birth:'2014-08-03', slotId:'sl2', guardian:'あゆむの保護者', phone:'090-0000-0031', status:'active', joined:'2021-06-15' },
     { id:'s32', name:'ちひろ', birth:'2016-12-19', slotId:'sl2', guardian:'ちひろの保護者', phone:'090-0000-0032', status:'trial',  joined:'' },
-    { id:'s25', name:'まなと', birth:'2011-12-24', slotId:'sl3', guardian:'まなとの保護者', phone:'090-0000-0025', status:'withdrawn', joined:'2018-04-10' },
+    { id:'s25', name:'まなと', birth:'2011-12-24', slotId:'sl3', guardian:'まなとの保護者', phone:'090-0000-0025', status:'withdrawn', joined:'2018-04-10', left:'2026-03-31' },
     { id:'s33', name:'ゆうた', birth:'2010-03-08', slotId:'sl3', guardian:'ゆうたの保護者', phone:'090-0000-0033', status:'active', joined:'2019-04-09' },
 
     { id:'s20', name:'あさひ', birth:'2017-03-30', slotId:'sl4', guardian:'あさひの保護者', phone:'090-0000-0020', status:'active', joined:'2024-01-10' },
@@ -944,6 +945,7 @@ const DUMMY_GUARDIAN_MEMO = {
   (db.students || []).forEach((s, i) => {
     if(s.fullName === undefined) s.fullName = DUMMY_SURNAME[i % DUMMY_SURNAME.length] + '　' + s.name;
     if(s.guardianNote === undefined) s.guardianNote = DUMMY_GUARDIAN_MEMO[s.id] || '';
+    if(s.left === undefined) s.left = '';
   });
   (db.teachers || []).forEach(t => {
     ['role','phone','mail','shift','memo','pay','hr'].forEach(k => { if(t[k] === undefined) t[k] = ''; });
@@ -1582,6 +1584,43 @@ function teacherLogOfSlot(slotId){
 }
 function namesOf(ids){ return teachersLabel((ids || []).map(teacherById).filter(Boolean)); }
 
+/* ---- 定員（管理会計の回答 2026-10-07：基本5名・最大6名。超えたら振替は断る） ---- */
+const CAPACITY = { base:5, max:6 };
+/* その日その時間帯に来る予定の人数（在籍の子の出席＋振替＋体験。休会の子は数えない） */
+function expectedCount(slotId){
+  const rec = todayRecord(slotId);
+  const members = studentsOfSlot(slotId).filter(s => s.status !== 'paused').map(s => s.id);
+  const ids = members.concat(rec.extra.map(e => e.id));
+  return ids.filter(i => rec.present[i]).length;
+}
+/* 'ok'（まだ入れる）／'full'（5名・基本の定員いっぱい）／'over'（6名・最大）／'closed'（これ以上足せない） */
+function capacityState(slotId){
+  const n = expectedCount(slotId);
+  if(n >= CAPACITY.max) return 'closed';
+  if(n >= CAPACITY.base) return 'over';
+  return 'ok';
+}
+
+/* ---- 6か月継続率（休会中も在籍扱い。入会から6か月たった子だけが分母） ---- */
+function addMonthsISO(iso, m){
+  const d = new Date(iso + 'T00:00:00');
+  d.setMonth(d.getMonth() + m);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+function retentionStats(){
+  let eligible = 0, kept = 0, noDate = 0;
+  db.students.forEach(s => {
+    if(!s.joined) return;                               // 体験のままの子は数えない
+    const six = addMonthsISO(s.joined, 6);
+    if(six > TODAY) return;                             // まだ6か月たっていない
+    if(s.status === 'withdrawn' && !s.left){ noDate++; return; }   // 退会日が無いと判定できない
+    eligible++;
+    if(s.status !== 'withdrawn' || s.left >= six) kept++;
+  });
+  return { eligible, kept, noDate, rate: eligible ? kept / eligible : null };
+}
+
 /* その子の経緯（体験・入会・枠の移動）を古い順に並べる */
 function historyOfStudent(studentId){
   const s = studentById(studentId);
@@ -1594,8 +1633,7 @@ function historyOfStudent(studentId){
   movesOfStudent(studentId).forEach(m => {
     const f = slotById(m.fromSlotId), t = slotById(m.toSlotId);
     out.push({ date:m.date, label:'枠の移動',
-      text:`${f ? slotFullLabel(f) : '?'} → ${t ? slotFullLabel(t) : '?'}`
-         + (m.viaMakeup ? `（${fullDate(m.makeupDate)}に振替で来ていた。担当 ${namesOf(m.toTeacherIds)}）` : '') });
+      text:`${f ? slotFullLabel(f) : '?'} → ${t ? slotFullLabel(t) : '?'}` });
   });
   return out.sort((a,b) => a.date.localeCompare(b.date));
 }
@@ -1774,12 +1812,17 @@ function renderMakeup(){
   const el = document.getElementById('results');
   const rec = todayRecord(cur);
   el.innerHTML = '';
-  if(!q){ el.innerHTML = '<div class="empty">名前を入力すると<br>ほかの曜日・時間帯の子から探します</div>'; return; }
+  const cs = capacityState(cur), n = expectedCount(cur);
+  const capMsg = cs === 'closed' ? `今日は ${n}人で最大（${CAPACITY.max}人）です。振替は断ってください`
+    : cs === 'over' ? `今日は ${n}人です。あと1人入れますが定員（${CAPACITY.base}人）を超えます`
+    : `今日は ${n}人。あと ${CAPACITY.base - n}人入れます（定員${CAPACITY.base}人）`;
+  el.innerHTML = `<div class="${cs === 'ok' ? 'fhint' : 'warnbox'}" style="margin-bottom:12px;">${capMsg}</div>`;
+  if(!q){ el.innerHTML += '<div class="empty">名前を入力すると<br>ほかの曜日・時間帯の子から探します</div>'; return; }
   const inSlot = studentsOfSlot(cur).map(s => s.id);
   const hits = db.students.filter(s =>
     s.status !== 'withdrawn' && s.name.includes(q) &&
     !inSlot.includes(s.id) && !rec.extra.some(e => e.id === s.id));
-  if(!hits.length){ el.innerHTML = '<div class="empty">見つかりません</div>'; return; }
+  if(!hits.length){ el.innerHTML += '<div class="empty">見つかりません</div>'; return; }
   const box = document.createElement('div');
   box.className = 'listbox';
   hits.forEach(s => {
@@ -1801,6 +1844,9 @@ function addMakeup(id){
   const inSlot = studentsOfSlot(cur).map(s => s.id);
   if(inSlot.includes(id) || rec.extra.some(e => e.id === id)){
     go('s2'); toast(studentById(id).name + ' はすでに今日のメンバーに入っています'); return;
+  }
+  if(capacityState(cur) === 'closed'){
+    toast('今日は最大の ' + CAPACITY.max + '人です。振替は足せません'); return;
   }
   rec.extra.push({ id, kind:'makeup' });
   rec.present[id] = true;
@@ -2058,7 +2104,7 @@ function openStudentForm(id){
   const s = id ? studentById(id) : null;
   formDraft = s ? Object.assign({}, s)
                 : { name:'', fullName:'', birth:'', slotId:(db.slots[0] || {}).id || '',
-                    guardian:'', phone:'', guardianNote:'', status:'trial', joined:'' };
+                    guardian:'', phone:'', guardianNote:'', status:'trial', joined:'', left:'' };
   document.getElementById('s7title').textContent = s ? '生徒を編集' : '生徒を追加';
   renderStudentForm();
   go('s7');
@@ -2107,12 +2153,17 @@ function renderStudentForm(){
     <div class="row2">
       <div class="field">
         <div class="flabel">在籍</div>
-        <select id="f_status">${statusOpts}</select>
+        <select id="f_status" onchange="document.getElementById('f_leftwrap').style.display = this.value === 'withdrawn' ? '' : 'none'">${statusOpts}</select>
       </div>
       <div class="field">
         <div class="flabel">入会日</div>
         <input type="date" id="f_joined" value="${esc(formDraft.joined)}">
       </div>
+    </div>
+    <div class="field" id="f_leftwrap" style="${formDraft.status === 'withdrawn' ? '' : 'display:none;'}">
+      <div class="flabel">退会日</div>
+      <input type="date" id="f_left" value="${esc(formDraft.left || '')}">
+      <div class="fhint">6か月継続率の計算に使います</div>
     </div>
     ${editingStudent ? `<button class="btn btn-danger" onclick="deleteStudent()">この生徒を消す</button>
       <div class="fhint" style="margin-top:8px;">ふだんは消さずに、在籍を「退会」に変えてください。記録が残ります</div>` : ''}`;
@@ -2138,6 +2189,7 @@ function saveStudentForm(){
     guardianNote: document.getElementById('f_gnote').value.trim(),
     status: document.getElementById('f_status').value,
     joined: document.getElementById('f_joined').value,
+    left: document.getElementById('f_status').value === 'withdrawn' ? document.getElementById('f_left').value : '',
   };
   if(editingStudent){
     const before = Object.assign({}, studentById(editingStudent));
